@@ -1,0 +1,514 @@
+/* Theme Variables - Color System */
+:root {
+  /* Font Family */
+  --font-primary: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  
+  /* Light Theme Colors */
+  --primary-light: #3498db;
+  --primary-light-rgb: 52, 152, 219;
+  --secondary-light: #2ecc71;
+  --secondary-light-rgb: 46, 204, 113;
+  --accent-light: #e74c3c;
+  --accent-light-rgb: 231, 76, 60;
+  --bg-light: #c0ebff;
+  --bg-light-rgb: 192, 235, 255;
+  --bg-light-alt: #f5f5f5;
+  --bg-light-alt-rgb: 245, 245, 245;
+  --bg-light-card: #ffffff;
+  --bg-light-card-rgb: 255, 255, 255;
+  --text-light: #333333;
+  --text-light-rgb: 51, 51, 51;
+  --text-light-secondary: #666666;
+  --text-light-secondary-rgb: 102, 102, 102;
+  --text-light-tertiary: #999999;
+  --text-light-tertiary-rgb: 153, 153, 153;
+  --border-light: #dddddd;
+  --border-light-rgb: 221, 221, 221;
+  --shadow-light: rgba(0, 0, 0, 0.1);
+  --shadow-light-rgb: 0, 0, 0;
+  --input-bg-light: #ffffff;
+  --input-bg-light-rgb: 255, 255, 255;
+  --hover-light: #f0f7ff;
+  --hover-light-rgb: 240, 247, 255;
+  --button-light: #4a4a4a;
+  --button-light-rgb: 74, 74, 74;
+  --button-hover-light: #6a6a6a;
+  --button-hover-light-rgb: 106, 106, 106;
+  --button-text-light: #ffffff;
+  --button-text-light-rgb: 255, 255, 255;
+  --success-light: #2ecc71;
+  --success-light-rgb: 46, 204, 113;
+  --error-light: #e74c3c;
+  --error-light-rgb: 231, 76, 60;
+  --warning-light: #f39c12;
+  --warning-light-rgb: 243, 156, 18;
+  --info-light: #3498db;
+  --info-light-rgb: 52, 152, 219;
+
+  /* Dark Theme Colors */
+  --primary-dark: #4fa6e0;
+  --primary-dark-rgb: 79, 166, 224;
+  --secondary-dark: #43d47e;
+  --secondary-dark-rgb: 67, 212, 126;
+  --accent-dark: #e95e4f;
+  --accent-dark-rgb: 233, 94, 79;
+  --bg-dark: #121212;
+  --bg-dark-rgb: 18, 18, 18;
+  --bg-dark-alt: #1e1e1e;
+  --bg-dark-alt-rgb: 30, 30, 30;
+  --bg-dark-card: #2a2a2a;
+  --bg-dark-card-rgb: 42, 42, 42;
+  --text-dark: #ffffff;
+  --text-dark-rgb: 255, 255, 255;
+  --text-dark-secondary: #cccccc;
+  --text-dark-secondary-rgb: 204, 204, 204;
+  --text-dark-tertiary: #808080;
+  --text-dark-tertiary-rgb: 128, 128, 128;
+  --border-dark: #444444;
+  --border-dark-rgb: 68, 68, 68;
+  --shadow-dark: rgba(0, 0, 0, 0.5);
+  --shadow-dark-rgb: 0, 0, 0;
+  --input-bg-dark: #2a2a2a;
+  --input-bg-dark-rgb: 42, 42, 42;
+  --hover-dark: #2c3a47;
+  --hover-dark-rgb: 44, 58, 71;
+  --button-dark: #5c5c5c;
+  --button-dark-rgb: 92, 92, 92;
+  --button-hover-dark: #7a7a7a;
+  --button-hover-dark-rgb: 122, 122, 122;
+  --button-text-dark: #ffffff;
+  --button-text-dark-rgb: 255, 255, 255;
+  --success-dark: #43d47e;
+  --success-dark-rgb: 67, 212, 126;
+  --error-dark: #e95e4f;
+  --error-dark-rgb: 233, 94, 79;
+  --warning-dark: #f5b041;
+  --warning-dark-rgb: 245, 176, 65;
+  --info-dark: #4fa6e0;
+  --info-dark-rgb: 79, 166, 224;
+  
+  /* Typography Scale */
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-md: 1.125rem;   /* 18px */
+  --font-size-lg: 1.25rem;    /* 20px */
+  --font-size-xl: 1.5rem;     /* 24px */
+  --font-size-2xl: 1.875rem;  /* 30px */
+  --font-size-3xl: 2.25rem;   /* 36px */
+  --font-size-4xl: 3rem;      /* 48px */
+  
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.25;
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Spacing Scale */
+  --space-0: 0;
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.5rem;    /* 24px */
+  --space-6: 2rem;      /* 32px */
+  --space-8: 3rem;      /* 48px */
+  --space-10: 4rem;     /* 64px */
+  --space-12: 6rem;     /* 96px */
+  
+  /* Border Radius */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.2);
+  --shadow-2xl: 0 12px 24px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  /* Animation & Transition */
+  --transition-fast: 150ms;
+  --transition-base: 300ms;
+  --transition-slow: 500ms;
+  --transition-timing-default: ease;
+  --transition-timing-bounce: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  --transition-timing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Z-index Layers */
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1100;
+  --z-index-fixed: 1200;
+  --z-index-modal-backdrop: 1300;
+  --z-index-modal: 1400;
+  --z-index-popover: 1500;
+  --z-index-tooltip: 1600;
+  
+  /* Breakpoints (for reference, not actually used as CSS variables) */
+  /* --breakpoint-xs: 0px; */
+  /* --breakpoint-sm: 576px; */
+  /* --breakpoint-md: 768px; */
+  /* --breakpoint-lg: 992px; */
+  /* --breakpoint-xl: 1200px; */
+  /* --breakpoint-2xl: 1400px; */
+}
+
+/* Global Light/Dark Theme */
+body[data-theme='light'] {
+  --primary: var(--primary-light);
+  --primary-rgb: var(--primary-light-rgb);
+  --secondary: var(--secondary-light);
+  --secondary-rgb: var(--secondary-light-rgb);
+  --accent: var(--accent-light);
+  --accent-rgb: var(--accent-light-rgb);
+  --bg-color: var(--bg-light);
+  --bg-rgb: var(--bg-light-rgb);
+  --bg-alt: var(--bg-light-alt);
+  --bg-alt-rgb: var(--bg-light-alt-rgb);
+  --bg-card: var(--bg-light-card);
+  --bg-card-rgb: var(--bg-light-card-rgb);
+  --text-color: var(--text-light);
+  --text-rgb: var(--text-light-rgb);
+  --text-secondary: var(--text-light-secondary);
+  --text-secondary-rgb: var(--text-light-secondary-rgb);
+  --text-tertiary: var(--text-light-tertiary);
+  --text-tertiary-rgb: var(--text-light-tertiary-rgb);
+  --border-color: var(--border-light);
+  --border-rgb: var(--border-light-rgb);
+  --shadow: var(--shadow-light);
+  --shadow-rgb: var(--shadow-light-rgb);
+  --input-bg: var(--input-bg-light);
+  --input-bg-rgb: var(--input-bg-light-rgb);
+  --hover-bg: var(--hover-light);
+  --hover-bg-rgb: var(--hover-light-rgb);
+  --button-bg: var(--button-light);
+  --button-bg-rgb: var(--button-light-rgb);
+  --button-hover: var(--button-hover-light);
+  --button-hover-rgb: var(--button-hover-light-rgb);
+  --button-text: var(--button-text-light);
+  --button-text-rgb: var(--button-text-light-rgb);
+  --success: var(--success-light);
+  --success-rgb: var(--success-light-rgb);
+  --error: var(--error-light);
+  --error-rgb: var(--error-light-rgb);
+  --warning: var(--warning-light);
+  --warning-rgb: var(--warning-light-rgb);
+  --info: var(--info-light);
+  --info-rgb: var(--info-light-rgb);
+}
+
+body[data-theme='dark'] {
+  --primary: var(--primary-dark);
+  --primary-rgb: var(--primary-dark-rgb);
+  --secondary: var(--secondary-dark);
+  --secondary-rgb: var(--secondary-dark-rgb);
+  --accent: var(--accent-dark);
+  --accent-rgb: var(--accent-dark-rgb);
+  --bg-color: var(--bg-dark);
+  --bg-rgb: var(--bg-dark-rgb);
+  --bg-alt: var(--bg-dark-alt);
+  --bg-alt-rgb: var(--bg-dark-alt-rgb);
+  --bg-card: var(--bg-dark-card);
+  --bg-card-rgb: var(--bg-dark-card-rgb);
+  --text-color: var(--text-dark);
+  --text-rgb: var(--text-dark-rgb);
+  --text-secondary: var(--text-dark-secondary);
+  --text-secondary-rgb: var(--text-dark-secondary-rgb);
+  --text-tertiary: var(--text-dark-tertiary);
+  --text-tertiary-rgb: var(--text-dark-tertiary-rgb);
+  --border-color: var(--border-dark);
+  --border-rgb: var(--border-dark-rgb);
+  --shadow: var(--shadow-dark);
+  --shadow-rgb: var(--shadow-dark-rgb);
+  --input-bg: var(--input-bg-dark);
+  --input-bg-rgb: var(--input-bg-dark-rgb);
+  --hover-bg: var(--hover-dark);
+  --hover-bg-rgb: var(--hover-dark-rgb);
+  --button-bg: var(--button-dark);
+  --button-bg-rgb: var(--button-dark-rgb);
+  --button-hover: var(--button-hover-dark);
+  --button-hover-rgb: var(--button-hover-dark-rgb);
+  --button-text: var(--button-text-dark);
+  --button-text-rgb: var(--button-text-dark-rgb);
+  --success: var(--success-dark);
+  --success-rgb: var(--success-dark-rgb);
+  --error: var(--error-dark);
+  --error-rgb: var(--error-dark-rgb);
+  --warning: var(--warning-dark);
+  --warning-rgb: var(--warning-dark-rgb);
+  --info: var(--info-dark);
+  --info-rgb: var(--info-dark-rgb);
+}
+
+/* Global Styles */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  transition: background-color var(--transition-base) var(--transition-timing-default), 
+              color var(--transition-base) var(--transition-timing-default);
+  margin: 0;
+  padding: 0;
+}
+
+/* Typography styles moved to typography.css */
+
+/* Button styles moved to buttons.css */
+
+/* Form element styles moved to forms.css */
+
+/* Card styles moved to cards.css */
+
+/* Component overrides */
+.app-header {
+  background-color: #175480 !important;
+  box-shadow: var(--shadow-md);
+  padding: var(--space-3) var(--space-4);
+}
+
+.app-header button {
+  color: var(--button-text);
+}
+
+.user-welcome {
+  color: var(--text-color);
+  font-size: var(--font-size-md);
+}
+
+.profile-link {
+  color: var(--primary);
+  background-color: var(--hover-bg);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast) var(--transition-timing-default),
+              color var(--transition-fast) var(--transition-timing-default);
+}
+
+.profile-link:hover {
+  background-color: var(--bg-alt);
+  color: var(--secondary);
+}
+
+.back-button {
+  background-color: var(--bg-alt);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  transition: background-color var(--transition-fast) var(--transition-timing-default);
+}
+
+.back-button:hover {
+  background-color: var(--hover-bg);
+}
+
+/* Modal overrides */
+.modal, .modal-content, .modal-body, .modal-header, .modal-footer,
+.user-modal, .user-modal-content, .user-modal-body {
+  background-color: var(--bg-card);
+  color: var(--text-color) !important;
+  border-color: var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.modal h1, .modal h2, .modal h3, .modal h4, .modal h5, .modal h6,
+.user-modal h1, .user-modal h2, .user-modal h3, .user-modal h4, .user-modal h5, .user-modal h6 {
+  color: var(--text-color) !important;
+}
+
+/* Tables */
+table {
+  border-color: var(--border-color);
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-4) 0;
+}
+
+th, td {
+  border-color: var(--border-color);
+  padding: var(--space-3);
+  text-align: left;
+}
+
+th {
+  font-weight: var(--font-weight-semibold);
+  background-color: var(--bg-alt);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-alt);
+}
+
+/* Form elements */
+.form-group {
+  margin-bottom: var(--space-4);
+}
+
+.form-group label {
+  color: var(--text-color);
+  display: block;
+  margin-bottom: var(--space-1);
+  font-weight: var(--font-weight-medium);
+}
+
+.form-control {
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  border-color: var(--border-color);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+}
+
+/* Alert/notification colors */
+.success {
+  color: var(--success);
+}
+
+.error {
+  color: var(--error);
+}
+
+.warning {
+  color: var(--warning);
+}
+
+.info {
+  color: var(--info);
+}
+
+/* States */
+.is-active {
+  border-color: var(--primary);
+  background-color: var(--hover-bg);
+}
+
+.is-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* Fallback styles for dark mode - ensures all components are readable */
+html body[data-theme='dark'] {
+  /* Override any components with light backgrounds and dark text that don't use CSS variables */
+  div, section, aside, header, footer, nav, main, article {
+    color: var(--text-dark);
+  }
+  
+  /* Ensure inputs are visible */
+  input, select, textarea {
+    background-color: var(--input-bg-dark);
+    color: var(--text-dark);
+    border-color: var(--border-dark);
+  }
+  
+  /* Fix potential contrast issues with links */
+  a {
+    color: var(--primary-dark);
+  }
+  
+  /* Make sure modals and dialogs are readable */
+  div[role="dialog"],
+  .modal,
+  [class*="modal"],
+  [class*="popup"],
+  [class*="dropdown"],
+  .menu,
+  .tooltip {
+    background-color: var(--bg-dark-card);
+    color: var(--text-dark);
+    border-color: var(--border-dark);
+  }
+  
+  /* Force some global overrides for components that might have hardcoded styles */
+  .homepage {
+    background-color: var(--bg-dark) !important;
+  }
+  
+  main, 
+  .main-content, 
+  .content-card, 
+  .user-profile-container, 
+  .preferences-page {
+    background-color: var(--bg-dark) !important;
+  }
+  
+  .card, 
+  .welcome-section, 
+  .content-card,
+  .homepage-content {
+    background-color: var(--bg-dark-card) !important;
+    color: var(--text-dark) !important;
+  }
+} 
+
+/* Utility classes for spacing */
+.mt-0 { margin-top: var(--space-0); }
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-5 { margin-top: var(--space-5); }
+.mt-6 { margin-top: var(--space-6); }
+
+.mb-0 { margin-bottom: var(--space-0); }
+.mb-1 { margin-bottom: var(--space-1); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-5 { margin-bottom: var(--space-5); }
+.mb-6 { margin-bottom: var(--space-6); }
+
+.ml-0 { margin-left: var(--space-0); }
+.ml-1 { margin-left: var(--space-1); }
+.ml-2 { margin-left: var(--space-2); }
+.ml-3 { margin-left: var(--space-3); }
+.ml-4 { margin-left: var(--space-4); }
+.ml-5 { margin-left: var(--space-5); }
+.ml-6 { margin-left: var(--space-6); }
+
+.mr-0 { margin-right: var(--space-0); }
+.mr-1 { margin-right: var(--space-1); }
+.mr-2 { margin-right: var(--space-2); }
+.mr-3 { margin-right: var(--space-3); }
+.mr-4 { margin-right: var(--space-4); }
+.mr-5 { margin-right: var(--space-5); }
+.mr-6 { margin-right: var(--space-6); }
+
+.p-0 { padding: var(--space-0); }
+.p-1 { padding: var(--space-1); }
+.p-2 { padding: var(--space-2); }
+.p-3 { padding: var(--space-3); }
+.p-4 { padding: var(--space-4); }
+.p-5 { padding: var(--space-5); }
+.p-6 { padding: var(--space-6); }
+
+.py-0 { padding-top: var(--space-0); padding-bottom: var(--space-0); }
+.py-1 { padding-top: var(--space-1); padding-bottom: var(--space-1); }
+.py-2 { padding-top: var(--space-2); padding-bottom: var(--space-2); }
+.py-3 { padding-top: var(--space-3); padding-bottom: var(--space-3); }
+.py-4 { padding-top: var(--space-4); padding-bottom: var(--space-4); }
+.py-5 { padding-top: var(--space-5); padding-bottom: var(--space-5); }
+.py-6 { padding-top: var(--space-6); padding-bottom: var(--space-6); }
+
+.px-0 { padding-left: var(--space-0); padding-right: var(--space-0); }
+.px-1 { padding-left: var(--space-1); padding-right: var(--space-1); }
+.px-2 { padding-left: var(--space-2); padding-right: var(--space-2); }
+.px-3 { padding-left: var(--space-3); padding-right: var(--space-3); }
+.px-4 { padding-left: var(--space-4); padding-right: var(--space-4); }
+.px-5 { padding-left: var(--space-5); padding-right: var(--space-5); }
+.px-6 { padding-left: var(--space-6); padding-right: var(--space-6); } 

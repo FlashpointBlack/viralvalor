@@ -1,0 +1,14 @@
+/* 
+ * BACKDROP IMAGE STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In images.css:
+ * - .backdrop-container → Added to images.css (lines 200-208)
+ * - .backdrop-image → Added to images.css (lines 210-216)
+ * - .backdrop-image img → Added to images.css (lines 218-223)
+ * - .backdrop-image:hover img → Added to images.css (lines 225-228)
+ * - .backdrop-overlay → Added to images.css (lines 230-238)
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

@@ -1,0 +1,764 @@
+.user-management {
+  width: 100%;
+  max-width: 100%;
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px var(--shadow);
+  padding: 1.5rem;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.user-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.user-management-header h2 {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 1.5rem;
+}
+
+.add-user-btn {
+  background-color: var(--primary);
+  color: var(--button-text);
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.add-user-btn:hover {
+  background-color: #2980b9;
+}
+
+.user-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.search-filter {
+  display: flex;
+  gap: 0.5rem;
+  flex-grow: 1;
+  max-width: 600px;
+}
+
+.search-input {
+  flex-grow: 1;
+  padding: 0.5rem;
+  border: 1px solid #e7ecf0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.role-filter {
+  padding: 0.5rem;
+  border: 1px solid #e7ecf0;
+  border-radius: 4px;
+  background-color: white;
+  min-width: 140px;
+  box-sizing: border-box;
+}
+
+.results-info {
+  font-size: 0.9rem;
+  color: #000;
+}
+
+.error-message {
+  background-color: #ffecec;
+  color: #e74c3c;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #e74c3c;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.users-table-container {
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.users-table th {
+  background-color: var(--bg-alt);
+  text-align: left;
+  padding: 0.75rem;
+  border-bottom: 2px solid var(--border-color);
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  color: var(--text-color);
+  box-sizing: border-box;
+}
+
+.users-table th:hover {
+  background-color: var(--hover-bg);
+}
+
+.users-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-color);
+  box-sizing: border-box;
+}
+
+.users-table tr:hover {
+  background-color: var(--hover-bg);
+}
+
+.email-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.verified-badge {
+  background-color: #2ecc71;
+  color: white;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+.admin-role {
+  font-weight: 500;
+  color: #9b59b6;
+}
+
+.educator-role {
+  font-weight: 500;
+  color: #3498db;
+}
+
+.student-role {
+  color: #000;
+}
+
+.user-nickname {
+  font-size: 0.85rem;
+  color: #000;
+  margin-left: 0.5rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.view-profile-button {
+  /* removed view-profile-button specific styles - using .btn */
+}
+
+.no-results {
+  text-align: center;
+  padding: 2rem 0 !important;
+  color: #000;
+  font-style: italic;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pagination-button {
+  border: 1px solid #e7ecf0;
+  background-color: white;
+  border-radius: 4px;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #3498db;
+  color: black;
+  border-color: #3498db;
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+  color: #999;
+}
+
+.pagination-info {
+  margin: 0 0.5rem;
+  color: #000;
+}
+
+/* User Modal Styles */
+.user-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+.user-modal {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  width: 95%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.user-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e7ecf0;
+  padding-bottom: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.user-modal-header h2 {
+  margin: 0;
+  color: #000;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #555;
+}
+
+.close-button:hover {
+  color: #000;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #000;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px solid #e7ecf0;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #000;
+  box-sizing: border-box;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-column {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-column label {
+  display: block;
+  margin-bottom: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-column input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-check input {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.form-check label {
+  color: #000;
+  font-weight: 500;
+}
+
+.form-check input:disabled + label {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cancel-button, .save-button {
+  padding: 0.65rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border: none;
+  box-sizing: border-box;
+}
+
+.cancel-button {
+  background-color: #ecf0f1;
+  color: #000;
+}
+
+.cancel-button:hover {
+  background-color: #dfe4e6;
+}
+
+.save-button {
+  background-color: #3498db;
+  color: black;
+}
+
+.save-button:hover {
+  background-color: #2980b9;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 1.1rem;
+  color: #000;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* User badges section */
+.user-badges-section {
+  margin-top: 30px;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Override for badge title specifically */
+.user-modal .user-badges-section .badge-list .badge-item .badge-info .badge-details h4 {
+  color: #000 !important;
+  font-weight: bold !important;
+}
+
+.badge-list {
+  max-height: 250px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.badge-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.badge-item:last-child {
+  border-bottom: none;
+}
+
+.badge-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.badge-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.badge-details {
+  flex: 1;
+}
+
+.badge-details h4 {
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  color: #000 !important;
+}
+
+.badge-details p {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+  color: #000;
+}
+
+.badge-date {
+  font-size: 12px;
+  color: #000;
+  display: block;
+}
+
+.remove-badge-btn {
+  background-color: #ff5757;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.remove-badge-btn:hover {
+  background-color: #ff3030;
+}
+
+.add-badge-section {
+  margin-top: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.add-badge-form {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.badge-select {
+  flex: 1;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.add-badge-btn {
+  background-color: #4caf50;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 15px;
+  cursor: pointer;
+}
+
+.add-badge-btn:hover {
+  background-color: #45a049;
+}
+
+.add-badge-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* XP and Level cell styling */
+.xp-cell, .level-cell {
+  font-weight: bold;
+  text-align: center;
+}
+
+.xp-cell {
+  color: #e67e22;
+}
+
+.level-cell {
+  color: #3498db;
+}
+
+/* Two-column form layout */
+.form-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-column-left, .form-column-right {
+  flex: 1;
+  min-width: 300px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-column-left .form-group, 
+.form-column-right .form-group {
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Enhanced mobile styles */
+@media (max-width: 768px) {
+  .user-management {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+  
+  .user-management-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+    width: 100% !important;
+  }
+  
+  .add-user-btn {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .user-controls {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+    width: 100% !important;
+  }
+  
+  .search-filter {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  
+  .search-input,
+  .role-filter {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Make tables responsive on mobile */
+  .users-table-container {
+    overflow-x: visible !important;
+    width: 100% !important;
+  }
+  
+  .users-table {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .users-table thead {
+    display: none !important; /* Hide table headers on mobile */
+  }
+  
+  .users-table tbody {
+    width: 100% !important;
+    display: block !important;
+  }
+  
+  .users-table tr {
+    display: block !important;
+    margin-bottom: 1rem !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 4px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .users-table td {
+    display: flex !important;
+    padding: 0.5rem !important;
+    border: none !important;
+    border-bottom: 1px solid var(--border-color-light, #eee) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+  }
+  
+  .users-table td:last-child {
+    border-bottom: none !important;
+  }
+  
+  /* Hide ID column on mobile */
+  .users-table td:nth-of-type(1) {
+    display: none !important;
+  }
+  
+  /* Fix all label mismatches by using the correct content labels */
+  .users-table td:nth-of-type(2):before { content: "Name: "; font-weight: bold; margin-right: 0.5rem; }
+  .users-table td:nth-of-type(3):before { content: "Email: "; font-weight: bold; margin-right: 0.5rem; }
+  .users-table td:nth-of-type(4):before { content: "Level: "; font-weight: bold; margin-right: 0.5rem; }
+  .users-table td:nth-of-type(5):before { content: "Last Seen: "; font-weight: bold; margin-right: 0.5rem; }
+  .users-table td:nth-of-type(6):before { content: "Role: "; font-weight: bold; margin-right: 0.5rem; }
+  .users-table td:nth-of-type(7):before { content: "Actions: "; font-weight: bold; margin-right: 0.5rem; }
+  
+  .action-buttons {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 0.5rem !important;
+  }
+  
+  .action-buttons button {
+    width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  .pagination {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+  }
+  
+  .pagination-button {
+    flex: 1 !important;
+    min-width: calc(25% - 0.5rem) !important;
+    text-align: center !important;
+  }
+  
+  /* Modal styling */
+  .user-modal {
+    width: 95% !important;
+    max-width: 95% !important;
+    padding: 1rem !important;
+    height: 90vh !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+  
+  .form-container {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+  
+  .form-column-left, 
+  .form-column-right {
+    width: 100% !important;
+    flex: 1 0 100% !important;
+    min-width: 100% !important;
+  }
+  
+  .form-row {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+  
+  .modal-actions {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 0.5rem !important;
+  }
+  
+  .modal-actions button {
+    width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Badge section */
+  .add-badge-form {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  
+  .badge-info {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  
+  .badge-item {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+  
+  .remove-badge-btn {
+    width: 100% !important;
+  }
+}
+
+.action-buttons .btn {
+  min-width: 80px;
+  box-sizing: border-box;
+} 

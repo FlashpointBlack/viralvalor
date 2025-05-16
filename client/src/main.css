@@ -1,0 +1,23 @@
+/*
+ * Main Application Stylesheet
+ * The single stylesheet that imports all other stylesheets
+ */
+
+/* Import reset and base styles */
+@import './index.css';
+
+/* Import theme variables */
+@import './theme.css';
+
+/* Import all centralized component styles */
+@import './styles/typography.css';
+@import './styles/layout-index.css';
+@import './styles/buttons.css';
+@import './styles/forms.css';
+@import './styles/cards.css';
+@import './styles/animations.css';
+
+/* Report pages overrides must come last to ensure highest priority */
+@import './styles/reports.css';
+
+/* Add any app-specific overrides last */ 

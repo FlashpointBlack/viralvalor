@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+-focus on the areas of code relevant to the task
+-do not touch code that is unrelated to the task
+-avoid making major changes to the patterns and architecture of how a feature works, after it has shown to work well, unless explicitly instructed
+
+-always think about what other methods and areas of code may be affected by code changes
+-do not ever use white text on a white background. do not ever use white text on a light grey background. avoid white text unless specifically asked

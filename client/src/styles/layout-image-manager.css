@@ -1,0 +1,215 @@
+/*
+ * Layout System - Image Manager
+ * Provides styles for image management components
+ */
+
+/* Image Manager */
+.image-manager {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.image-manager h2 {
+  margin-bottom: 20px;
+  color: var(--text-color);
+}
+.image-manager-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+.tab-button {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  color: var(--text-secondary);
+}
+.tab-button:hover {
+  background-color: var(--hover-bg);
+  color: var(--primary);
+}
+.tab-button.active {
+  border-bottom: 3px solid var(--primary);
+  font-weight: bold;
+  color: var(--text-color);
+}
+.image-manager-content {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 30px;
+}
+
+.upload-section {
+  background-color: var(--bg-card);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--shadow);
+}
+.upload-section h3 {
+  color: var(--text-color);
+  margin-bottom: 15px;
+}
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.images-gallery {
+  background-color: var(--bg-card);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--shadow);
+}
+.loading, .error, .no-images {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+.error {
+  color: var(--error);
+  background-color: var(--bg-alt);
+  border: 1px solid var(--error);
+  border-radius: 4px;
+}
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Unlinked encounters list */
+.unlinked-encounters-list {
+  margin-top: 1rem;
+  background-color: var(--bg-alt);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 1rem;
+}
+.unlinked-encounters-list h4 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+.unlinked-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.route-navigation {
+  margin-bottom: 15px;
+}
+
+/* File upload button */
+.file-upload-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 30px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.file-upload-btn:hover {
+  border-color: var(--primary);
+  background-color: var(--bg-alt);
+}
+.file-upload-btn i {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: var(--text-secondary);
+}
+.file-upload-btn p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+.upload-input {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
+/* Image management controls */
+.image-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.image-filters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.image-search {
+  position: relative;
+}
+
+.image-search input {
+  padding: 8px 12px 8px 32px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 14px;
+  width: 200px;
+  background-color: var(--input-bg);
+  color: var(--text-color);
+}
+
+.image-search i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.image-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.image-sort label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.image-sort select {
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .image-manager-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .image-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .image-search input {
+    width: 100%;
+  }
+} 

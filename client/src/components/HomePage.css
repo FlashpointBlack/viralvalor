@@ -1,0 +1,429 @@
+.homepage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #175480 !important;
+  color: var(--text-color);
+  box-shadow: 0 2px 4px var(--shadow);
+}
+
+.main-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: var(--text-color);
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.main-tabs {
+  display: flex;
+  gap: 0.5rem;
+  position: relative;
+}
+
+/* Base nav button */
+.main-tab {
+  padding: 0.5rem 0.75rem;
+  background-color: var(--bg-alt);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  white-space: nowrap; /* prevent wrapping */
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px var(--shadow);
+  margin: 0 3px;
+}
+
+.main-tab:hover {
+  color: var(--primary);
+  background-color: var(--hover-bg);
+  transform: translateY(-2px);
+}
+
+/* active link highlight */
+.main-tab.active {
+  color: var(--primary);
+  background-color: var(--hover-bg);
+  border-bottom: 2px solid var(--primary);
+}
+
+.game-link {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: var(--accent);
+  color: var(--button-text);
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.game-link:hover {
+  background-color: var(--accent-dark);
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  background-color: var(--bg-color);
+}
+
+.content-section {
+  margin-bottom: 2rem;
+}
+
+.welcome-section {
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px var(--shadow);
+  border-left: 5px solid var(--primary);
+}
+
+.content-section h2 {
+  margin-top: 0;
+  color: var(--text-color);
+  font-size: 1.5rem;
+}
+
+.content-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  grid-auto-rows: 1fr;
+}
+
+.content-card {
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  height: 100%;
+}
+
+.content-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px var(--shadow);
+}
+
+.content-card h3 {
+  margin-top: 0;
+  color: var(--text-color);
+  font-size: 1.2rem;
+}
+
+.card-actions {
+  margin-top: auto; /* push buttons to bottom */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card-action-btn {
+  padding: 0.5rem 1rem;
+  background-color: var(--primary);
+  color: var(--button-text);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.card-action-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+.placeholder-content {
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px var(--shadow);
+  text-align: center;
+}
+
+.placeholder-content h2 {
+  margin-top: 0;
+  color: var(--text-color);
+}
+
+.placeholder-content p {
+  color: var(--text-secondary);
+}
+
+.main-nav .btn {
+  padding: 0.35rem 0.75rem;
+  background-color: var(--primary);
+  color: var(--button-text);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.main-nav .btn:hover {
+  background-color: var(--primary-dark);
+}
+
+/* Greeting text next to auth buttons */
+.main-header .user-welcome {
+  color: var(--accent);
+  margin-right: 1rem;
+  white-space: nowrap; /* prevent text wrapping */
+}
+
+@media (max-width: 768px) {
+  .main-header {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  .main-nav {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .main-tabs {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .main-content {
+    padding: 1rem;
+  }
+  
+  .content-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dropdown container - Ensure no extra borders/shadows/background */
+.main-tabs .dropdown {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  background-color: transparent !important; /* Force transparent background */
+}
+
+/* Hidden dropdown menu */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: var(--bg-card);
+  border-radius: 4px;
+  padding: 0.25rem 0;
+  box-shadow: 0 2px 6px var(--shadow);
+  min-width: 240px; /* wider to fit long labels */
+  z-index: 1000;
+}
+
+/* Show dropdown on hover */
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* Dropdown item buttons - Increased specificity and appearance reset */
+.main-tabs .dropdown .dropdown-content button.dropdown-item {
+  appearance: none; /* Remove default browser button styles */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  padding: 0.6rem 1.1rem; /* Slightly adjust padding for alignment */
+  margin: 0;
+  font-weight: normal;
+  text-align: left;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+  display: block; /* Ensure it behaves like a block element */
+}
+
+.main-tabs .dropdown .dropdown-content button.dropdown-item:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-color);
+}
+
+.main-tabs .dropdown .dropdown-content button.dropdown-item:focus {
+  outline: 1px dashed var(--primary);
+  outline-offset: -2px; /* Adjust offset */
+  background-color: var(--hover-bg); /* Add focus background */
+}
+
+.main-tabs .dropdown .dropdown-content button.dropdown-item.active {
+  background-color: var(--bg-alt);
+  color: var(--text-color);
+  font-weight: bold;
+}
+
+/* Ensure Home button and Dropdown triggers have identical base styles */
+.main-tabs > button.main-tab,
+.main-tabs > .dropdown > button.main-tab {
+  padding: 0.5rem 0.75rem;
+  background-color: var(--bg-alt);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px var(--shadow);
+  margin: 0 3px;
+  display: inline-flex; /* Use flex for alignment with caret */
+  align-items: center;
+}
+
+.main-tabs > button.main-tab .caret { /* Style caret if directly inside button */
+  margin-left: 6px;
+  font-size: 0.7rem;
+}
+
+/* Full-width content container for dashboard */
+.fullwidth-content {
+  flex: 1;
+  display: flex;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  background-color: var(--bg-color);
+}
+
+/* Homepage styling */
+.homepage-content {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  background-color: transparent;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Fullscreen homepage content - takes up entire available space */
+.fullscreen-homepage-content {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  background-color: transparent;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.welcome-banner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 65px); /* subtract header height */
+  overflow: hidden;
+}
+
+.welcome-banner h2 {
+  font-size: 2rem;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.welcome-banner p {
+  color: var(--text-color);
+  position: relative;
+  z-index: 2;
+}
+
+.welcome-banner .splash-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* prevent cropping by fitting entire image */
+  object-position: center;
+  max-height: calc(100vh - 65px); /* ensure it doesn't exceed viewport minus header */
+}
+
+.featured-content {
+  max-width: 800px;
+  margin: 0 auto;
+  color: var(--text-color);
+}
+
+.featured-content h3 {
+  color: var(--text-color);
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+
+.featured-content p {
+  color: var(--text-color);
+}
+
+.featured-content ul {
+  padding-left: 1.5rem;
+  margin-top: 1rem;
+  color: var(--text-color);
+}
+
+.featured-content li {
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-color);
+}
+
+.main-tab .caret {
+  margin-left: 6px;
+  font-size: 0.7rem;
+}
+
+/* Ensure Home button matches other tab styles */
+.main-tab[key="dashboard"] { /* More specific selector if needed */
+  /* identical style already inherited, placeholder for overrides if needed */
+} 

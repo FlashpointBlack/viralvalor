@@ -1,0 +1,125 @@
+/*
+ * Dropdown Menu Styles
+ * Provides consistent dropdown styles across the application
+ */
+
+/* Base dropdown styles */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 220px;
+  background-color: var(--bg-card);
+  border-radius: 4px;
+  box-shadow: var(--shadow-lg);
+  overflow: visible !important; /* Always show overflow */
+  z-index: 100;
+  border: 1px solid var(--border-color);
+  width: max-content !important; /* Force width to content size */
+  max-width: 350px !important; /* Maximum width */
+}
+
+/* Section headers in dropdowns */
+.dropdown-header {
+  padding: 8px 12px 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: var(--bg-alt);
+  border-top: 1px solid var(--border-color);
+}
+
+.dropdown-header:first-child {
+  border-top: none;
+}
+
+/* Dropdown items */
+.dropdown-item {
+  width: 100%;
+  background-color: var(--bg-alt);
+  border: none;
+  padding: 0.6rem 1.1rem;
+  font-weight: normal;
+  text-align: left;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 0.9rem;
+  white-space: nowrap; /* Keep nowrap for desktop view */
+  transition: background-color 0.2s ease;
+  display: block;
+}
+
+.dropdown-item:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-color);
+}
+
+.dropdown-item:focus {
+  outline: 1px dashed var(--primary);
+  outline-offset: -2px;
+  background-color: var(--hover-bg);
+}
+
+.dropdown-item.active {
+  background-color: var(--bg-alt);
+  color: var(--text-color);
+  font-weight: bold;
+}
+
+/* Tab and caret styles */
+.main-tab {
+  background: none;
+  border: none;
+  color: white;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.main-tab:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.main-tab.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  font-weight: 500;
+}
+
+.caret {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  transition: transform 0.2s ease;
+}
+
+.dropdown.open .caret {
+  transform: rotate(180deg);
+}
+
+/* Mobile-specific dropdown styles */
+@media (max-width: 768px) {
+  .dropdown-content.mobile {
+    width: 100% !important;
+    max-width: none !important;
+  }
+  
+  .dropdown-content.mobile .dropdown-item,
+  .dropdown-content.mobile a.dropdown-item,
+  .dropdown-content.mobile button.dropdown-item,
+  .dropdown-content.mobile .dropdown-header {
+    white-space: normal !important; /* Force text wrapping */
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    width: 100% !important;
+  }
+} 

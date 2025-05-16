@@ -1,0 +1,326 @@
+/* CRITICAL OVERRIDE: Insert at top of the file to ensure these styles take precedence */
+/* Direct content override - Must be at the top to ensure priority */
+.story-view .encounter-content, 
+.story-view .encounter-container .encounter-content {
+  position: absolute !important;
+  z-index: 999 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+/* Direct title/description override - Must be at the top to ensure priority */
+.story-view .encounter-title,
+.story-view .encounter-description {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Ensure backdrop overlay doesn't obscure content - Must be at the top to ensure priority */
+.story-view .backdrop-overlay {
+  z-index: 2 !important;
+}
+
+/*
+ * Layout System - Story View and Encounters
+ * Provides styles for story presentation components
+ */
+
+/* StoryView Layout */
+.story-view {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  --fade-duration: 600ms;
+  min-height: 80vh;
+  background-color: #000;
+}
+
+/* Hide header in single player mode */
+.single-player-game-active .app-header,
+.single-player-game-active .main-header,
+.single-player-game-active .message-dropdown,
+.single-player-game-active .chat-window {
+  display: none !important;
+}
+
+/* Game mode indicator */
+.game-mode-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: rgba(231, 76, 60, 0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  z-index: 100;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Override crucial backdrop styles */
+.story-view .backdrop-container {
+  z-index: 1 !important;
+}
+
+.story-view .backdrop-image {
+  z-index: 1 !important;
+}
+
+.story-view .backdrop-overlay {
+  z-index: 2 !important;
+}
+
+/* Encounter content */
+.encounter-content {
+  position: relative;
+  z-index: 20 !important;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 800px;
+  width: 90%;
+  text-align: center;
+  margin: auto !important;
+}
+
+/* Title and description */
+.encounter-title {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #f8f8f8;
+}
+
+.encounter-description {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  color: #e0e0e0;
+}
+
+/* Choice buttons styles */
+.choice-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  position: relative;
+  z-index: 20 !important;
+}
+
+.choice-buttons .btn,
+.choice-buttons .btn-primary,
+.choice-buttons .btn-block {
+  background-color: rgba(52, 152, 219, 0.8);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+  display: block;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 21 !important;
+}
+
+.choice-buttons .btn:hover,
+.choice-buttons .btn-primary:hover {
+  background-color: rgba(41, 128, 185, 1.0);
+}
+
+.no-choices {
+  margin-top: 1rem;
+  color: #bbb;
+  font-style: italic;
+}
+
+/* Character images layout */
+.character-images {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  z-index: 5;
+}
+
+/* Character image container */
+.character-image-container {
+  position: absolute;
+  bottom: 0;
+  max-height: 100vh;
+  z-index: 5;
+  transition: all 0.5s ease;
+}
+.character-image-container.left {
+  left: 0;
+  transform: translateX(-10%);
+}
+.character-image-container.right {
+  right: 0;
+  transform: translateX(10%);
+}
+.character-image-container img {
+  max-height: 90vh;
+  object-fit: contain;
+}
+
+/* Scenario selector */
+.scenario-selector {
+  position: relative;
+  z-index: 30;
+  padding: 20px 0;
+}
+.story-view .scenario-selector {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+}
+.story-view .scenario-selector select {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+/* Back button */
+.back-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 30;
+}
+.story-view .back-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+}
+
+/* Blank state message */
+.blank-state-message {
+  color: #ffffff;
+  font-size: 1.2rem;
+  opacity: 0.8;
+  margin-top: 20vh;
+  z-index: 20 !important;
+}
+
+/* Encounter containers for transition effects */
+.encounter-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 1;
+  will-change: opacity;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10 !important;
+}
+
+/* Current encounter (new content) */
+.encounter-container.current {
+  z-index: 15 !important;
+}
+
+/* Previous encounter (fading out) */
+.encounter-container.previous {
+  z-index: 10 !important;
+}
+
+/* Animation for fading out the previous encounter */
+.encounter-container.previous.fade-out {
+  animation: storyFadeOut var(--fade-duration) forwards;
+  pointer-events: none; /* Prevent interaction during fade */
+}
+
+/* Keyframe animation for the fade out effect */
+@keyframes storyFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Backdrop container - From the original */
+.backdrop-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.backdrop-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.backdrop-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.backdrop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6));
+  z-index: 2;
+}
+
+/* Responsive adjustments for story view */
+@media (max-width: 768px) {
+  .encounter-title {
+    font-size: 1.8rem;
+  }
+  .encounter-description {
+    font-size: 1rem;
+  }
+  .encounter-content {
+    padding: 1.5rem;
+  }
+  .character-image-container.left {
+    transform: translateX(-30%);
+  }
+  .character-image-container.right {
+    transform: translateX(30%);
+  }
+  .character-image-container img {
+    max-height: 70vh;
+  }
+}
+
+/* DIRECT FIX FOR TEXT VISIBILITY - DO NOT REMOVE */
+.story-view .backdrop-container { z-index: 1 !important; }
+.story-view .backdrop-image { z-index: 1 !important; }
+.story-view .backdrop-overlay { z-index: 2 !important; }
+.story-view .encounter-content { z-index: 20 !important; position: relative !important; margin: auto !important; }
+.story-view .encounter-title { position: relative !important; z-index: 21 !important; }
+.story-view .encounter-description { position: relative !important; z-index: 21 !important; }
+.story-view .choice-buttons { position: relative !important; z-index: 22 !important; }
+.story-view .btn-primary { position: relative !important; z-index: 23 !important; } 

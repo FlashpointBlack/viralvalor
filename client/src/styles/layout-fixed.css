@@ -1,0 +1,40 @@
+/* Add the character image styles to layout.css at the end of the file, before the responsive section */
+
+/* Character image container - From CharacterImage.css (lines 1-36) */
+.character-image-container {
+  position: absolute;
+  bottom: 0;
+  max-height: 100vh;
+  z-index: 5;
+  transition: all 0.5s ease;}
+.character-image-container.left {
+  left: 0;
+  transform: translateX(-10%);}
+.character-image-container.right {
+  right: 0;
+  transform: translateX(10%);}
+.character-image-container img {
+  max-height: 90vh;
+  object-fit: contain;}
+@media (max-width: 768px) {
+  .character-image-container.left {
+    transform: translateX(-30%);}
+  .character-image-container.right {
+    transform: translateX(30%);}
+  .character-image-container img {
+    max-height: 70vh;}
+}
+
+.no-results {
+  text-align: center;
+  padding: var(--space-5) 0 !important;
+  color: var(--text-color);
+  font-style: italic;
+  /* From lines 130-135 in UserManagement.css */}
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  /* From lines 136-142 in UserManagement.css */} 

@@ -1,0 +1,31 @@
+/* 
+ * ENCOUNTER DISPLAY STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In layout.css:
+ * - .encounter-display → Added to layout.css (lines 1060-1073)
+ * - .loading-display → Added to layout.css (lines 1075-1085)
+ * - .encounter-backdrop → Added to layout.css (lines 1087-1097)
+ * - .encounter-character and character positioning → Added to layout.css (lines 1099-1122)
+ * - .encounter-content → Added to layout.css (lines 1124-1142)
+ * - .poll-overlay and .poll-timer → Added to layout.css (lines 1164-1183)
+ * - .encounter-options and .encounter-option → Added to layout.css (lines 1185-1204)
+ * - Media queries for responsive adjustments → Added to layout.css (lines 1225-1240)
+ * - Educator mode styles → Added to layout.css (lines 1242-1269)
+ * - Placeholder styles → Added to layout.css (lines 1271-1291)
+ * - Fullscreen styles → Added to layout.css (lines 1293-1308)
+ * - Transition container styles → Added to layout.css (lines 1310-1338)
+ * - Status indicator styles → Added to layout.css (lines 1340-1369)
+ * - Debug panel styles → Added to layout.css (lines 1371-1434)
+ * 
+ * In typography.css:
+ * - .encounter-title → Merged with existing style (lines 430-435)
+ * - .encounter-description → Merged with existing style (lines 437-443)
+ * 
+ * In animations.css:
+ * - @keyframes pulse → Already existed (lines 83-87)
+ * - @keyframes fadeOut → Already existed (lines 12-15)
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

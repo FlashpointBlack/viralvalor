@@ -1,0 +1,240 @@
+.chat-window{position:fixed;width:350px;height:33vh;min-height:160px;max-height:77vh;display:flex;flex-direction:column;border-radius:8px 8px 0 0;box-shadow:0 4px 12px var(--shadow);background:var(--bg-card);bottom:0;}
+.chat-header{padding:10px 12px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:0.85rem;}
+.chat-header span {
+  color: var(--text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chat-close{background:none;border:none;cursor:pointer;color:var(--text-secondary);width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background-color 0.2s;}
+.chat-close:hover{background-color:var(--hover-bg);color:var(--text-color);}
+.chat-messages{flex:1;overflow-y:auto;padding:0.5rem;background:var(--bg-alt);display:flex;flex-direction:column;}
+.bubble-container{
+  position: relative;
+  margin-bottom: 4px; /* Even tighter default spacing */
+  margin-top: 3px; /* Reduced from 6px */
+}
+/* Add more space when reactions exist or timestamp is shown */
+.bubble-container.has-reactions {
+  margin-bottom: 18px;
+}
+.bubble-container .chat-bubble.show-time {
+  margin-bottom: 8px; /* Add space for timestamp */
+}
+.chat-bubble{
+  max-width:70%;
+  padding:0.4rem 0.6rem;
+  border-radius:6px;
+  font-size:0.85rem;
+  position:relative;
+  margin-bottom: 0; /* No bottom margin on bubble itself */
+}
+.chat-bubble p {
+  margin: 0;
+  overflow-wrap: break-word; /* Force long words to wrap */
+  word-break: break-word; /* Additional support for browsers */
+  hyphens: auto; /* Add hyphens where possible */
+}
+.chat-bubble.me{
+  background:var(--bg-color);
+  margin-left:auto;
+  color:var(--text-color);
+}
+.chat-bubble.them{
+  background:var(--bg-color);
+  color:var(--text-color);
+}
+.chat-time{
+  font-size:0.65rem;
+  color:var(--text-secondary);
+  position:absolute;
+  bottom:-16px;
+  left:50%;
+  transform:translateX(-50%);
+  display:none;
+  white-space:nowrap;
+  text-align:center;
+  width:auto;
+}
+.chat-bubble.show-time .chat-time{
+  display:block;
+}
+.chat-bubble.show-time{
+  /* Don't modify bubble margin - timestamp is absolute */
+}
+.chat-input{display:flex;border-top:1px solid var(--border-color);}
+.chat-input textarea{flex:1;border:none;padding:0.15rem;font-size:0.8rem;resize:none;height:25px;background:var(--input-bg);color:var(--text-color);}
+.chat-input textarea:disabled{
+  background: var(--bg-disabled, #f1f1f1);
+  color: var(--text-secondary, #888);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.chat-input button{height:25px;padding:0 0.4rem;background:var(--button-bg);color:var(--button-text);}
+.chat-input button:disabled{
+  background: var(--button-disabled-bg, #ccc);
+  color: var(--text-secondary, #666);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.chat-input button:hover{background:var(--button-hover);}
+.chat-controls{display:flex;gap:6px;}
+.chat-min{
+  background:none;
+  border:none;
+  cursor:pointer;
+  color:var(--text-secondary);
+  width:22px;
+  height:22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+.chat-min:hover{
+  background-color: var(--hover-bg);
+  color:var(--text-color);
+}
+.bubble-container:hover .reaction-trigger{opacity:1;}
+.chat-bubble:hover + .reaction-trigger{opacity:1;}
+.reaction-trigger{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  cursor:pointer;
+  font-size:18px;
+  opacity:0;
+  transition:opacity 0.2s;
+}
+/* position for incoming */
+.bubble-container.them .reaction-trigger{right:-24px;}
+/* position for outgoing */
+.bubble-container.me .reaction-trigger{left:-24px;}
+.reaction-menu{
+  position:absolute;
+  top:-30px;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--bg-card);
+  border:1px solid var(--border-color);
+  border-radius:8px;
+  padding:4px;
+  display:flex;
+  gap:4px;
+  box-shadow:0 2px 6px var(--shadow);
+  z-index:10;
+}
+/* Position reaction menu based on message sender */
+.bubble-container.them .reaction-menu{
+  margin-right:0;
+}
+.bubble-container.me .reaction-menu{
+  margin-left:0;
+}
+.reaction-menu span{cursor:pointer;font-size:20px;}
+.reaction-display{
+  position:absolute;
+  top:calc(100% - 4px); /* Overlap bubble by 4px */
+  font-size:14px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:3px;
+  z-index:1; /* Ensure reactions appear above next bubble */
+}
+.bubble-container.me .reaction-display{
+  right:6px;
+  justify-content:flex-end;
+}
+.bubble-container.them .reaction-display{
+  left:6px;
+  justify-content:flex-start;
+}
+.reaction-display span {
+  display: inline-block;
+  background-color: var(--bg-alt);
+  border-radius: 12px;
+  padding: 1px 5px;
+  margin-right: 2px;
+  cursor: default;
+}
+
+/* =============================
+   Presenter Chat – modal style
+   ============================= */
+
+.presenter-chat-overlay {
+  position: fixed;
+  inset: 0; /* top, right, bottom, left */
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200; /* above other UI */
+  padding: 16px;
+  /* Ensure content sits above any device safe-area (iOS home indicator, etc.) */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Override sizing/positioning for the chat window when used as presenter modal */
+.presenter-chat-window {
+  position: relative; /* drop fixed positioning */
+  width: 95vw;
+  max-width: 600px;
+  height: 45vh !important; /* 45% of viewport */
+  max-height: 45vh !important;
+  bottom: auto !important; /* cancel bottom:0 from base class */
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 55px;
+}
+
+/* Make header and controls bigger for easier tapping */
+.presenter-chat-window .chat-header {
+  padding: 14px 18px;
+  font-size: 1rem; /* bigger text */
+}
+
+.presenter-chat-window .chat-close,
+.presenter-chat-window .chat-min {
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+}
+
+.presenter-chat-window .chat-messages {
+  padding: 0.8rem;
+}
+
+.presenter-chat-window .chat-input textarea {
+  font-size: 1rem;
+  height: 35px;
+}
+
+.presenter-chat-window .chat-input button {
+  height: 35px;
+  padding: 0 0.6rem;
+  font-size: 1rem;
+}
+
+.presenter-chat-window .chat-input {
+  display: flex;
+  border-top: 1px solid var(--border-color);
+  /* Keep input above browser UI / home indicator */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (max-width: 600px) {
+  .presenter-chat-overlay {
+    align-items: flex-end; /* Stick to bottom */
+    justify-content: center;
+    padding: 0; /* Remove extra padding */
+  }
+
+  .presenter-chat-window {
+    width: 100vw;
+    height: 45vh !important;
+    margin-bottom: 55px;
+    border-radius: 12px 12px 0 0; /* flat bottom corners */
+  }
+} 

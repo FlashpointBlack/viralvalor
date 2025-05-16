@@ -1,0 +1,409 @@
+/*
+ * Layout System - Encounter Display
+ * Provides styles for the /encounters2 display view
+ * Based on the original EncounterDisplay.css
+ */
+
+/* Main container styles */
+.encounter-display {
+  --fade-duration: 2s; /* Adjust this value to make transitions slower or faster */
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background-color: #000;
+  font-family: Arial, sans-serif;
+  color: white;
+  cursor: pointer; /* Indicate clickable area */
+  user-select: none;
+}
+
+.encounter-display * {
+  user-select: none;
+}
+
+.loading-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: #000;
+  color: white;
+  font-size: 2rem;
+}
+
+/* Encounter backdrop - appears behind everything */
+.encounter-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.encounter-backdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Character images - increase scaling to 60% */
+.encounter-character {
+  position: absolute;
+  bottom: 0;
+  z-index: 2;
+  height: 60vh; /* Increased from 40vh to 60vh */
+  display: flex;
+  align-items: flex-end;
+}
+
+.encounter-character img {
+  max-height: 100%;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Place characters firmly at the bottom corners */
+.character-1 {
+  left: 0;
+  bottom: 0;
+}
+
+.character-2 {
+  right: 0;
+  bottom: 0;
+}
+
+/* Main content area - reduce width to 60% */
+.encounter-content {
+  position: absolute;
+  z-index: 3;
+  padding: 40px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  max-width: 60%;
+  max-height: 80%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+}
+
+.encounter-title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.encounter-description {
+  font-size: 1.5rem;
+  line-height: 1.6;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  white-space: pre-wrap;
+}
+
+/* Poll overlay styles */
+.poll-overlay {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+}
+
+.poll-timer {
+  background-color: rgba(231, 76, 60, 0.8);
+  padding: 10px 30px;
+  border-radius: 30px;
+  text-align: center;
+  animation: pulse 2s infinite;
+}
+
+.poll-timer h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: white;
+  text-transform: uppercase;
+}
+
+/* Poll options */
+.encounter-options {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.encounter-option {
+  background-color: rgba(52, 152, 219, 0.7);
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.encounter-option:hover {
+  background-color: rgba(52, 152, 219, 0.9);
+  transform: translateY(-2px);
+}
+
+/* Animation */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(231, 76, 60, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .encounter-content {
+    max-width: 90%;
+    padding: 20px;
+    margin: 20px;
+  }
+
+  .encounter-title {
+    font-size: 1.8rem;
+  }
+
+  .encounter-description {
+    font-size: 1.2rem;
+  }
+
+  .poll-timer h2 {
+    font-size: 1.2rem;
+  }
+}
+
+/* Add styles for educator mode */
+.encounter-display.educator-mode {
+  /* Ensure the display fills the window nicely */
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Educator mode content - maintain consistent 60% width */
+.educator-mode .encounter-content {
+  padding: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  position: absolute;
+  z-index: 10;
+  max-width: 60%;
+  width: 60%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.educator-mode .encounter-title {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.educator-mode .encounter-description {
+  font-size: 1.5rem;
+  line-height: 1.6;
+  color: #fff;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Placeholder styles */
+.encounter-display.placeholder {
+  background-color: #000;
+  color: #fff;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.placeholder-content {
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  max-width: 600px;
+}
+
+.placeholder-content h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #e67e22;
+}
+
+.placeholder-content p {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+/* Fullscreen styles */
+.encounter-display:fullscreen {
+  width: 100vw;
+  height: 100vh;
+}
+
+.encounter-display:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+}
+
+.encounter-display:-ms-fullscreen {
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Updated transition container styles */
+.encounter-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  will-change: opacity; /* Optimize for animation */
+}
+
+/* Current container (new encounter) - sits behind old during fade */
+.encounter-container.current {
+  z-index: 5;
+  opacity: 1;
+  transition: opacity var(--fade-duration) ease-in-out;
+}
+
+/* Previous container (old encounter) - on top until it fades out */
+.encounter-container.previous {
+  z-index: 10;
+  opacity: 1;
+}
+
+/* Fade-out animation */
+.encounter-container.previous.fade-out {
+  animation: fadeOut var(--fade-duration) forwards;
+  pointer-events: none; /* Prevent interaction during fade */
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Status indicator styles */
+.transition-status-indicator {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 1000;
+  font-family: monospace;
+  animation: fadeIn 0.3s ease-in-out;
+  text-align: center;
+  max-width: 90%;
+}
+
+.transition-status-indicator.loading {
+  background-color: rgba(41, 128, 185, 0.9); /* Blue background */
+  color: white;
+}
+
+.transition-status-indicator.error {
+  background-color: rgba(231, 76, 60, 0.9); /* Red background */
+  color: white;
+}
+
+/* Hide the original error indicator that we're replacing */
+.transition-error-indicator {
+  display: none;
+}
+
+/* Debug panel styles */
+.debug-panel {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  width: 300px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: #00ff00;
+  font-family: monospace;
+  padding: 10px;
+  border: 1px solid #00ff00;
+  z-index: 1000;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.debug-panel h3, .debug-panel h4 {
+  color: #00ff00;
+  margin: 5px 0;
+  text-align: center;
+}
+
+.debug-panel p {
+  margin: 3px 0;
+}
+
+.debug-error {
+  background-color: #330000;
+  border: 1px solid #ff0000;
+  color: #ff0000;
+  padding: 5px;
+  margin-top: 10px;
+  border-radius: 3px;
+}
+
+.debug-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.debug-controls button, .transition-error-indicator button {
+  background-color: #333;
+  color: white;
+  border: 1px solid #00ff00;
+  padding: 5px;
+  cursor: pointer;
+  font-family: monospace;
+}
+
+.debug-controls button:hover, .transition-error-indicator button:hover {
+  background-color: #444;
+}
+
+.debug-controls input {
+  background-color: #222;
+  color: white;
+  border: 1px solid #00ff00;
+  padding: 5px;
+  font-family: monospace;
+} 

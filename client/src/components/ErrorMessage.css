@@ -1,0 +1,48 @@
+/* 
+ * ERROR MESSAGE STYLES
+ * All styles from this file have been centralized in layout.css (lines 605-639)
+ * 
+ * The original styles were:
+ * - .error-container
+ * - .error-content
+ * - .error-content h2
+ * - .error-content p
+ * 
+ * These styles are now maintained in the centralized layout.css file
+ * using CSS custom properties for better consistency.
+ */
+
+.error-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+}
+
+.error-content {
+  background-color: #333;
+  padding: 30px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  color: white;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.error-content h2 {
+  color: #ff6b6b;
+  margin-bottom: 15px;
+}
+
+.error-content p {
+  margin-bottom: 20px;
+}
+
+/* removed retry-button styling; relies on .btn */ 

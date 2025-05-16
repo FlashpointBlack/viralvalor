@@ -1,0 +1,17 @@
+/* 
+ * ENCOUNTER FORM STYLES
+ * All styles from this file have been centralized in forms.css and layout.css
+ * 
+ * The original styles were:
+ * - .encounter-form → Using form classes from forms.css (lines 6-11)
+ * - .encounter-form h3 → Using typography.css heading styles
+ * - .form-group → Using .form-group from forms.css (lines 15-19)
+ * - .form-group label → Using label styles from forms.css (lines 33-38)
+ * - .form-control → Using .form-control from forms.css (lines 65-77)
+ * - .form-control:focus → Using focus styles from forms.css (lines 79-83)
+ * - textarea.form-control → Using textarea styles from forms.css (lines 110-113)
+ * - .encounter-info → Moved to layout.css as component-specific styles
+ * - .info-item → Moved to layout.css as component-specific styles
+ * - .info-label → Moved to layout.css as component-specific styles
+ * - .info-value → Moved to layout.css as component-specific styles
+ */ 

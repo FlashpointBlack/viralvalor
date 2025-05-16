@@ -1,0 +1,64 @@
+/*
+ * Layout System - Main Index
+ * This file imports all layout modules and replaces the original layout.css
+ */
+
+/* Import core layout utilities */
+@import './layout-core.css';
+
+/* Import page structure */
+@import './layout-page.css';
+
+/* Import UI components */
+@import './layout-components.css';
+
+/* Import chat reactions */
+@import './layout-chat-reactions.css';
+
+/* Import story-related layouts */
+@import './layout-story.css';
+
+/* Import educator panel styles */
+@import './layout-educator.css';
+
+/* Import poll styles */
+@import './layout-polls.css';
+
+/* Import user management and utilities */
+@import './layout-utilities.css';
+
+/* Import user search and profile card styles */
+@import './layout-user-search.css';
+
+/* Import user profile styles */
+@import './layout-user-profile.css';
+
+/* Import user preferences styles */
+@import './layout-user-preferences.css';
+
+/* Import responsive layouts */
+@import './layout-responsive.css';
+
+/* Import animations and keyframes */
+@import './layout-animations.css';
+
+/* Import encounter editor and UI components */
+@import './layout-encounter-ui.css';
+
+/* Import encounter display view (/encounters2) */
+@import './layout-encounter-display.css';
+
+/* Import compose UI and modal components */
+@import './layout-compose-ui.css';
+
+/* Import image manager components */
+@import './layout-image-manager.css';
+
+/* Import badges and user components */
+@import './layout-badges.css';
+
+/* Import image gallery grid styles */
+@import './layout-image-gallery.css';
+
+/* Import question bank styles */
+@import './layout-question-bank.css'; 

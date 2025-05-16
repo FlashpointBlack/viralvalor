@@ -1,0 +1,17 @@
+/* 
+ * RETURN BUTTON STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In layout.css:
+ * - .return-buttons → Added to layout.css (lines 570-577)
+ * 
+ * In buttons.css:
+ * - .return-button → Added to buttons.css (lines 350-361)
+ * - .admin-button → Added to buttons.css (lines 363-367)
+ * - .return-button:hover, .admin-button:hover → Added to buttons.css (lines 369-374)
+ * - .admin-button:hover → Added to buttons.css (lines 376-378)
+ * - .return-button:active, .admin-button:active → Added to buttons.css (lines 380-382)
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

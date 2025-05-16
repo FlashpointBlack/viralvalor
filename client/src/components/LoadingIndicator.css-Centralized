@@ -1,0 +1,12 @@
+/* 
+ * LOADING INDICATOR STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In animations.css:
+ * - .loading-container → Added to animations.css (lines 200-212)
+ * - .loading-spinner → Added to animations.css (lines 214-221)
+ * - @keyframes spin → Added to animations.css (lines 223-227)
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

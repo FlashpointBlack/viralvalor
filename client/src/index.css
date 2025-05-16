@@ -1,0 +1,37 @@
+/*
+ * Main Stylesheet
+ * Import centralized styles and provide global resets
+ */
+
+/* Box sizing reset */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Base browser improvements */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Import all centralized styles */
+@import './styles/index.css';
+
+/* Any overrides and global styles that don't fit into component styles */
+
+/* Global styling moved to theme.css */
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Button styles moved to buttons.css */
+
+/* Theme CSS variables moved to theme.css */ 

@@ -1,0 +1,10 @@
+/* simple panel */
+.debug-panel {
+  background: rgba(0,0,0,0.05);
+  border: 1px solid #ccc;
+  padding: 8px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  max-height: 200px;
+  overflow: auto;
+} 

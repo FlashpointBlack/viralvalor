@@ -1,0 +1,17 @@
+/*
+ * Centralized Styles Index
+ * This file imports all the centralized style components
+ */
+
+/* Import the theme variables first */
+@import '../theme.css';
+
+/* Import the base components */
+@import './typography.css';
+@import './layout-index.css';
+@import './buttons.css';
+@import './forms.css';
+@import './cards.css';
+@import './animations.css';
+
+/* If you add more component-specific style files, import them here */ 

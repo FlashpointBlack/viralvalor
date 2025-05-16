@@ -1,0 +1,67 @@
+.lecture-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+}
+
+.lecture-detail-container {
+  background: var(--bg-light-card, #ffffff);
+  color: var(--text-light, #000000);
+  max-width: 900px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .lecture-detail-container {
+  background: var(--bg-dark-card, #1e1e1e);
+  color: var(--text-dark, #ffffff);
+}
+
+.lecture-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.lecture-detail-header button {
+  background: var(--primary-light, #007bff);
+  color: var(--button-text-light, #ffffff);
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.lecture-detail-header button:hover {
+  opacity: 0.9;
+}
+
+.edit-btn {
+  margin-left: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--primary-light, #007bff);
+  cursor: pointer;
+}
+
+.edit-btn:hover {
+  text-decoration: underline;
+}
+
+.lecture-edit-form label{display:flex;flex-direction:column;margin-bottom:12px;}
+.lecture-edit-form input[type="text"],.lecture-edit-form input[type="url"],.lecture-edit-form textarea{padding:8px;border:1px solid #ccc;border-radius:4px;font-size:1rem;}
+.lecture-edit-form button{padding:10px 18px;border:none;border-radius:4px;background:#1976d2;color:#fff;cursor:pointer;}
+.lecture-edit-form button:disabled{opacity:0.6;cursor:not-allowed;}
+.or-divider{text-align:center;margin:8px 0;color:#666;} 

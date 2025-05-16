@@ -1,0 +1,218 @@
+.question-bank-editor {
+  display: flex;
+  min-height: 300px;
+  height: auto;
+  background-color: var(--bg-alt);
+  color: var(--text-color);
+}
+
+/* Sidebar */
+.qbe-sidebar {
+  width: 260px;
+  padding: 15px;
+  background-color: var(--bg-card);
+  border-right: 1px solid var(--border-color);
+  box-shadow: 2px 0 4px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.qbe-sidebar .create-btn {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.question-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.question-list li {
+  padding: 8px 10px;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.question-list li:hover {
+  background-color: var(--hover-bg);
+  border-color: var(--primary);
+}
+
+.question-list li.active {
+  background-color: var(--primary);
+  color: var(--button-text);
+  border-color: var(--primary);
+}
+
+/* Main editor */
+.qbe-main {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: visible;
+}
+
+.question-editor .form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.question-editor textarea {
+  background-color: var(--bg-card);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 10px;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.options-section {
+  margin-top: 15px;
+}
+
+.options-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+/* Option container for each answer */
+.option-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+/* Grid layout for option columns */
+.option-main,
+.option-row.option-header {
+  display: grid;
+  grid-template-columns: 60px 1fr 120px; /* mark correct | answer text | delete */
+  align-items: center;
+  gap: 10px;
+}
+
+.option-main input[type="radio"] {
+  margin: 0 auto; /* center radio */
+}
+
+.option-main .delete-btn {
+  width: 100%;
+}
+
+.option-row.option-header span.header-label {
+  text-align: center;
+  font-weight: 600;
+}
+
+.option-row.option-header {
+  border: none;
+  padding: 0 10px 8px 10px; /* match option-row horizontal padding */
+  margin-bottom: 8px;
+}
+
+/* Rationale label indentation */
+.option-rationale-label {
+  margin-left: 30px; /* slight indent to show grouping */
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  font-weight: 600;
+  gap: 4px;
+}
+
+/* Rationale textarea styling */
+.option-rationale-input {
+  width: 100%;
+  background-color: var(--bg-card);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 6px 10px;
+  resize: vertical;
+}
+
+.option-input {
+  flex-grow: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--bg-card);
+  color: var(--text-color);
+}
+
+.delete-btn {
+  background-color: var(--error);
+  color: var(--button-text);
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  filter: brightness(90%);
+}
+
+/* Tag checkboxes */
+.tag-item {
+  /* Make each tag look like a pill toggle button */
+  display: inline-flex !important;
+  align-items: center;
+  /* gap: 6px; */ /* Removed to rely on ::before margin for checkmark spacing */
+  border: 1px solid var(--border-color);
+  border-radius: 9999px; /* pill shape */
+  padding: 6px 12px;
+  background-color: var(--bg-card);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  position: relative;
+  user-select: none;
+  flex: 0 0 auto !important; /* Do not grow or shrink */
+  width: max-content !important; /* Size to content */
+}
+
+.tag-item input {
+  /* Visually hide the native checkbox but keep it accessible */
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  height: 0;
+  width: 0;
+}
+
+.tag-item::before {
+  /* Custom checkmark (hidden by default) */
+  content: "✓";
+  font-size: 0.8em;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.2s;
+  margin-right: 4px;
+}
+
+.tag-item.selected {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--button-text);
+  padding-right: 16px; /* Original 12px + 4px to balance checkmark's margin-right */
+}
+
+.tag-item.selected::before {
+  opacity: 1; /* reveal checkmark when selected */
+}
+
+/* Dark theme overrides ensured via variables */ 

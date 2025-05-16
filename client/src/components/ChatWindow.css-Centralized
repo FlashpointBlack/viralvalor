@@ -1,0 +1,19 @@
+/* 
+ * CHAT WINDOW STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In layout.css:
+ * - .chat-window → Added to layout.css (lines 1440-1450)
+ * - .chat-header → Added to layout.css (lines 1452-1460)
+ * - .chat-close → Added to layout.css (lines 1462-1466)
+ * - .chat-messages → Added to layout.css (lines 1468-1473)
+ * - .bubble-container → Added to layout.css (lines 1475-1486)
+ * - .chat-bubble → Added to layout.css (lines 1488-1507)
+ * - .chat-time → Added to layout.css (lines 1509-1521)
+ * - .chat-input → Added to layout.css (lines 1523-1530)
+ * - .chat-controls → Added to layout.css (lines 1532-1546)
+ * - Reaction styles → Added to layout.css (lines 1548-1605)
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

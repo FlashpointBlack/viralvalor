@@ -1,0 +1,40 @@
+/* 
+ * PROFILE SEARCH STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In layout.css:
+ * - .profile-search-container → Added to layout.css (lines 2450-2458)
+ * - .profile-search-container h2 → Added to layout.css (lines 2460-2465)
+ * - .search-container → Added to layout.css (lines 2467-2469)
+ * - .search-form → Added to layout.css (lines 2471-2475)
+ * - .search-input → Added to layout.css (lines 2477-2487)
+ * - .error-message → Added to layout.css (lines 2489-2496)
+ * - .profiles-header → Added to layout.css (lines 2498-2505)
+ * - .profiles-header h3 → Added to layout.css (lines 2507-2511)
+ * - .loading-profiles → Added to layout.css (lines 2513-2520)
+ * - .no-profiles → Added to layout.css (lines 2522-2531)
+ * - .profiles-grid → Added to layout.css (lines 2533-2537)
+ * - Responsive adjustments → Added to layout.css (lines 2681-2692)
+ * 
+ * In cards.css:
+ * - .profile-card → Added to cards.css (lines 228-240)
+ * - .profile-card:hover → Added to cards.css (lines 242-246)
+ * - .profile-card-header → Added to cards.css (lines 248-255)
+ * - .profile-name → Added to cards.css (lines 257-262)
+ * - .profile-level → Added to cards.css (lines 264-270)
+ * - .profile-card-body → Added to cards.css (lines 272-276)
+ * - .profile-location → Added to cards.css (lines 278-283)
+ * - .profile-location .label → Added to cards.css (lines 285-288)
+ * - .profile-bio → Added to cards.css (lines 290-294)
+ * - .profile-bio.empty → Added to cards.css (lines 296-299)
+ * - .profile-card-footer → Added to cards.css (lines 301-305)
+ * - .profile-stats → Added to cards.css (lines 307-311)
+ * - .stat → Added to cards.css (lines 313-317)
+ * - .stat .value → Added to cards.css (lines 319-323)
+ * - .stat .label → Added to cards.css (lines 325-328)
+ * - .profile-last-seen → Added to cards.css (lines 330-334)
+ * - .profile-card .btn → Added to cards.css (lines 336-340)
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

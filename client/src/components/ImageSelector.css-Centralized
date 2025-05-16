@@ -1,0 +1,41 @@
+/* 
+ * IMAGE SELECTOR STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In layout.css:
+ * - .image-selector → Added to layout.css (lines 2694-2703)
+ * - .image-selector h4 → Added to layout.css (lines 2705-2710)
+ * - .image-selector-actions → Added to layout.css (lines 2712-2716)
+ * - .select-image-btn → Added to layout.css (lines 2718-2727)
+ * - .select-image-btn:hover → Added to layout.css (lines 2729-2731)
+ * - .upload-container, .file-input, .upload-btn → Added to layout.css (lines 2733-2736)
+ * - .modal-header → Added to layout.css (lines 2738-2744)
+ * - .modal-header h3 → Added to layout.css (lines 2746-2750)
+ * - .close-btn → Added to layout.css (lines 2752-2758)
+ * - .modal-body → Added to layout.css (lines 2760-2765)
+ * - .loading, .error styles → Added to layout.css (lines 2767-2777)
+ * - .upload-prompt → Added to layout.css (lines 2779-2786)
+ * - .upload-prompt p → Added to layout.css (lines 2788-2792)
+ * 
+ * In images.css:
+ * - .image-preview → Added to images.css (lines 83-94)
+ * - .preview-container → Added to images.css (lines 96-103)
+ * - .image-preview-content → Added to images.css (lines 105-109)
+ * - .preview-description-tooltip → Added to images.css (lines 111-124)
+ * - .preview-container:hover .preview-description-tooltip → Added to images.css (lines 126-130)
+ * - .no-image → Added to images.css (lines 132-135)
+ * - .image-selector-modal → Added to images.css (lines 137-147)
+ * - .modal-content → Added to images.css (lines 149-161)
+ * - .images-grid → Added to images.css (lines 163-167)
+ * - .image-item → Added to images.css (lines 169-176)
+ * - .image-item:hover → Added to images.css (lines 178-180)
+ * - .image-item.selected → Added to images.css (lines 182-184)
+ * - .image-container → Added to images.css (lines 186-191)
+ * - .image-thumbnail → Added to images.css (lines 193-197)
+ * - .image-description-tooltip → Added to images.css (lines 199-212)
+ * - .image-container:hover .image-description-tooltip → Added to images.css (lines 214-218)
+ * - .image-title → Added to images.css (lines 220-229)
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

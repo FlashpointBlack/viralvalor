@@ -1,0 +1,22 @@
+/* 
+ * ENCOUNTER ROUTES STYLES
+ * All styles from this file have been centralized in layout.css
+ * 
+ * The original styles were:
+ * - .encounter-routes → Added to layout.css
+ * - .encounter-routes h3 → Added to layout.css, consistent with typography.css heading styles
+ * - .no-routes → Added to layout.css
+ * - .encounter-route → Added to layout.css
+ * - .encounter-route:hover → Added to layout.css
+ * - .route-content → Added to layout.css
+ * - .route-title-input → Added to forms.css
+ * - .route-title-input:focus → Added to forms.css
+ * - .route-actions → Added to layout.css
+ * - .route-actions button → Added to layout.css
+ * - .unlinked-encounters-list → Added to layout.css
+ * - .unlinked-encounters-list h4 → Added to layout.css
+ * - .unlinked-options → Added to layout.css
+ * - .route-navigation → Added to layout.css
+ * - .up-level-btn → Added to buttons.css
+ * - .up-level-btn:hover → Added to buttons.css
+ */ 

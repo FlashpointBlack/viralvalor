@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+
+<div id="encounterForm" class="encounter">
+    <input type="text" id="title" placeholder="Encounter Title">
+    <textarea id="description" placeholder="Encounter Description"></textarea>
+    <button onclick="addChoice()">Add Choice</button>
+</div>
+
+<script>
+    function addChoice() {
+        let choiceDiv = document.createElement("div");
+        choiceDiv.className = 'choice';
+
+        // Choice label input
+        let choiceLabel = document.createElement("input");
+        choiceLabel.setAttribute("type", "text");
+        choiceLabel.setAttribute("placeholder", "Label for Choice");
+        choiceDiv.appendChild(choiceLabel);
+
+        // Encounter ID input
+        let encounterID = document.createElement("input");
+        encounterID.setAttribute("type", "text");
+        encounterID.setAttribute("placeholder", "Encounter ID for Choice");
+        choiceDiv.appendChild(encounterID);
+
+        // Delete button
+        let deleteButton = document.createElement("button");
+        deleteButton.innerHTML = "Delete";
+        deleteButton.onclick = function() { choiceDiv.remove(); };
+        choiceDiv.appendChild(deleteButton);
+
+        document.getElementById("encounterForm").appendChild(choiceDiv);
+    }
+</script>
+
+</body>
+</html>

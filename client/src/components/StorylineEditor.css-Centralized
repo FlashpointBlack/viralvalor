@@ -1,0 +1,37 @@
+/* 
+ * STORYLINE EDITOR STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In layout.css:
+ * - .storyline-editor → Added to layout.css (lines 3091-3097)
+ * - .storyline-controls → Added to layout.css (lines 3099-3103)
+ * - .root-encounter-dropdown → Added to layout.css (lines 3105-3115)
+ * - .root-encounter-dropdown:hover → Added to layout.css (lines 3117-3119)
+ * - .root-encounter-dropdown:focus → Added to layout.css (lines 3121-3125)
+ * - .loading → Added to layout.css (lines 3127-3131)
+ * - .error → Added to layout.css (lines 3133-3140)
+ * - .encounter-editor → Added to layout.css (lines 3142-3148)
+ * - .editor-row → Added to layout.css (lines 3150-3153)
+ * - .encounter-form-section → Added to layout.css (lines 3155-3158)
+ * - .encounter-routes-section → Added to layout.css (lines 3160-3163)
+ * - .image-selector-section → Added to layout.css (lines 3165-3169)
+ * - .image-selector-section h3 → Added to layout.css (lines 3171-3175)
+ * - .image-selectors → Added to layout.css (lines 3177-3181)
+ * - .image-selectors-row → Added to layout.css (lines 3183-3189)
+ * - .visual-breadcrumb-trail → Added to layout.css (lines 3191-3201)
+ * - .dark-theme .visual-breadcrumb-trail → Added to layout.css (lines 3203-3206)
+ * - .breadcrumb-circle → Added to layout.css (lines 3208-3221)
+ * - .breadcrumb-circle:hover → Added to layout.css (lines 3223-3226)
+ * - .breadcrumb-circle.active → Added to layout.css (lines 3228-3230)
+ * - status colors → Added to layout.css (lines 3232-3245)
+ * - .breadcrumb-arrow → Added to layout.css (lines 3247-3251)
+ * - Old breadcrumb styles → Added to layout.css (lines 3253-3257)
+ * - Media queries → Added to layout.css (lines 3259-3273)
+ * - .image-note → Added to layout.css (lines 3275-3282)
+ * 
+ * In buttons.css:
+ * - Button styles (primary, secondary, add-choice) → Added to buttons.css (lines 554-590)
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

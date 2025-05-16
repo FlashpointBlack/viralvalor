@@ -1,0 +1,156 @@
+/* Chat bubble styles - Facebook style */
+.message-dropdown {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: transparent !important;
+}
+
+/* Bubble trigger button */
+.message-btn {
+  position: relative !important; /* Contains pseudo circle and image */
+  width: 108px !important;  /* Match image dimensions so full image is visible */
+  height: 108px !important;
+  background: transparent !important; /* no fill; circle will be in ::before */
+  border: none !important; /* border handled by pseudo-element */
+  padding: 0 !important;
+  cursor: pointer;
+  border-radius: 0 !important; /* Ensure no clipping */
+  overflow: visible !important; /* Allow image to extend beyond */
+}
+
+/* Small circular background under the image */
+.message-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--button-bg, #ffffff);
+  border: 1px solid var(--border-color, #ccc);
+  z-index: 0; /* Behind the image */
+}
+
+/* Maintain hover effect on the circle */
+.message-btn:hover::before {
+  background: var(--button-hover, #f0f0f0);
+}
+
+/* Unread badge above everything */
+.badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: var(--error);
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px var(--shadow);
+  z-index: 3 !important;
+}
+
+.message-popup {
+  position: absolute;
+  right: 0;
+  bottom: 75px;
+  width: 320px;
+  max-height: 400px;
+  background: var(--bg-card) !important;
+  border-radius: 12px;
+  box-shadow: 0 2px 20px var(--shadow);
+  overflow: hidden;
+  animation: slide-up 0.2s ease-out;
+  z-index: 5 !important; /* Ensure popup is on top of button and image */
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.popup-header {
+  padding: 15px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+}
+
+.popup-header h4 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text-color);
+}
+
+.conversation-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  max-height: 350px;
+}
+
+.conversation-item {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.conversation-item:hover {
+  background-color: var(--hover-bg);
+}
+
+.conv-meta {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.conv-other {
+  font-weight: 600;
+  color: var(--text-color);
+  margin-right: 8px;
+}
+
+.conv-unread {
+  background: #f03e3e;
+  color: white;
+  border-radius: 12px;
+  padding: 3px 8px;
+  min-width: 20px;
+  height: 20px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  margin-right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.conv-snippet {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Full-size image shown above the circle */
+.chat-icon {
+  position: relative !important;
+  width: 108px !important;
+  height: 108px !important;
+  z-index: 1 !important; /* Above circle, below badge */
+  pointer-events: none !important; /* clicks go to button */
+} 

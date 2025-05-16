@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css"> <!-- Link to your CSS file -->
+  <script src="socket.io/socket.io.js"></script>
+
+</head>
+
+<body>
+  <div id="returnToStart" class="return-button">Return to Start</div>
+
+  <div id="encounterDisplay" class="encounter-display">
+    <div class="encounter-text">
+      <h1 id="encounterTitle"></h1>
+      <p id="encounterDescription"></p>
+      <div id="navbuttons"></div>
+    </div>
+    <div id="characterImage1Container" class="character-image-container"></div>
+    <div id="characterImage2Container" class="character-image-container"></div>
+    <div id="encounterBackdropContainer" class="encounter-backdrop-container"></div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetchEncounterData(108);
+    });
+
+    function fetchEncounterData(EncounterID) {
+      fetch('GetEncounterData/' + EncounterID)
+        .then(response => response.json())
+        .then(data => displayEncounter(data))
+        .catch(error => console.error('Error:', error));
+    }
+
+    function displayEncounter(data) {
+      const encounter = data.Encounter;
+      const routes = data.EncounterRoutes;
+
+      document.getElementById('encounterTitle').innerText = encounter.Title;
+      document.getElementById('encounterDescription').innerText = encounter.Description;
+
+      // Insert the image HTML into their respective containers
+      document.getElementById('characterImage1Container').innerHTML = encounter.Character1Image || '';
+      document.getElementById('characterImage2Container').innerHTML = encounter.Character2Image || '';
+      document.getElementById('encounterBackdropContainer').innerHTML = encounter.BackdropImage || '';
+
+
+      // Add event listener for return to start
+      const returnToStartButton = document.getElementById('returnToStart');
+      returnToStartButton.addEventListener('click', () => fetchEncounterData(102));
+    }
+
+    const socket = io('https://www.viralvalor.com/');
+    const messageBox = document.getElementById('messageBox');
+    const sendButton = document.getElementById('sendButton');
+    const chatDiv = document.getElementById('chatDiv');
+    const onlineCountDiv = document.getElementById('onlineCount');
+    // On Connect
+    socket.on('TravelToID', (RouteID) => { // poll results to pass to the chart
+      console.log('display route ID: ' + RouteID)
+      fetchEncounterData(RouteID); // Broadcast the message to all other clients
+    });
+  </script>
+</body>
+
+</html>

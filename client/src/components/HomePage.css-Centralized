@@ -1,0 +1,32 @@
+/* 
+ * HOMEPAGE STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In layout.css:
+ * - .homepage → Similar to .page-container (lines 207-211)
+ * - .main-header → Already existed (lines 213-220)
+ * - .main-nav → Added to layout.css (lines 720-725)
+ * - .main-tabs → Added to layout.css (lines 727-731)
+ * - .main-content → Already existed (lines 222-229)
+ * - .content-section → Already existed (lines 510-513)
+ * - .welcome-section → Added to layout.css (lines 733-739)
+ * - .content-cards → Added to cards.css (lines 230-235)
+ * - .content-card → Similar to existing card styles in cards.css (lines 10-22)
+ * - Media queries for responsive layout → Merged with existing media queries
+ * - .dropdown and dropdown-related styles → Added to layout.css (lines 741-800)
+ * - .fullwidth-content, .homepage-content, .fullscreen-homepage-content → Added to layout.css (lines 802-830)
+ * - .welcome-banner and related styles → Added to layout.css (lines 832-870)
+ * - .featured-content and related styles → Added to layout.css (lines 872-902)
+ * 
+ * In buttons.css:
+ * - .main-tab → Added to buttons.css (lines 382-410)
+ * - .game-link → Similar to .btn-accent (lines 60-68)
+ * - .card-action-btn → Similar to .btn-primary (lines 45-53)
+ * - .main-nav .btn → Similar to .btn-primary.btn-sm (lines 45-53, 165-169)
+ * 
+ * In typography.css:
+ * - Text styling for headers and content → Already covered or enhanced
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

@@ -1,0 +1,319 @@
+/*
+ * Layout System - UI Components
+ * Provides consistent component layouts across the application
+ */
+
+/* Profile menu */
+.profile-menu-container {
+  position: relative;
+  z-index: 100;
+}
+
+/* Profile button */
+.profile-button {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  transition: background-color 0.2s;
+  color: var(--text-color);
+}
+.profile-button:hover {
+  background-color: var(--hover-bg);
+}
+.profile-button img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin-right: 12px;
+  object-fit: cover;
+}
+.profile-button span {
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+}
+.profile-button .arrow-icon {
+  margin-left: 6px;
+  font-size: 12px;
+  transition: transform 0.2s;
+}
+.profile-button:hover .arrow-icon {
+  transform: translateY(2px);
+}
+
+.profile-dropdown {
+  position: absolute;
+  /* Overlap dropdown with the profile button by ~10px */
+  top: calc(100% - 10px);
+  right: 0;
+  width: 220px;
+  background: var(--bg-card) !important;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  z-index: 101;
+}
+.profile-name {
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  display: block;
+  border-bottom: 1px solid var(--border-color);
+}
+.profile-email {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  word-break: break-all;
+  padding: 0 var(--space-3) var(--space-2);
+}
+.profile-menu-items {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-1) var(--space-2) var(--space-2);
+}
+.profile-menu-item {
+  display: block;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  text-decoration: none;
+  color: var(--text-color) !important;
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+.profile-menu-item:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-color) !important;
+}
+
+/* Logout button styling */
+.profile-menu-container .logout-button {
+  background: none !important;
+  color: var(--text-color) !important;
+  border: none !important;
+  width: 100%;
+  display: block;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.profile-menu-container .logout-button:hover {
+  background-color: var(--hover-bg) !important;
+  color: var(--text-color) !important;
+}
+
+/* User avatar */
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-alt);
+  color: var(--text-color);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+}
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Dropdown menu */
+.dropdown {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  background-color: transparent;
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: var(--bg-card);
+  border-radius: 4px;
+  padding: 0.25rem 0;
+  box-shadow: 0 2px 6px var(--shadow);
+  min-width: 240px;
+  z-index: 1000;
+}
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+.dropdown-item {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  padding: 0.6rem 1.1rem;
+  margin: 0;
+  font-weight: normal;
+  text-align: left;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+  display: block;
+}
+.dropdown-item:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-color);
+}
+.dropdown-item:focus {
+  outline: 1px dashed var(--primary);
+  outline-offset: -2px;
+  background-color: var(--hover-bg);
+}
+.dropdown-item.active {
+  background-color: var(--bg-alt);
+  color: var(--text-color);
+  font-weight: bold;
+}
+
+/* Dropdown section header */
+.dropdown-header {
+  padding: 0.45rem 1.1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary, #888);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* Chat Window layout */
+.chat-window {
+  position: fixed;
+  width: 350px;
+  height: 33vh;
+  min-height: 160px;
+  max-height: 77vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 4px 12px var(--shadow);
+  background: var(--bg-card);
+  bottom: 0;
+}
+.chat-header {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.chat-header span {
+  color: var(--text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chat-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+.chat-close:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-color);
+}
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background: var(--bg-alt);
+  display: flex;
+  flex-direction: column;
+}
+.bubble-container {
+  position: relative;
+  margin-bottom: 4px;
+  margin-top: 3px;
+}
+/* Add more space when reactions exist or timestamp is shown */
+.bubble-container.has-reactions {
+  margin-bottom: 18px;
+}
+.bubble-container .chat-bubble.show-time {
+  margin-bottom: 8px;
+}
+.chat-bubble {
+  max-width: 70%;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  position: relative;
+  margin-bottom: 0;
+}
+.chat-bubble p {
+  margin: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+.chat-bubble.me {
+  background: var(--bg-color);
+  margin-left: auto;
+  color: var(--text-color);
+}
+.chat-bubble.them {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+.chat-time {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  white-space: nowrap;
+  text-align: center;
+  width: auto;
+}
+.chat-bubble.show-time .chat-time {
+  display: block;
+}
+.chat-input {
+  display: flex;
+  border-top: 1px solid var(--border-color);
+}
+.chat-input textarea {
+  flex: 1;
+  border: none;
+  padding: 0.15rem;
+  font-size: 0.8rem;
+  resize: none;
+  height: 25px;
+  background: var(--input-bg);
+  color: var(--text-color);
+}
+.chat-input button {
+  height: 25px;
+  padding: 0 0.4rem;
+  background: var(--button-bg);
+  color: var(--button-text);
+} 

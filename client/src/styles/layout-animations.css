@@ -1,0 +1,117 @@
+/*
+ * Layout System - Animations
+ * Provides keyframe animations and animation-related styles
+ */
+
+/* Keyframe Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes storyFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Status indicator styles */
+.transition-status-indicator {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 1000;
+  font-family: monospace;
+  animation: fadeIn 0.3s ease-in-out;
+  text-align: center;
+  max-width: 90%;
+}
+.transition-status-indicator.loading {
+  background-color: rgba(41, 128, 185, 0.9); /* Blue background */
+  color: white;
+}
+.transition-status-indicator.error {
+  background-color: rgba(231, 76, 60, 0.9); /* Red background */
+  color: white;
+}
+
+/* Hide the original error indicator that we're replacing */
+.transition-error-indicator {
+  display: none;
+}
+
+/* Debug panel styles */
+.debug-panel {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  width: 300px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: #00ff00;
+  font-family: monospace;
+  padding: 10px;
+  border: 1px solid #00ff00;
+  z-index: 1000;
+  font-size: 12px;
+  border-radius: 4px;
+}
+.debug-panel h3, .debug-panel h4 {
+  color: #00ff00;
+  margin: 5px 0;
+  text-align: center;
+}
+.debug-panel p {
+  margin: 3px 0;
+}
+.debug-error {
+  background-color: #330000;
+  border: 1px solid #ff0000;
+  color: #ff0000;
+  padding: 5px;
+  margin-top: 10px;
+  border-radius: 3px;
+}
+.debug-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+}
+.debug-controls button, .transition-error-indicator button {
+  background-color: #333;
+  color: white;
+  border: 1px solid #00ff00;
+  padding: 5px;
+  cursor: pointer;
+  font-family: monospace;
+}
+.debug-controls button:hover, .transition-error-indicator button:hover {
+  background-color: #444;
+}
+.debug-controls input {
+  background-color: #222;
+  color: white;
+  border: 1px solid #00ff00;
+  padding: 5px;
+  font-family: monospace;
+} 

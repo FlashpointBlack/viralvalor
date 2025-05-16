@@ -1,0 +1,51 @@
+/* Profile Menu Styles */
+
+/* Mobile-specific profile dropdown styling */
+.mobile-profile-dropdown {
+  width: 100%;
+}
+
+.mobile-profile-dropdown .main-tab {
+  width: 100%;
+  text-align: left;
+  padding: 1rem;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mobile-profile-dropdown .dropdown-content {
+  position: relative;
+  width: 100%;
+  box-shadow: none;
+  border: none;
+  border-radius: 0;
+  background-color: rgba(0,0,0,0.2);
+}
+
+.mobile-profile-dropdown .dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 1rem 2rem;
+  color: white;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  font-size: 0.9rem;
+}
+
+.mobile-profile-dropdown .dropdown-header {
+  color: rgba(255,255,255,0.7);
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  background-color: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+} 

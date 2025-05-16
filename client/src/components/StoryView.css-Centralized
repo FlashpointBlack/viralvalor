@@ -1,0 +1,25 @@
+/* 
+ * STORY VIEW STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In layout.css:
+ * - .story-view → Added to layout.css (lines 905-916)
+ * - .game-mode-indicator → Added to layout.css (lines 918-929)
+ * - .encounter-content → Added to layout.css (lines 931-942)
+ * - .character-images → Added to layout.css (lines 955-963)
+ * - Media queries for responsive design → Added to layout.css (lines 965-977)
+ * - .scenario-selector, .story-view .scenario-selector, .scenario-selector select → Added to layout.css (lines 987-1005)
+ * - .back-btn, .story-view .back-btn → Added to layout.css (lines 1007-1015)
+ * - .blank-state-message → Added to layout.css (lines 1017-1022)
+ * - .encounter-container & animation styles → Added to layout.css (lines 1029-1058)
+ * 
+ * In typography.css:
+ * - .encounter-title → Added to typography.css (lines 430-435)
+ * - .encounter-description → Added to typography.css (lines 437-443)
+ * 
+ * In animations.css:
+ * - @keyframes storyFadeOut → Added to animations.css (lines 490-493)
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

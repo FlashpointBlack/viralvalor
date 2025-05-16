@@ -1,0 +1,184 @@
+.preferences-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px var(--shadow);
+}
+
+.preferences-page h2 {
+  color: var(--text-color);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.preferences-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pref-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.pref-group label {
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.pref-group select,
+.pref-group input[type="checkbox"] {
+  /* Assuming select and checkbox inherit input styles */
+}
+
+.pref-group select {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  color: var(--text-color);
+  background-color: var(--input-bg);
+}
+
+.checkbox-group {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox-group label {
+  margin-bottom: 0;
+}
+
+.pref-success {
+  color: var(--success);
+  background-color: var(--bg-alt);
+  padding: 0.75rem;
+  border-radius: 4px;
+  border-left: 4px solid var(--success);
+  margin-top: 1rem;
+}
+
+.pref-error {
+  color: var(--error);
+  background-color: var(--bg-alt);
+  padding: 0.75rem;
+  border-radius: 4px;
+  border-left: 4px solid var(--error);
+  margin-top: 1rem;
+}
+
+.preferences-form button[type="submit"] {
+  background-color: var(--primary);
+  color: var(--button-text);
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 1rem;
+}
+
+.preferences-form button[type="submit"]:hover {
+  background-color: var(--secondary);
+}
+
+.preferences-form button[type="submit"]:disabled {
+  background-color: var(--text-tertiary);
+  color: var(--bg-alt);
+  cursor: not-allowed;
+}
+
+.test-results {
+  margin-top: 20px;
+}
+
+.result-item {
+  margin-bottom: 15px;
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+
+.result-item.success {
+  background-color: rgba(46, 204, 113, 0.1);
+  border-left: 4px solid var(--success);
+}
+
+.result-item.failure {
+  background-color: rgba(231, 76, 60, 0.1);
+  border-left: 4px solid var(--error);
+}
+
+.result-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.result-message {
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  padding: 8px;
+  background: var(--bg-alt);
+  border-radius: 3px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.details-toggle {
+  margin-top: 8px;
+  background-color: var(--bg-alt);
+  color: var(--text-color);
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.no-results {
+  font-style: italic;
+  color: var(--text-secondary);
+  padding: 20px;
+  text-align: center;
+  background: var(--bg-alt);
+  border-radius: 4px;
+}
+
+.debug-toggle {
+  margin-top: 20px;
+  background-color: var(--bg-alt);
+  color: var(--text-color);
+  font-size: 12px;
+}
+
+.debug-help {
+  margin-top: 25px;
+  padding: 15px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.debug-help h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: var(--text-color);
+}
+
+.debug-help ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.debug-help li {
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: var(--text-secondary);
+} 

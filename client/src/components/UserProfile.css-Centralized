@@ -1,0 +1,38 @@
+/* 
+ * USER PROFILE STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In layout.css:
+ * - .user-profile-container → Added to layout.css (lines 2361-2370)
+ * - .profile-content → Added to layout.css (lines 2372-2377)
+ * - .profile-loading → Similar to loading spinner styles (lines 2224-2232)
+ * - .profile-error, .profile-success, .profile-notice → Added to layout.css (lines 2379-2402)
+ * - .profile-form-section, .profile-stats-section → Added to layout.css (lines 2404-2413)
+ * - .profile-stats, .profile-badges → Added to layout.css (lines 2415-2431)
+ * - .stats-grid → Added to layout.css (lines 2433-2438)
+ * - .stat-item → Added to layout.css (lines 2440-2449)
+ * - .badges-grid → Added to layout.css (lines 2451-2458)
+ * - .badge-card → Added to layout.css (lines 2460-2469)
+ * - .profile-info-section → Added to layout.css (lines 2471-2475)
+ * - .profile-card → Added to layout.css (lines 2477-2485)
+ * - .profile-header → Added to layout.css (lines 2487-2493)
+ * - .profile-field → Added to layout.css (lines 2495-2515)
+ * - .back-link → Added to layout.css (lines 2517-2534)
+ * - Media queries for responsive layout → Merged with existing media queries
+ * 
+ * In typography.css:
+ * - Heading styles → Similar to existing heading styles
+ * - .field-hint → Added to typography.css
+ * - .stat-value, .stat-label → Added to typography.css
+ * - .no-badges → Added to typography.css
+ * 
+ * In forms.css:
+ * - .form-group → Already similar to existing form styles
+ * - Form input, select, textarea styles → Similar to existing form field styles
+ * 
+ * In buttons.css:
+ * - .back-button → Similar to existing .btn-flat.btn-primary (lines 113-121)
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

@@ -1,0 +1,19 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+#coding pattern preferences
+
+-You do not have direct access to the server, so you cannot run commands on it. Please let me know any commands you need run and if you require the output.
+-please ask me before creating any page with a differing URL. we are building a SPA. 
+-always prefer simple solutions
+-avoid duplication of code whenever possible, which means checking for other areas of the codebase that might already have similar code and functionality
+-you are careful to only make changes that are requested or that you are confident are well u nderstood and related to the change being requested
+-when fixing an issue or bug, do not introduce a new pattern or technology without first exhausting all options for the existing implementation. if you finally do this, make sure to remove the old implementation afterwards so we don't have duplicate logic for the same operation
+-keep the codebase very clean and organized
+-avoid writing scripts in files if possible, especially if the script is likely to only be run once.
+-avoid having files over 200-300 lines of code. Refactor at that point. 
+-never add stubbing or fake data patterns to code that affects our environment.
+
+-never overwrite .env files without asking for confirmation first.

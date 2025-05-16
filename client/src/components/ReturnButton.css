@@ -1,0 +1,39 @@
+.return-buttons {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+}
+
+.return-button, .admin-button {
+  padding: 10px 20px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.admin-button {
+  background-color: rgba(231, 76, 60, 0.8);
+  text-decoration: none;
+}
+
+.return-button:hover, .admin-button:hover {
+  background-color: rgba(40, 40, 40, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.admin-button:hover {
+  background-color: rgba(192, 57, 43, 0.9);
+}
+
+.return-button:active, .admin-button:active {
+  transform: translateY(0);
+} 

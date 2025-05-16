@@ -1,0 +1,261 @@
+.lecture-editor-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: var(--bg-light-card, #ffffff);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+[data-theme='dark'] .lecture-editor-container {
+  background-color: var(--bg-dark-card, #1e1e1e);
+  color: var(--text-dark, #ffffff);
+}
+
+.lecture-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-light, #dddddd);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+[data-theme='dark'] .lecture-editor-header {
+  border-bottom-color: var(--border-dark, #444444);
+}
+
+.lecture-editor-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.back-btn {
+  padding: 8px 16px;
+  background: var(--primary-light, #1976d2);
+  color: var(--button-text-light, #ffffff);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.back-btn:hover {
+  background: var(--primary-light-hover, #1565c0);
+  opacity: 0.9;
+}
+
+[data-theme='dark'] .back-btn {
+  background: var(--primary-dark, #1565c0);
+  color: var(--button-text-dark, #ffffff);
+}
+
+[data-theme='dark'] .back-btn:hover {
+  background: var(--primary-dark-hover, #0d47a1);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancel-btn {
+  padding: 10px 18px;
+  background: transparent;
+  color: var(--text-light-secondary, #666666);
+  border: 1px solid var(--border-light, #dddddd);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.cancel-btn:hover {
+  background: var(--hover-light, #f5f5f5);
+}
+
+[data-theme='dark'] .cancel-btn {
+  color: var(--text-dark-secondary, #aaaaaa);
+  border-color: var(--border-dark, #444444);
+}
+
+[data-theme='dark'] .cancel-btn:hover {
+  background: var(--hover-dark, #2a2a2a);
+}
+
+.save-btn {
+  padding: 10px 18px;
+  background: var(--primary-light, #1976d2);
+  color: var(--button-text-light, #ffffff);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.save-btn:hover {
+  background: var(--primary-light-hover, #1565c0);
+  opacity: 0.9;
+}
+
+.save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+[data-theme='dark'] .save-btn {
+  background: var(--primary-dark, #1565c0);
+  color: var(--button-text-dark, #ffffff);
+}
+
+[data-theme='dark'] .save-btn:hover {
+  background: var(--primary-dark-hover, #0d47a1);
+}
+
+.question-bank-section {
+  margin-top: 30px;
+  min-height: 300px;
+  border-radius: 8px;
+  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Form field styles copied from LectureDetail.css */
+.lecture-edit-form {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.lecture-edit-form label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.lecture-edit-form input[type="text"],
+.lecture-edit-form input[type="url"],
+.lecture-edit-form textarea {
+  padding: 8px;
+  border: 1px solid var(--border-light, #ccc);
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: var(--input-bg-light, #ffffff);
+  color: var(--text-light, #000000);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+[data-theme='dark'] .lecture-edit-form input[type="text"],
+[data-theme='dark'] .lecture-edit-form input[type="url"],
+[data-theme='dark'] .lecture-edit-form textarea {
+  border-color: var(--border-dark, #444);
+  background-color: var(--input-bg-dark, #2a2a2a);
+  color: var(--text-dark, #ffffff);
+}
+
+.or-divider {
+  text-align: center;
+  margin: 16px 0;
+  color: var(--text-light-secondary, #666);
+}
+
+[data-theme='dark'] .or-divider {
+  color: var(--text-dark-secondary, #aaa);
+}
+
+/* Pill switch style */
+.pill-switch {
+  display: inline-flex;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.pill-switch .pill {
+  padding: 6px 14px;
+  cursor: pointer;
+  background: var(--bg, #f6f6f6);
+  color: var(--text, #333);
+  transition: background 0.2s;
+  user-select: none;
+}
+.pill-switch .pill + .pill {
+  border-left: 1px solid var(--border-color, #ccc);
+}
+.pill-switch .pill.active {
+  background: var(--primary, #007bff);
+  color: #fff;
+}
+
+/* Mobile-friendly styles */
+@media (max-width: 768px) {
+  .lecture-editor-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    padding: 15px !important;
+  }
+  
+  .lecture-editor-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+  
+  .lecture-edit-form {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .lecture-edit-form label {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .lecture-edit-form input[type="text"],
+  .lecture-edit-form input[type="url"],
+  .lecture-edit-form input[type="file"],
+  .lecture-edit-form textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .form-actions {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 10px !important;
+  }
+  
+  .form-actions button {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .pill-switch {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+  
+  .pill-switch .pill {
+    flex: 1 !important;
+    text-align: center !important;
+  }
+} 

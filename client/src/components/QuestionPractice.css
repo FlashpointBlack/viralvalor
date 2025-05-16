@@ -1,0 +1,374 @@
+/* QuestionPractice.css
+   Basic styling to give breathing room and improve readability for the practice interface.
+*/
+
+.question-practice-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 16px;
+}
+
+.qp-layout {
+  display: flex;
+  flex: 1;
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ---------- Sidebar ---------- */
+.qp-sidebar {
+  width: 260px;
+  min-width: 200px;
+  background: var(--sidebar-bg, #f7f7f7);
+  border-radius: 8px;
+  padding: 16px;
+  overflow-y: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.qp-sidebar h3 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.qp-question-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.qp-question-list li + li {
+  margin-top: 8px;
+}
+
+.qp-question-list button {
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.qp-question-list li.active button,
+.qp-question-list button:hover {
+  background: var(--sidebar-active-bg, #e6e6e6);
+}
+
+/* ---------- Main Panel ---------- */
+.qp-main {
+  flex: 1;
+  background: var(--main-bg, #ffffff);
+  border-radius: 8px;
+  padding: 24px;
+  overflow-y: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.qp-placeholder {
+  color: #666;
+  font-size: 1rem;
+}
+
+.qp-question-text {
+  margin: 0 0 16px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.qp-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.qp-option-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+}
+
+.qp-submit-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--primary, #1976d2);
+  color: #fff;
+  transition: background 0.2s;
+}
+
+.qp-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.qp-submit-btn:not(:disabled):hover {
+  background: #11529b;
+}
+
+.qp-result {
+  margin-top: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.qp-result.correct {
+  color: #2e7d32;
+}
+
+.qp-result.incorrect {
+  color: #c62828;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .qp-layout {
+    flex-direction: column;
+  }
+
+  .qp-sidebar {
+    width: 100%;
+    order: 2;
+  }
+
+  .qp-main {
+    order: 1;
+  }
+}
+
+/* --- New elements for sequential navigation --- */
+.qp-next-btn {
+  margin-top: 16px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--secondary, #455a64);
+  color: #fff;
+  transition: background 0.2s;
+}
+
+.qp-next-btn:hover {
+  background: #2c3e50;
+}
+
+.qp-complete-msg {
+  margin-top: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.qp-restart-btn {
+  margin-top: 12px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--primary, #1976d2);
+  color: #fff;
+  transition: background 0.2s;
+}
+
+.qp-restart-btn:hover {
+  background: #11529b;
+}
+
+.qp-complete-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* ---------- Date filter controls ---------- */
+.date-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.date-filter-btn {
+  padding: 6px 12px;
+  border: 1px solid var(--primary, #1976d2);
+  background: transparent;
+  color: var(--primary, #1976d2);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s, color 0.2s;
+}
+
+.date-filter-btn.active,
+.date-filter-btn:hover {
+  background: var(--primary, #1976d2);
+  color: #fff;
+}
+
+.custom-date-range {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.custom-date-range label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.custom-date-range input[type="date"] {
+  margin-top: 4px;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.9rem;
+  color: #374151;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none; /* remove default arrow in some browsers */
+  position: relative;
+}
+
+.custom-date-range input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(32%) sepia(41%) saturate(1808%) hue-rotate(196deg) brightness(92%) contrast(101%); /* gives calendar icon the primary tint */
+}
+
+.custom-date-range input[type="date"]:hover {
+  border-color: #a5b4cf;
+}
+
+.custom-date-range input[type="date"]:focus {
+  border-color: var(--primary, #1976d2);
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+  outline: none;
+}
+
+/* ---------- React DatePicker overrides ---------- */
+.date-picker-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.date-picker-group span {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.date-picker-input {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.9rem;
+  color: #374151;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.date-picker-input:hover {
+  border-color: #a5b4cf;
+}
+
+.date-picker-input:focus {
+  border-color: var(--primary, #1976d2);
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+  outline: none;
+}
+
+/* Calendar popup styling */
+.react-datepicker {
+  font-family: var(--font-primary, sans-serif);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.react-datepicker__header {
+  background-color: var(--primary, #1976d2);
+  border-bottom: none;
+  padding-top: 8px;
+}
+
+.react-datepicker__current-month,
+.react-datepicker__day-name {
+  color: #fff;
+  font-weight: 500;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: var(--primary, #1976d2) !important;
+  color: #fff !important;
+}
+
+.react-datepicker__navigation--previous,
+.react-datepicker__navigation--next {
+  top: 12px;
+}
+
+.react-datepicker__navigation-icon::before {
+  border-color: #fff;
+}
+
+/* ---------- Report table styling ---------- */
+.qp-report-table {
+  width: auto;
+  border-collapse: collapse;
+  margin: 1rem auto;
+}
+
+.qp-report-table th,
+.qp-report-table td {
+  border: 1px solid #e0e0e0;
+  padding: 8px 12px;
+  text-align: center;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* Keep question text left-aligned for readability */
+.qp-report-table td:first-child {
+  text-align: left;
+}
+
+/* Sorting helpers */
+.qp-report-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.qp-report-table th.sortable:hover {
+  background-color: #f5f5f5;
+}
+
+/* Header styling */
+.qp-report-table thead th {
+  background-color: #f0f4ff;
+  font-weight: 600;
+}
+.qp-report-table thead tr:first-child th {
+  border-bottom: 2px solid #c0d0ff;
+} 

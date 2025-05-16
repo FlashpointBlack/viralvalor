@@ -1,0 +1,178 @@
+/*
+ * Layout System - Mobile Polls
+ * Provides styles for poll-related components
+ */
+
+/* ===================== MOBILE POLL STYLES ===================== */
+.mobile-poll-container {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  box-sizing: border-box;
+  font-family: var(--font-family-base);
+  background-color: var(--bg-alt);
+}
+
+.registration-form {
+  width: 100%;
+  max-width: 500px;
+  margin: auto;
+  padding: var(--space-5);
+  background-color: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.poll-placeholder {
+  text-align: center;
+  margin: auto;
+  padding: var(--space-5);
+  background-color: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  color: var(--text-secondary);
+}
+
+.poll-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.poll-header h2 {
+  margin: 0;
+  color: var(--text-color);
+}
+
+.poll-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.results-container {
+  position: relative;
+  height: 24px;
+  background-color: var(--bg-alt);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-top: var(--space-2);
+}
+
+.result-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: var(--success);
+  transition: width 0.5s ease;
+}
+
+.vote-percentage {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-color);
+  z-index: 1;
+}
+
+.poll-logo {
+  width: 100%;
+  height: auto;
+  max-width: none;
+  display: block;
+  margin: 0 auto var(--space-4) auto;
+}
+
+.presenter-btn-container {
+  margin-top: var(--space-5);
+  margin-bottom: var(--space-6);
+  text-align: center;
+}
+
+.mobile-poll-timer {
+  text-align: center;
+  margin: var(--space-4) auto;
+  font-size: var(--font-size-lg);
+  font-family: monospace;
+  color: var(--success);
+  font-weight: var(--font-weight-bold);
+}
+
+.placeholder-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.floating-login-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 10;
+}
+
+/* Poll overlay styles */
+.poll-overlay {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+}
+
+.poll-timer {
+  background-color: rgba(231, 76, 60, 0.8);
+  padding: 10px 30px;
+  border-radius: 30px;
+  text-align: center;
+  animation: pulse 2s infinite;
+}
+
+.poll-timer h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: white;
+  text-transform: uppercase;
+}
+
+/* Poll options */
+.encounter-options {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.encounter-option {
+  background-color: rgba(52, 152, 219, 0.7);
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.encounter-option:hover {
+  background-color: rgba(52, 152, 219, 0.9);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 320px) {
+  .poll-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+} 

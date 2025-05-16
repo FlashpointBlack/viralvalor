@@ -1,0 +1,25 @@
+/* 
+ * MESSAGE DROPDOWN STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In layout.css:
+ * - .message-dropdown → Added to layout.css (lines 2958-2964)
+ * - .message-btn → Added to layout.css (lines 2966-2979)
+ * - .message-btn:hover → Added to layout.css (lines 2981-2983)
+ * - .badge → Added to layout.css (lines 2985-2998)
+ * - .message-popup → Added to layout.css (lines 3000-3010)
+ * - @keyframes slide-up → Added to layout.css (lines 3012-3015)
+ * - .popup-header → Added to layout.css (lines 3017-3022)
+ * - .popup-header h4 → Added to layout.css (lines 3024-3028)
+ * - .conversation-list → Added to layout.css (lines 3030-3036)
+ * - .conversation-item → Added to layout.css (lines 3038-3043)
+ * - .conversation-item:hover → Added to layout.css (lines 3045-3047)
+ * - .conv-meta → Added to layout.css (lines 3049-3053)
+ * - .conv-other → Added to layout.css (lines 3055-3059)
+ * - .conv-unread → Added to layout.css (lines 3061-3076)
+ * - .conv-snippet → Added to layout.css (lines 3078-3084)
+ * - .chat-icon → Added to layout.css (lines 3086-3089)
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

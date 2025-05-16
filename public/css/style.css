@@ -1,0 +1,119 @@
+/* General Styles */
+body,
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+.encounter-display {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* Backdrop Container */
+#encounterBackdropContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    /* Ensures it's behind all other content */
+}
+
+#encounterBackdropContainer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* This ensures the image covers the entire area */
+}
+
+.character-image-container,
+.return-button {
+    position: absolute;
+}
+
+
+/* Character Images */
+.character-image-container img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#characterImage1Container {
+    left: 0;
+    bottom: 0;
+    max-width: 25%;
+}
+
+#characterImage2Container {
+    right: 0;
+    bottom: 0;
+    max-width: 25%;
+}
+
+.encounter-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Semi-transparent black */
+    border-radius: 10px;
+    /* Rounded corners */
+    padding: 20px;
+    /* Add some padding around the text */
+    max-width: 80%;
+    /* Limit the width of the container */
+    box-sizing: border-box;
+    /* Ensures padding is included in width calculation */
+}
+
+#encounterTitle {
+    font-size: 3em;
+    margin-bottom: 0.5em;
+}
+
+#encounterDescription {
+    font-size: 2em;
+    margin-bottom: 1em;
+}
+
+#navbuttons button {
+    margin: 0.5em;
+    padding: 0.5em 1em;
+    font-size: 2em;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#navbuttons button:hover {
+    background-color: #0056b3;
+}
+
+
+
+/* Return to Start Button */
+.return-button {
+    top: 10px;
+    left: 10px;
+    font-size: 2em;
+    background-color: #dc3545;
+    color: white;
+    padding: 0.5em 1em;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.return-button:hover {
+    background-color: #c82333;
+}

@@ -1,0 +1,38 @@
+/* 
+ * PREFERENCES STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In cards.css:
+ * - .preferences-page → Similar to .card with card-padding-md (lines 8-22, 39-41)
+ * - .preferences-page h2 → Similar to .card-header styles (lines 45-53)
+ * - .result-item → Added to cards.css as .result-card (lines 260-265)
+ * - .result-item.success → Similar to .card-highlight-success (lines 78-80)
+ * - .result-item.failure → Similar to .card-highlight-danger (lines 86-88)
+ * - .debug-help → Similar to .card with styles added (lines 8-22)
+ * 
+ * In forms.css:
+ * - .preferences-form → Similar to .form (lines 7-11)
+ * - .pref-group → Similar to .form-group (lines 14-18)
+ * - .pref-group label → Similar to .form-label (lines 34-39)
+ * - .pref-group select → Similar to select.form-control (lines 94-104)
+ * - .checkbox-group → Similar to .form-check (lines 159-164)
+ * - .checkbox-group label → Similar to .form-check-label (lines 173-177)
+ * - .pref-success → Added to forms.css as .form-success-message (lines 335-342)
+ * - .pref-error → Similar to existing .form-error-text with expanded styling (lines 45-48)
+ * - .test-results → Added to forms.css (lines 343-346)
+ * 
+ * In buttons.css:
+ * - .preferences-form button[type="submit"] → Similar to .btn-primary (lines 45-53)
+ * - .preferences-form button[type="submit"]:hover → Similar to .btn-primary:hover (lines 54-56)
+ * - .preferences-form button[type="submit"]:disabled → Similar to .btn:disabled (lines 125-129)
+ * - .details-toggle → Added to buttons.css as .btn-subtle (lines 150-156)
+ * - .debug-toggle → Similar to .btn-subtle (lines 150-156)
+ *
+ * In typography.css:
+ * - .result-title → Added as .result-title (lines 250-255)
+ * - .result-message → Added as .result-message (lines 257-265)
+ * - .no-results → Similar to .text-muted (lines 78-81)
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

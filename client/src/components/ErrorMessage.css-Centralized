@@ -1,0 +1,13 @@
+/* 
+ * ERROR MESSAGE STYLES
+ * All styles from this file have been centralized in layout.css (lines 605-639)
+ * 
+ * The original styles were:
+ * - .error-container
+ * - .error-content
+ * - .error-content h2
+ * - .error-content p
+ * 
+ * These styles are now maintained in the centralized layout.css file
+ * using CSS custom properties for better consistency.
+ */ 

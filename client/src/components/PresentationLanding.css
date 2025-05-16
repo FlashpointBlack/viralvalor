@@ -1,0 +1,76 @@
+.presentation-landing-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
+
+  /* Add a vibrant animated gradient background */
+  background: linear-gradient(135deg, #ff7e5f, #feb47b, #86A8E7, #91EAE4);
+  background-size: 400% 400%;
+  animation: gradientShift 12s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.presentation-welcome {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 30px 0;
+  max-width: 90%;
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.25);
+}
+
+.presentation-qr {
+  max-width: 80vw;
+  width: 380px;
+  height: auto;
+  border: 6px solid #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease;
+}
+
+.presentation-qr:hover {
+  transform: scale(1.05);
+}
+
+.presentation-landing-container, .presentation-landing-container * {
+  user-select: none; /* Prevent text selection */
+}
+
+/* --------- Fullscreen scaling --------- */
+:fullscreen .presentation-welcome {
+  font-size: 4vw !important; /* scale title with viewport width */
+}
+
+:fullscreen .presentation-qr {
+  width: 40vw !important; /* reduced from 45vw */
+  max-width: 65vh !important; /* reduced from 80vh */
+  margin-bottom: 5vh !important; /* ensure space at bottom */
+}
+
+/* WebKit prefix */
+:-webkit-full-screen .presentation-welcome {
+  font-size: 4vw !important;
+}
+
+:-webkit-full-screen .presentation-qr {
+  width: 40vw !important;
+  max-width: 65vh !important;
+  margin-bottom: 5vh !important;
+}
+
+/* Add padding to container in fullscreen to prevent content touching edges */
+:fullscreen .presentation-landing-container,
+:-webkit-full-screen .presentation-landing-container {
+  padding: 5vh 5vw !important;
+} 

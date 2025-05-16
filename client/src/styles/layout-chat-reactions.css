@@ -1,0 +1,223 @@
+/*
+ * Layout System - Chat Reactions
+ * Provides styles for chat reactions UI
+ */
+
+/* Chat reactions */
+.chat-controls {
+  display: flex;
+  gap: 6px;
+}
+.chat-min {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+.chat-min:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-color);
+}
+
+.bubble-container:hover .reaction-trigger {
+  opacity: 1;
+}
+.chat-bubble:hover + .reaction-trigger {
+  opacity: 1;
+}
+.reaction-trigger {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+/* Position for incoming */
+.bubble-container.them .reaction-trigger {
+  right: -24px;
+}
+/* Position for outgoing */
+.bubble-container.me .reaction-trigger {
+  left: -24px;
+}
+.reaction-menu {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  gap: 4px;
+  box-shadow: 0 2px 6px var(--shadow);
+  z-index: 10;
+}
+/* Position reaction menu based on message sender */
+.bubble-container.them .reaction-menu {
+  margin-right: 0;
+}
+.bubble-container.me .reaction-menu {
+  margin-left: 0;
+}
+.reaction-menu span {
+  cursor: pointer;
+  font-size: 20px;
+}
+.reaction-display {
+  position: absolute;
+  top: calc(100% - 4px);
+  font-size: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  z-index: 1;
+}
+.bubble-container.me .reaction-display {
+  right: 6px;
+  justify-content: flex-end;
+}
+.bubble-container.them .reaction-display {
+  left: 6px;
+  justify-content: flex-start;
+}
+.reaction-display span {
+  display: inline-block;
+  background-color: var(--bg-alt);
+  border-radius: 12px;
+  padding: 1px 5px;
+  margin-right: 2px;
+  cursor: default;
+}
+
+/* Message Dropdown */
+.message-dropdown {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: transparent !important;
+}
+.message-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+  /* Use standard button variables */
+  background: var(--button-bg);
+  color: var(--button-text);
+  transition: background-color 0.2s;
+}
+.message-btn:hover {
+  background-color: var(--button-hover);
+}
+.badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: var(--error);
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px var(--shadow);
+}
+.message-popup {
+  position: absolute;
+  right: 0;
+  bottom: 75px;
+  width: 320px;
+  max-height: 400px;
+  background: var(--bg-card) !important;
+  border-radius: 12px;
+  box-shadow: 0 2px 20px var(--shadow);
+  overflow: hidden;
+  animation: slide-up 0.2s ease-out;
+}
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.popup-header {
+  padding: 15px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+}
+.popup-header h4 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text-color);
+}
+.conversation-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  max-height: 350px;
+}
+.conversation-item {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.conversation-item:hover {
+  background-color: var(--hover-bg);
+}
+.conv-meta {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+.conv-other {
+  font-weight: 600;
+  color: var(--text-color);
+  margin-right: 8px;
+}
+.conv-unread {
+  background: #f03e3e;
+  color: white;
+  border-radius: 12px;
+  padding: 3px 8px;
+  min-width: 20px;
+  height: 20px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  margin-right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.conv-snippet {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chat-icon {
+  width: 108px;
+  height: 108px;
+} 

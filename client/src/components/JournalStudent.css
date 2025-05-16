@@ -1,0 +1,160 @@
+.journal-list-container {
+  padding: 1rem;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+.journal-list {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.journal-list li {
+  margin-bottom: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.journal-list button {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.journal-list li.completed button {
+  background: #e8f5e9;
+  border-color: #c8e6c9;
+}
+.status {
+  float: right;
+  font-size: 0.9rem;
+  color: #2e7d32;
+}
+
+.journal-writer-container {
+  padding: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+.back-btn {
+  margin-bottom: 12px;
+  background: none;
+  border: none;
+  color: #1976d2;
+  cursor: pointer;
+}
+.prompt-text {
+  margin-bottom: 12px;
+  font-style: italic;
+  width: 100%;
+  box-sizing: border-box;
+}
+.response-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.char-counter {
+  margin-top: 4px;
+  font-size: 0.9rem;
+}
+.save-btn {
+  margin-top: 12px;
+  padding: 10px 20px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.save-msg {
+  margin-left: 12px;
+  color: #2e7d32;
+}
+.student-explanation {
+  color: var(--text-muted, #666);
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Mobile-friendly styles */
+@media (max-width: 768px) {
+  .journal-list-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+  
+  .journal-list {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .journal-list li {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .journal-list button {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 1rem !important;
+  }
+  
+  .status {
+    float: none !important;
+    width: 100% !important;
+    text-align: left !important;
+    margin-top: 0.5rem !important;
+  }
+  
+  .journal-writer-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+  
+  .prompt-text {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0.5rem !important;
+  }
+  
+  .response-textarea {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    min-height: 150px !important;
+  }
+  
+  .save-btn {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .save-msg {
+    display: block !important;
+    margin: 0.5rem 0 !important;
+    text-align: center !important;
+  }
+} 

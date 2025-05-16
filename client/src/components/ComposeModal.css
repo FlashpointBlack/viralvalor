@@ -1,0 +1,12 @@
+.compose-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index: 300; }
+.compose-modal { background: var(--bg-card); padding:1rem 1.25rem; width:320px; border-radius:8px; box-shadow:0 4px 12px var(--shadow); color: var(--text-color); position:relative; }
+.compose-modal h3 { margin-top:0; }
+.compose-modal label { display:block; margin-bottom:0.5rem; font-size:0.85rem; position:relative; }
+.compose-modal input, .compose-modal textarea { width:100%; padding:0.4rem; margin-top:0.25rem; border:1px solid var(--border-color); border-radius:4px; font-size:0.85rem; background-color: var(--input-bg); color: var(--text-color); }
+.compose-actions { display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.75rem; }
+.compose-error { color: var(--error); font-size:0.8rem; }
+.compose-close{position:absolute;top:4px;right:4px;background:none;border:none;font-size:1rem;line-height:1;cursor:pointer;color:var(--text-secondary);}
+.compose-close:hover{color:var(--text-color);}
+.suggestion-list{position:absolute;background:var(--bg-card);border:1px solid var(--border-color);width:100%;max-height:120px;overflow-y:auto;margin:2px 0 0 0;padding:0;list-style:none;z-index:5; box-shadow:0 2px 6px var(--shadow);}
+.suggestion-list li{padding:4px 6px;cursor:pointer;font-size:0.85rem;}
+.suggestion-list li:hover{background:var(--bg-alt);} 

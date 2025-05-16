@@ -1,0 +1,14 @@
+/* 
+ * CHARACTER IMAGE STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In images.css:
+ * - .character-image-container → Added to images.css (lines 41-46)
+ * - .character-image-container.left → Added to images.css (lines 48-51)
+ * - .character-image-container.right → Added to images.css (lines 53-56)
+ * - .character-image-container img → Added to images.css (lines 58-61)
+ * - Media queries for responsive design → Added to images.css (lines 63-73)
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

@@ -1,0 +1,172 @@
+.badge-showcase {
+  margin-top: 2rem;
+}
+
+.badge-showcase__title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  color: var(--text-color, #333);
+}
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1.5rem;
+}
+
+.badge-card {
+  background: var(--bg-alt, #ffffff);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.badge-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+}
+
+.badge-card__image-wrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  background: var(--bg-muted, #f1f1f1);
+}
+
+.badge-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.badge-card__content {
+  padding: 0.75rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.badge-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  text-align: center;
+  color: var(--text-color, #333);
+}
+
+.badge-card__description {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #666);
+  flex-grow: 1;
+  margin: 0 0 0.5rem 0;
+  text-align: center;
+}
+
+.badge-card__earned {
+  font-size: 0.7rem;
+  color: var(--text-secondary, #888);
+  text-align: center;
+}
+
+/* Overlay for title on hover */
+.badge-card__overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 0.8rem;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(100%);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.badge-card:hover .badge-card__overlay {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Modal styles */
+.badge-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.badge-modal__content {
+  background: var(--bg, #fff);
+  border-radius: 12px;
+  width: min(90%, 480px);
+  padding: 2rem 1.5rem 1.5rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  position: relative;
+  text-align: center;
+}
+
+.badge-modal__close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.8rem;
+  background: transparent;
+  border: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-color, #666);
+}
+
+.badge-modal__image {
+  width: 280px;
+  height: 280px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+  margin: 0 auto 1.5rem;
+}
+
+.badge-modal__title,
+.badge-modal__description,
+.badge-modal__earned {
+  text-align: center;
+}
+
+.badge-modal__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.4rem;
+  color: var(--text-color, #333);
+}
+
+.badge-modal__description {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #555);
+  margin-bottom: 0.75rem;
+}
+
+.badge-modal__earned {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #777);
+}
+
+.no-badges {
+  text-align: center;
+  font-style: italic;
+  margin-top: 1rem;
+}
+
+/* Badge detail modal overrides */
+.badge-detail-modal {
+  max-width: 500px;
+  width: 90%;
+} 

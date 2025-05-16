@@ -1,0 +1,99 @@
+/* 
+ * PresentationTransitions.css
+ * Handles transitions between different presentation views
+ */
+
+:root {
+  --transition-duration: 1.5s; /* Match with TRANSITION_DURATION in PresentationDisplayHost.js */
+}
+
+/* Main presentation view container styling */
+.presentation-view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  will-change: opacity;
+  opacity: 1;
+  overflow: hidden;
+}
+
+/* Ensure current view is visible and positioned properly */
+.presentation-view.current {
+  z-index: 100; /* Top layer when it's the current view */
+  opacity: 1;
+}
+
+/* When transitioning, previous view is on top and fades out */
+.presentation-view.previous {
+  z-index: 200; /* Put above current during transition */
+  opacity: 1;
+}
+
+/* Fade out animation for the previous view */
+.presentation-view.previous.fade-out {
+  animation: viewFadeOut var(--transition-duration) forwards ease-in-out;
+  pointer-events: none; /* Prevent interaction during fade */
+}
+
+@keyframes viewFadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Apply a fade-in effect for new views */
+.presentation-view.current {
+  animation: viewFadeIn 0.3s ease-in-out;
+}
+
+@keyframes viewFadeIn {
+  0% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+/* View-specific adjustments */
+.welcome-view {
+  /* Welcome-specific styling could go here if needed */
+}
+
+.encounter-view {
+  /* Any specific styling for encounter view */
+}
+
+.end-view {
+  /* Special handling for the end view */
+}
+
+/* Ensure entering the end view is smooth */
+.end-view.current {
+  animation: endViewEnter 0.2s ease-in;
+}
+
+/* Special animation for encounter->end transition */
+@keyframes endViewEnter {
+  0% { opacity: 0.2; transform: scale(0.98); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* And make sure the encounter->end transition is super smooth */
+.encounter-view.previous.fade-out + .end-view.current {
+  animation: endViewReveal var(--transition-duration) ease-in-out;
+}
+
+@keyframes endViewReveal {
+  0% { opacity: 0.2; }
+  30% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Ensure nested transitions in EncounterDisplay work well with parent transitions */
+.encounter-view .encounter-container.previous.fade-out {
+  /* When an encounter transition happens inside the encounter view, coordinate z-indexes */
+  z-index: 150; /* Below the presentation-view.previous but above current view */
+}
+
+/* Force all presentation views to have higher z-index than other page elements */
+.presentation-view {
+  z-index: 10;
+} 

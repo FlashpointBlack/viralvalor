@@ -1,0 +1,292 @@
+/*
+ * Images - Centralized Image Styles
+ * Contains styles for BackdropImage and CharacterImage components
+ */
+
+/* BackdropImage - From client/src/components/BackdropImage.css */
+.backdrop-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.backdrop-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.backdrop-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.backdrop-image:hover img {
+  transform: scale(1.05);
+}
+
+.backdrop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6));
+  z-index: 2;
+}
+
+/* CharacterImage - From client/src/components/CharacterImage.css */
+.character-image-container {
+  position: absolute;
+  bottom: 0;
+  max-height: 100vh;
+  z-index: 5;
+  transition: all 0.5s ease;
+}
+
+.character-image-container.left {
+  left: 0;
+  transform: translateX(-10%);
+}
+
+.character-image-container.right {
+  right: 0;
+  transform: translateX(10%);
+}
+
+.character-image-container img {
+  max-height: 90vh;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .character-image-container.left {
+    transform: translateX(-30%);
+  }
+  
+  .character-image-container.right {
+    transform: translateX(30%);
+  }
+  
+  .character-image-container img {
+    max-height: 70vh;
+  }
+}
+
+/* Image Selector Component (from ImageSelector.css) */
+.image-preview {
+  width: 100%;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: var(--bg-alt);
+  margin-bottom: 10px;
+}
+
+.preview-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-preview-content {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.preview-description-tooltip {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+  border-top: 1px solid var(--border-color);
+  padding: 8px;
+  font-size: 12px;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+}
+
+.preview-container:hover .preview-description-tooltip {
+  max-height: 100px;
+  opacity: 1;
+  overflow-y: auto;
+}
+
+.no-image {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.image-selector-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  width: 80%;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-dark);
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.image-item {
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 2px solid transparent;
+}
+
+.image-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px var(--shadow);
+  border-color: var(--primary);
+}
+
+.image-item.selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary);
+}
+
+.image-container {
+  position: relative;
+  height: 120px;
+  background-color: var(--bg-alt);
+  overflow: hidden;
+}
+
+.image-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.image-description-tooltip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+  padding: 8px;
+  font-size: 12px;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+}
+
+.image-container:hover .image-description-tooltip {
+  max-height: 100px;
+  opacity: 1;
+  overflow-y: auto;
+}
+
+.image-title {
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  background-color: var(--bg-card);
+  text-align: center;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--text-color);
+}
+
+/* Additional Image Manager styles (from ImageManager.css) */
+.image-actions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 5px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.image-container:hover .image-actions {
+  opacity: 1;
+}
+
+.image-preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.full-size-preview {
+  max-width: 100%;
+  max-height: 400px;
+  margin: 0 auto;
+  display: block;
+}
+
+.image-details {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.image-details p {
+  margin: 5px 0;
+  color: var(--text-color);
+}
+
+/* Profile Picture - From CompleteProfile.css */
+.profile-picture {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--primary);
+} 

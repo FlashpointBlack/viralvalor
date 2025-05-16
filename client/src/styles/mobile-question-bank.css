@@ -1,0 +1,119 @@
+/*
+ * Mobile-friendly styles for Question Bank Editor
+ * Responsive layout adjustments for smaller screens
+ */
+
+@media (max-width: 768px) {
+  /* Main container - switch to column layout for mobile */
+  .question-bank-editor {
+    flex-direction: column !important;
+    height: auto !important;
+  }
+
+  /* Make sidebar full width on mobile */
+  .qbe-sidebar {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    max-height: 300px !important;
+    padding: 15px !important; /* Matched to qbe-main for visual alignment */
+    box-sizing: border-box !important; /* Ensure padding is included in width */
+  }
+
+  /* Ensure question list takes full width and remove default UL styling */
+  .question-list {
+    width: 100% !important;
+    padding: 0 !important; /* Remove default UL padding */
+    margin: 0 !important; /* Remove default UL margin */
+    list-style: none !important; /* Remove default list styling (bullets) */
+  }
+
+  .question-list li {
+    width: 100% !important; /* Force full width */
+    box-sizing: border-box !important;
+    padding: 6px 8px !important; /* Explicit padding for content */
+    font-size: 0.9rem !important;
+    margin-bottom: 6px !important;
+  }
+
+  /* Main content area full width */
+  .qbe-main {
+    width: 100% !important;
+    padding: 15px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Make question editor take full width */
+  .question-editor {
+    width: 100% !important;
+  }
+
+  /* Adjust option layout for mobile */
+  .option-main,
+  .option-row.option-header {
+    grid-template-columns: 40px 1fr 60px !important; /* Smaller columns for mobile */
+    gap: 6px !important;
+  }
+
+  /* Make delete button smaller on mobile */
+  .option-main .delete-btn {
+    padding: 4px !important;
+    font-size: 0.9rem !important;
+  }
+
+  /* Adjustments for form inputs */
+  .question-editor textarea,
+  .option-input,
+  .option-rationale-input {
+    font-size: 16px !important; /* Prevent iOS zoom on focus */
+    padding: 8px !important;
+    width: 100% !important; /* Ensure inputs take full width */
+    box-sizing: border-box !important;
+  }
+
+  /* Create button adjustments */
+  .qbe-sidebar .create-btn {
+    padding: 8px !important;
+    font-size: 0.9rem !important;
+    width: 100% !important; /* Make create button full width */
+    box-sizing: border-box !important;
+  }
+
+  /* Tag grid adjustments */
+  .tags-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  /* Tag items smaller on mobile */
+  .tag-item {
+    padding: 4px 8px !important; /* slightly reduced padding for small screens */
+    font-size: 0.85rem !important;
+  }
+
+  .tag-item input {
+    position: absolute; /* keep hidden on mobile too */
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    width: 0;
+  }
+
+  /* Make form labels stand out more */
+  .question-editor .form-group label {
+    font-weight: 600 !important;
+    margin-bottom: 6px !important;
+  }
+
+  /* Adjust tag filter for mobile */
+  .tag-filter {
+    margin-bottom: 12px !important;
+    width: 100% !important; /* Make tag filter full width */
+    box-sizing: border-box !important;
+  }
+
+  .tag-filter > div { /* Target the react-select container */
+    width: 100% !important;
+  }
+} 

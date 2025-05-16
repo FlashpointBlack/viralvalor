@@ -1,0 +1,345 @@
+/*
+ * Layout System - Centralized Layout Styles
+ * Provides consistent layout structures across the application
+ */
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);}
+.container-sm {
+  max-width: 640px;}
+.container-md {
+  max-width: 768px;}
+.container-lg {
+  max-width: 1024px;}
+.container-xl {
+  max-width: 1280px;}
+.container-fluid {
+  max-width: 100%;}
+/* Flex layouts */
+.flex {
+  display: flex;}
+.inline-flex {
+  display: inline-flex;}
+.flex-row {
+  flex-direction: row;}
+.flex-row-reverse {
+  flex-direction: row-reverse;}
+.flex-col {
+  flex-direction: column;}
+.flex-col-reverse {
+  flex-direction: column-reverse;}
+.flex-wrap {
+  flex-wrap: wrap;}
+.flex-nowrap {
+  flex-wrap: nowrap;}
+.flex-wrap-reverse {
+  flex-wrap: wrap-reverse;}
+/* Justify content */
+.justify-start {
+  justify-content: flex-start;}
+.justify-end {
+  justify-content: flex-end;}
+.justify-center {
+  justify-content: center;}
+.justify-between {
+  justify-content: space-between;}
+.justify-around {
+  justify-content: space-around;}
+.justify-evenly {
+  justify-content: space-evenly;}
+/* Align items */
+.items-start {
+  align-items: flex-start;}
+.items-end {
+  align-items: flex-end;}
+.items-center {
+  align-items: center;}
+.items-baseline {
+  align-items: baseline;}
+.items-stretch {
+  align-items: stretch;}
+/* Align self */
+.self-auto {
+  align-self: auto;}
+.self-start {
+  align-self: flex-start;}
+.self-end {
+  align-self: flex-end;}
+.self-center {
+  align-self: center;}
+.self-stretch {
+  align-self: stretch;}
+/* Align content */
+.content-center {
+  align-content: center;}
+.content-start {
+  align-content: flex-start;}
+.content-end {
+  align-content: flex-end;}
+.content-between {
+  align-content: space-between;}
+.content-around {
+  align-content: space-around;}
+/* Flex grow/shrink */
+.flex-1 {
+  flex: 1 1 0%;}
+.flex-auto {
+  flex: 1 1 auto;}
+.flex-initial {
+  flex: 0 1 auto;}
+.flex-none {
+  flex: none;}
+.flex-grow-0 {
+  flex-grow: 0;}
+.flex-grow {
+  flex-grow: 1;}
+.flex-shrink-0 {
+  flex-shrink: 0;}
+.flex-shrink {
+  flex-shrink: 1;}
+/* Grid layouts */
+.grid {
+  display: grid;}
+.inline-grid {
+  display: inline-grid;}
+.grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));}
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));}
+.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));}
+.grid-cols-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));}
+.grid-cols-6 {
+  grid-template-columns: repeat(6, minmax(0, 1fr));}
+.grid-cols-12 {
+  grid-template-columns: repeat(12, minmax(0, 1fr));}
+.grid-cols-none {
+  grid-template-columns: none;}
+/* Grid gaps */
+.gap-0 {
+  gap: 0;}
+.gap-1 {
+  gap: var(--space-1);}
+.gap-2 {
+  gap: var(--space-2);}
+.gap-3 {
+  gap: var(--space-3);}
+.gap-4 {
+  gap: var(--space-4);}
+.gap-5 {
+  gap: var(--space-5);}
+.gap-6 {
+  gap: var(--space-6);}
+/* Spacing */
+.m-auto {
+  margin: auto;}
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;}
+.my-auto {
+  margin-top: auto;
+  margin-bottom: auto;}
+/* Position */
+.relative {
+  position: relative;}
+.absolute {
+  position: absolute;}
+.fixed {
+  position: fixed;}
+.sticky {
+  position: sticky;}
+.static {
+  position: static;}
+/* Z-index */
+.z-0 {
+  z-index: 0;}
+.z-10 {
+  z-index: 10;}
+.z-20 {
+  z-index: 20;}
+.z-30 {
+  z-index: 30;}
+.z-40 {
+  z-index: 40;}
+.z-50 {
+  z-index: 50;}
+.z-auto {
+  z-index: auto;}
+/* Top, Right, Bottom, Left */
+.inset-0 {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;}
+.top-0 {
+  top: 0;}
+.right-0 {
+  right: 0;}
+.bottom-0 {
+  bottom: 0;}
+.left-0 {
+  left: 0;}
+/* Visibility */
+.visible {
+  visibility: visible;}
+.invisible {
+  visibility: hidden;}
+/* Display */
+.block {
+  display: block;}
+.inline-block {
+  display: inline-block;}
+.inline {
+  display: inline;}
+.hidden {
+  display: none;}
+/* Width and height */
+.w-full {
+  width: 100%;}
+.w-auto {
+  width: auto;}
+.h-full {
+  height: 100%;}
+.h-auto {
+  height: auto;}
+.min-h-full {
+  min-height: 100%;}
+.min-h-screen {
+  min-height: 100vh;}
+/* Main page layouts */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;}
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4);
+  background-color: #175480;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  flex-wrap: wrap;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.header-logo {
+  width: 500px;
+  height: auto;
+  max-width: 100%;
+}
+
+/* Main nav styles */
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.mobile-nav-container {
+  display: flex;
+  width: auto;
+}
+
+/* Main tabs styles */
+.main-tabs {
+  display: flex;
+  gap: 0.5rem;
+  position: relative;
+}
+
+/* Caret styles for dropdown indicators */
+.caret {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  transition: transform 0.2s ease;
+}
+
+.dropdown.open .caret {
+  transform: rotate(180deg);
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  /* Reduce logo size for mobile */
+  .header-logo {
+    width: 250px; /* 50% of the original 500px */
+    height: auto;
+  }
+
+  /* Mobile nav container */
+  .mobile-nav-container {
+    display: none;
+    width: 100%;
+  }
+
+  .mobile-nav-container.open {
+    display: flex;
+  }
+
+  /* Hide desktop nav by default on mobile */
+  .main-nav {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem 0;
+    gap: 0;
+  }
+
+  /* Mobile-friendly tabs */
+  .main-tabs.mobile {
+    flex-direction: column;
+    width: 100%;
+    gap: 0;
+  }
+
+  /* Make dropdown full width in mobile */
+  .main-tabs.mobile .dropdown {
+    width: 100%;
+  }
+
+  /* Content padding adjustments for mobile */
+  .main-content {
+    padding: var(--space-4);
+  }
+  
+  /* Adjust the welcome banner for mobile */
+  .welcome-banner {
+    height: calc(100vh - 120px); /* account for taller header */
+  }
+  
+  .welcome-banner .splash-image {
+    object-fit: cover;
+  }
+}
+
+/* Desktop specific styles */
+@media (min-width: 769px) {
+  /* Ensure logo retains original size on larger screens */
+  .header-logo {
+    width: 500px;
+    height: auto;
+  }
+}
+
+/* Explicitly center the logo <h1> and the hamburger button within the header */
+.main-header .logo,
+.main-header .hamburger-btn {
+  align-self: center;
+}

@@ -1,0 +1,458 @@
+/* Remove all preview-related CSS styles */
+.storyline-editor {
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px var(--shadow);
+  width: 100%;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important; /* Prevent horizontal scrolling */
+}
+
+.storyline-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+.control-item {
+  display: flex;
+  flex-grow: 1;
+  min-width: 200px;
+}
+
+.control-item > button,
+.control-item > select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Button styles - unified */
+.primary-button, .secondary-button, .add-choice-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  color: var(--button-text);
+  background: var(--button-bg);
+}
+
+/* Primary */
+.primary-button {
+  background: var(--primary);
+  color: var(--button-text);
+}
+.primary-button:hover {
+  background: var(--secondary);
+}
+
+/* Secondary */
+.secondary-button {
+  background: var(--bg-alt);
+  color: var(--text-secondary);
+}
+.secondary-button:hover {
+  background: var(--hover-bg);
+  color: var(--text-color);
+}
+
+/* Success / add-choice */
+.add-choice-button {
+  background: var(--success);
+  color: var(--button-text);
+  margin-bottom: 1rem;
+}
+.add-choice-button:hover {
+  filter: brightness(90%);
+}
+
+.root-encounter-dropdown {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  color: var(--text-color);
+  background-color: var(--input-bg);
+  height: auto;
+}
+
+.root-encounter-dropdown:hover {
+  border-color: var(--primary);
+}
+
+.root-encounter-dropdown:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-shadow, rgba(52, 152, 219, 0.2));
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-tertiary);
+}
+
+.error {
+  background-color: var(--bg-alt);
+  color: var(--error);
+  border: 1px solid var(--error);
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+/* Storyline Editor Styles */
+.storyline-editor {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Scenario section */
+.encounter-editor {
+  margin-top: 20px;
+  background: var(--bg-card);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px var(--shadow);
+  padding: 20px;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+/* Editor layout */
+.editor-row {
+  display: flex;
+  gap: 20px;
+}
+
+/* Scenario form section */
+.encounter-form-section {
+  flex: 1;
+  min-width: 300px;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.encounter-routes-section {
+  flex: 2;
+  min-width: 400px;
+}
+
+.image-selector-section {
+  margin-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+}
+
+.image-selector-section h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.image-selectors {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.image-selectors-row {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.image-selectors-row > * {
+  flex: 1;
+}
+
+/* Up-level button styles removed; use .btn */
+
+/* Visual Breadcrumb trail styles */
+.storyline-editor .visual-breadcrumb-trail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0.5rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  background-color: var(--bg-card);
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+/* Force dark mode styling */
+.dark-theme .storyline-editor .visual-breadcrumb-trail {
+  background-color: #1e2124 !important;
+  border-color: #444 !important;
+}
+
+.storyline-editor .breadcrumb-circle {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  line-height: 1;
+  cursor: pointer;
+  font-weight: bold;
+  border: 2px solid var(--border-color);
+  color: white;
+  background-color: var(--primary);
+  transition: all 0.2s ease;
+  position: relative;
+  text-align: center;
+}
+
+.storyline-editor .breadcrumb-circle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.storyline-editor .breadcrumb-circle.active {
+  box-shadow: 0 0 0 3px var(--primary-shadow, rgba(52, 152, 219, 0.5));
+}
+
+/* Status colors */
+.storyline-editor .breadcrumb-circle.status-red {
+  background-color: var(--error);
+}
+
+.storyline-editor .breadcrumb-circle.status-yellow {
+  background-color: var(--warning);
+}
+
+.storyline-editor .breadcrumb-circle.status-green {
+  background-color: var(--success);
+}
+
+.storyline-editor .breadcrumb-circle.status-default {
+  background-color: var(--primary);
+}
+
+.storyline-editor .breadcrumb-arrow {
+  margin: 0 8px;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+}
+
+/* Remove the old breadcrumb styles */
+.breadcrumb-trail,
+.breadcrumb-item,
+.breadcrumb-separator {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .storyline-controls {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .storyline-controls .control-item {
+    width: 100%;
+    min-width: 0;
+    flex-grow: 0;
+    margin-bottom: 0.5rem;
+  }
+  
+  .storyline-controls .control-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .storyline-controls .control-item > button,
+  .storyline-controls .control-item > select {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .root-encounter-dropdown {
+    width: 100%;
+    min-width: 100%;
+  }
+  
+  /* Force all buttons to be full width on mobile */
+  .storyline-controls button {
+    width: 100%;
+  }
+  
+  .editor-row {
+    flex-direction: column;
+  }
+  
+  .encounter-editor {
+    padding: 15px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+  
+  .encounter-form-section,
+  .encounter-routes-section {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: none !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+  
+  .image-selectors {
+    flex-direction: column;
+  }
+
+  .image-selectors-row {
+    flex-direction: column;
+  }
+}
+
+.image-note {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 15px;
+  padding: 8px 12px;
+  background-color: var(--bg-alt);
+  border-left: 3px solid var(--primary);
+  border-radius: 0 4px 4px 0;
+}
+
+/* Ensure all inputs and buttons stay within container width */
+input, select, textarea, button {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Add more specific targeting for route content */
+.storyline-editor .encounter-route {
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+/* Handle story choices specifically */
+.storyline-editor .route-content,
+.storyline-editor .route-title-input {
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Ensure story choices don't overflow their containers */
+.storyline-editor .route-actions {
+  flex-wrap: wrap !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Contain all form elements */
+.storyline-editor .form-control,
+.storyline-editor .form-group {
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Target the main content container to prevent any overflow */
+.main-content {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Target all elements inside storyline-editor to ensure they can't overflow */
+.storyline-editor,
+.storyline-editor * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+}
+
+/* Force text truncation for elements that need it */
+.route-title-input,
+button,
+select,
+input[type="text"] {
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+}
+
+/* Force text wrapping for elements that need to break lines */
+textarea,
+.form-control[type="textarea"] {
+  white-space: pre-wrap !important;
+  overflow: auto !important;
+}
+
+/* Ensure the route-content inside encounter-route has proper constraints */
+.encounter-route .route-content {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Force route actions to stack properly on mobile */
+@media (max-width: 768px) {
+  .route-actions {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  
+  .route-actions button {
+    width: 100% !important;
+    margin: 0 0 0.5rem 0 !important;
+  }
+  
+  .route-actions button:last-child {
+    margin-bottom: 0 !important;
+  }
+  
+  /* Force all inputs to respect their container width */
+  input,
+  select,
+  textarea,
+  .form-control {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Ensure that all form elements inside encounter-editor are properly constrained */
+.encounter-editor input,
+.encounter-editor textarea,
+.encounter-editor select {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+} 

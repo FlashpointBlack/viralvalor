@@ -1,0 +1,12 @@
+/* 
+ * CHOICE BUTTONS STYLES
+ * All styles from this file have been centralized in layout.css (lines 580-603)
+ * 
+ * The original styles were:
+ * - .choice-buttons
+ * - .no-choices
+ * - @media (min-width: 768px) .choice-buttons
+ * 
+ * These styles are now maintained in the centralized layout.css file
+ * using CSS custom properties for better consistency.
+ */ 

@@ -1,0 +1,18 @@
+/* 
+ * COMPOSE MODAL STYLES
+ * All styles from this file have been centralized in layout.css and forms.css
+ * 
+ * The original styles were:
+ * - .compose-overlay → Added to layout.css (modal overlay styles)
+ * - .compose-modal → Added to layout.css (modal container styles)
+ * - .compose-modal h3 → Using typography.css heading styles
+ * - .compose-modal label → Using label styles from forms.css
+ * - .compose-modal input, .compose-modal textarea → Using input styles from forms.css
+ * - .compose-actions → Added to layout.css (modal action button container)
+ * - .compose-error → Added to forms.css (error message styles)
+ * - .compose-close → Using close-button styles from buttons.css
+ * - .compose-close:hover → Using close-button:hover styles from buttons.css
+ * - .suggestion-list → Added to layout.css (autocomplete suggestion styles)
+ * - .suggestion-list li → Added to layout.css (suggestion item styles)
+ * - .suggestion-list li:hover → Added to layout.css (suggestion item hover styles)
+ */ 

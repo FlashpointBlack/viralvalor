@@ -1,0 +1,38 @@
+/* 
+ * MOBILE POLL STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In layout.css:
+ * - .mobile-poll-container → Added to layout.css (lines 1890-1900)
+ * - .registration-form → Similar to existing card styles (lines 1902-1912)
+ * - .poll-placeholder → Similar to existing card styles (lines 1914-1924)
+ * - .poll-header → Added to layout.css (lines 1926-1934)
+ * - .poll-options → Added to layout.css (lines 1936-1942)
+ * - .results-container, .result-bar → Added to layout.css (lines 1944-1960)
+ * - .vote-percentage → Added to layout.css (lines 1962-1970)
+ * - .total-votes → Already exists (lines 392-395)
+ * - .debug-panel styles → Merged with existing debug panel (lines 1344-1371)
+ * - .poll-logo → Added to layout.css (lines 1972-1978)
+ * - .presenter-btn-container → Added to layout.css (lines 1980-1984)
+ * - .mobile-poll-timer → Added to layout.css (lines 1986-1993)
+ * - .placeholder-actions → Added to layout.css (lines 1995-2000)
+ * - .floating-login-btn → Added to layout.css (lines 2002-2010)
+ * - Media queries for responsive layout → Merged with existing media queries
+ * 
+ * In buttons.css:
+ * - .show-results-btn → Similar to .btn-primary (lines 45-53)
+ * - .poll-option → Added to buttons.css (lines 460-480)
+ * - .poll-option.selected → Added to buttons.css (lines 482-486)
+ * - .presenter-btn → Similar to .btn-warning (lines 93-101)
+ * - .floating-login-btn button → Similar to .btn-primary.btn-sm (lines 45-53, 165-169)
+ * 
+ * In forms.css:
+ * - .registration-form input → Already covered by form field styles
+ * - .registration-form button → Similar to .btn-success (lines 75-83)
+ * 
+ * In typography.css:
+ * - Text styling for headers and content → Already covered or enhanced
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

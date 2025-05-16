@@ -1,0 +1,1184 @@
+.educator-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: var(--bg-alt);
+  color: var(--text-color);
+  font-family: Arial, sans-serif;
+  /* Ensure panel is at least full viewport height minus header (approx 60px) but can grow with content */
+  min-height: calc(100vh - 150px);
+}
+
+/* panel-header replaced by reusable admin-header */
+
+.scenario-selector {
+  display: flex;
+  align-items: center;
+  margin: 0 15px;
+  flex-grow: 1;
+}
+
+.scenario-selector .control-item {
+  display: flex;
+  width: 100%;
+}
+
+.scenario-selector .control-item > select {
+  width: 100%;
+}
+
+.scenario-selector label {
+  margin-right: 10px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.scenario-selector select {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  color: var(--text-color);
+  font-size: 1rem;
+  width: 100%;
+  max-width: 260px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+
+.scenario-selector select:focus {
+  outline: 2px solid var(--primary);
+}
+
+.open-display-btn {
+  background-color: var(--accent);
+  color: var(--button-text);
+  border: none;
+  border-radius: 4px;
+  padding: 8px 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  flex-shrink: 0;
+}
+
+.open-display-btn:hover {
+  filter: brightness(90%);
+}
+
+.panel-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 15px;
+  padding: 15px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+/* Poll information section */
+.poll-info-section {
+  grid-column: 1;
+  grid-row: 1;
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px var(--shadow);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.poll-time {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.time-display {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--error);
+  text-align: center;
+  margin: 10px 0;
+}
+
+.poll-options {
+  flex-grow: 1;
+  margin-bottom: 8px;
+}
+
+.poll-option {
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0;
+}
+
+.poll-option:last-child {
+  margin-bottom: 0;
+}
+
+.option-label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.option-label-button {
+  font-weight: bold;
+  width: 200px;
+  min-width: 200px;
+  padding: 5px 10px;
+  text-align: center;
+  margin-bottom: 0;
+  background-color: var(--primary);
+  color: var(--button-text);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  flex-shrink: 0;
+}
+
+.option-label-button:hover:not(:disabled) {
+  filter: brightness(90%);
+}
+
+.option-label-button:disabled {
+  background-color: var(--border-color);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+.option-bar-container {
+  height: 25px;
+  min-width: 120px;
+  flex-basis: 100px;
+  background-color: var(--bg-alt);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.option-bar {
+  height: 100%;
+  background-color: var(--primary);
+  transition: width 0.5s ease;
+}
+
+.vote-counts {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: bold;
+  color: var(--text-color);
+  z-index: 2;
+  text-shadow: 0 0 2px white;
+}
+
+.poll-controls {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+}
+
+.poll-controls button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s, opacity 0.3s;
+}
+
+.poll-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.send-poll-btn {
+  background-color: var(--success);
+  color: white;
+}
+
+.end-poll-btn {
+  background-color: var(--error);
+  color: white;
+}
+
+.show-messages-btn {
+  background-color: var(--primary);
+  color: white;
+}
+
+.poll-controls button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+/* User information section */
+.user-info-section {
+  grid-column: 1 / -1 !important;
+  grid-row: 2;
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px var(--shadow);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.total-users {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.view-categories-btn {
+  align-self: flex-start;
+  background-color: #7f8c8d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+.user-categories {
+  margin-top: 10px;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.user-categories ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-categories li {
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.user-list {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.user-table th, .user-table td {
+  padding: 8px;
+  text-align: center !important;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border-color);
+  height: 60px;
+}
+
+.user-table th {
+  font-weight: bold;
+  background-color: var(--bg-alt);
+}
+
+/* Re-add simple centering for the first cell's content */
+.user-table td:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+.user-table td:first-child .username {
+  text-align: left;
+}
+
+.user-table td:nth-child(5) > button {
+  margin: 0 3px;
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  min-width: 50px;
+}
+
+.message-indicator {
+  color: #e74c3c;
+  font-size: 1.2rem;
+}
+
+/* Selection styling */
+.selection-staphylococcus {
+  background-color: rgba(52, 152, 219, 0.2);
+}
+
+.selection-streptococcus {
+  background-color: rgba(231, 76, 60, 0.2);
+}
+
+.selection-enterococcus {
+  background-color: rgba(46, 204, 113, 0.2);
+}
+
+.selection-actinomyces {
+  background-color: rgba(241, 196, 15, 0.2);
+}
+
+/* Encounter preview section */
+.encounter-preview-section {
+  grid-column: 2;
+  grid-row: 1;
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px var(--shadow);
+  padding: 6px 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.encounter-preview {
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  flex-grow: 1;
+}
+
+.encounter-preview h4 {
+  margin-top: 0;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  color: #2c3e50;
+}
+
+.preview-images {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  justify-content: center;
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.preview-character {
+  position: relative;
+  z-index: 2;
+  margin: 0 10px;
+  height: 100%;
+}
+
+.preview-backdrop img, .preview-character img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Story tree section */
+.story-tree-section {
+  grid-column: 1 / 3;
+  grid-row: 3;
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px var(--shadow);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.story-tree {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.tree-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.tree-list li {
+  padding: 8px 10px;
+  margin-bottom: 5px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.tree-list li:hover {
+  background-color: #eee;
+}
+
+.tree-list .active-node {
+  background-color: var(--primary);
+  color: white;
+}
+
+/* Add styles for the combined poll toggle button */
+.poll-toggle-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.poll-toggle-btn.send-poll {
+  background-color: #4CAF50; /* Green */
+  color: white;
+}
+
+.poll-toggle-btn.end-poll {
+  background-color: #f44336; /* Red */
+  color: white;
+}
+
+.poll-toggle-btn:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+}
+
+.total-votes {
+  font-size: 14px;
+  color: var(--text-color);
+  margin-bottom: 10px;
+}
+
+@media (max-width: 1024px) {
+  .panel-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+  
+  .poll-info-section {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  
+  .encounter-preview-section {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  
+  .user-info-section {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .scenario-selector {
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 10px 0;
+  }
+
+  .scenario-selector label {
+    margin-bottom: 5px;
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .panel-header h1 {
+    margin-bottom: 10px;
+  }
+
+  .open-display-btn {
+    margin-top: 10px;
+    align-self: center;
+  }
+}
+
+/* Debug panel styles */
+.educator-panel .debug-panel {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  width: 300px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: #00ff00;
+  font-family: monospace;
+  padding: 10px;
+  border: 1px solid #00ff00;
+  z-index: 1000;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.educator-panel .debug-panel h3, .educator-panel .debug-panel h4 {
+  color: #00ff00;
+  margin: 5px 0;
+  text-align: center;
+}
+
+.educator-panel .debug-panel p {
+  margin: 3px 0;
+}
+
+.educator-panel .debug-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.educator-panel .debug-controls button {
+  background-color: #333;
+  color: white;
+  border: 1px solid #00ff00;
+  padding: 5px;
+  cursor: pointer;
+  font-family: monospace;
+}
+
+.educator-panel .debug-controls button:hover {
+  background-color: #444;
+}
+
+/* Error toast styles */
+.educator-panel .error-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(255, 0, 0, 0.8);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: monospace;
+  max-width: 80%;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.educator-panel .error-toast p {
+  margin: 0 0 10px 0;
+}
+
+.educator-panel .error-toast button {
+  background-color: #333;
+  color: white;
+  border: 1px solid white;
+  padding: 5px 15px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+/* Connection status message styles */
+.connection-status {
+  padding: 8px 15px;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: center;
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.connection-status.loading {
+  background-color: rgba(52, 152, 219, 0.8);
+  color: white;
+}
+
+.connection-status.error {
+  background-color: rgba(231, 76, 60, 0.8);
+  color: white;
+}
+
+.connection-status.disconnected {
+  background-color: rgba(241, 196, 15, 0.8);
+  color: #333;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Game ID display */
+.game-id-display {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+/* Visual Breadcrumb trail styles */
+.educator-panel .visual-breadcrumb-trail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+  margin: 0;
+  overflow-x: auto;
+  /* Use theme variables so the background adapts to light/dark mode */
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px var(--shadow);
+}
+
+.educator-panel .breadcrumb-circle {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px; /* lock width in flexbox */
+  box-sizing: border-box; /* include border in dimension */
+  font-size: 0.7rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  border: 2px solid transparent;
+  color: white;
+  background-color: #95a5a6; /* Default gray */
+  transition: background-color 0.3s ease, 
+              box-shadow 0.3s ease, 
+              transform 0.2s ease, 
+              opacity 0.3s ease,
+              background-image 0.3s ease; /* Smooth transition for properties */
+  position: relative;
+  flex-shrink: 0;
+  will-change: background-color, box-shadow, transform, opacity; /* Optimize performance */
+}
+
+.educator-panel .breadcrumb-circle:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Change order to ensure active has highest precedence */
+.educator-panel .breadcrumb-circle.future {
+  background-color: #95a5a6; /* Future crumb is gray */
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
+}
+
+.educator-panel .breadcrumb-circle.unreachable {
+  background-color: #95a5a6; /* Base color is gray */
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 5px,
+    rgba(0, 0, 0, 0.3) 5px,
+    rgba(0, 0, 0, 0.3) 10px
+  );
+  cursor: not-allowed;
+  opacity: 0.8;
+  box-shadow: none;
+  position: relative;
+}
+
+.educator-panel .breadcrumb-circle.visited {
+  background-color: #27ae60; /* Visited crumb is green */
+  box-shadow: none; /* Ensure no shadow from other states */
+}
+
+.educator-panel .breadcrumb-circle.active {
+  background-color: #f1c40f; /* Active crumb is yellow */
+  box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.5);
+  border-color: transparent; /* Ensure border is truly transparent */
+  opacity: 1; /* Ensure full opacity */
+}
+
+.educator-panel .breadcrumb-circle:disabled {
+  cursor: not-allowed;
+}
+
+.breadcrumb-arrow {
+  margin: 0 4px;
+  color: #7f8c8d;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Scale arrow SVG */
+.breadcrumb-arrow svg {
+  width: 12px;
+  height: 12px;
+}
+
+@media (max-width: 768px) {
+  /* Ensure the main panel doesn't overflow */
+  .educator-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Visual breadcrumb trail styles - restore while keeping overflow protection */
+  .educator-panel .visual-breadcrumb-trail {
+    padding: 5px !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+  }
+  
+  .educator-panel .breadcrumb-circle {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    font-size: 0.8rem !important;
+    box-sizing: border-box !important;
+  }
+  
+  .educator-panel .breadcrumb-arrow {
+    margin: 0 3px !important;
+  }
+  
+  .educator-panel .breadcrumb-arrow svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  
+  /* Fix panel content and all its child sections */
+  .panel-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 10px !important;
+    overflow-x: hidden !important;
+  }
+  
+  .poll-info-section,
+  .user-info-section,
+  .encounter-preview-section,
+  .story-tree-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    padding: 10px !important;
+  }
+  
+  .user-table {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    overflow-x: auto !important;
+  }
+  
+  .scenario-controls {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 0.75rem !important;
+  }
+  
+  .scenario-selector {
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 10px 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  .scenario-selector label {
+    margin-bottom: 5px !important;
+    width: 100% !important;
+    display: block !important;
+  }
+  
+  .scenario-selector select {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  .scenario-controls button,
+  .open-display-btn,
+  .poll-controls button {
+    width: 100% !important;
+    margin: 5px 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  .poll-option {
+    flex-direction: column !important;
+    padding: 10px !important;
+    margin-bottom: 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .option-label-button {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-bottom: 5px !important;
+    box-sizing: border-box !important;
+  }
+  
+  .option-bar-container {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  .message-bubble-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .badge-modal {
+    width: 90% !important;
+    max-width: 90vw !important;
+    box-sizing: border-box !important;
+    padding: 15px !important;
+  }
+  
+  .badge-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)) !important;
+    gap: 8px !important;
+  }
+  
+  /* Stack route button and vote bar vertically in compact view */
+  .poll-option-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+  }
+
+  .poll-option-row .poll-route-button {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 6px !important;
+  }
+
+  .poll-option-row .option-bar-container {
+    width: 100% !important;
+    flex-basis: 20px !important;
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
+    justify-content: flex-start !important;
+  }
+
+  .poll-option-row .option-bar-container .option-bar {
+    flex-basis: auto !important;
+  }
+
+  .poll-option-row .option-bar-container .vote-counts {
+    line-height: 1 !important;
+  }
+}
+
+/* ===================== THEME INTEGRATION OVERRIDES ===================== */
+
+/* Panels and cards */
+.educator-panel select,
+.educator-panel .poll-info-section,
+.educator-panel .user-info-section,
+.educator-panel .encounter-preview-section,
+.educator-panel .story-tree-section {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 5px var(--shadow);
+  color: var(--text-color);
+}
+
+/* Scenario selector */
+.scenario-selector select {
+  background-color: var(--bg-card);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px var(--shadow);
+}
+
+.scenario-selector select:focus {
+  outline: 2px solid var(--primary);
+}
+
+/* Poll option row */
+.poll-option {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+}
+
+.option-bar-container {
+  background-color: var(--bg-alt);
+}
+
+/* Buttons */
+.open-display-btn {
+  background-color: var(--accent);
+  color: var(--button-text);
+}
+.open-display-btn:hover {
+  filter: brightness(90%);
+}
+
+.option-label-button {
+  background-color: var(--primary);
+  color: var(--button-text);
+}
+.option-label-button:hover:not(:disabled) {
+  filter: brightness(90%);
+}
+.option-label-button:disabled {
+  background-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+.send-poll-btn {
+  background-color: var(--success);
+}
+.end-poll-btn {
+  background-color: var(--error);
+}
+.show-messages-btn {
+  background-color: var(--primary);
+}
+
+/* Misc text colours */
+.time-display {
+  color: var(--error);
+}
+.total-votes,
+.vote-counts {
+  color: var(--text-color);
+}
+
+/* Border colours */
+.option-bar-container,
+.poll-time,
+.total-users,
+.user-categories li,
+.user-table th,
+.user-table td,
+.tree-list li,
+.tree-list li:hover,
+.tree-list .active-node {
+  border-color: var(--border-color);
+}
+
+/* Route choice buttons in educator panel */
+.poll-route-button {
+  width: 180px;
+  max-width: 100%;
+  white-space: normal; /* allow wrap */
+  text-align: center;
+  padding: 5px 8px;
+}
+
+/* Guest user styling */
+.guest-user {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.guest-label {
+  background-color: var(--border-color);
+  color: var(--text-color);
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: 0.75rem;
+  vertical-align: middle;
+}
+
+/* Message bubble icon button */
+.message-bubble-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.message-bubble-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Message bubble graphic icon */
+.message-bubble-icon {
+  width: 50px;   /* increased size as requested */
+  height: 50px;
+  cursor: pointer;
+  transition: transform 0.15s ease-in-out;
+}
+
+.message-bubble-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Wrapper to position unread badge */
+.message-bubble-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.message-bubble-wrapper .unread-badge {
+  position: absolute;
+  top: -2px;          /* snug to the top edge */
+  right: -2px;        /* snug to the right edge */
+  width: 18px;
+  height: 18px;
+  background-color: red;
+  color: #fff;
+  border-radius: 50%; /* perfect circle */
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 18px; /* vertically center number */
+  pointer-events: none; /* allow clicks to fall through to wrapper */
+}
+
+/* Modal overlay for badge selection */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.badge-modal {
+  background: var(--bg-card, #fff);
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  color: var(--text-color);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.badge-modal .badge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.badge-modal .badge-item:hover {
+  transform: scale(1.05);
+}
+
+.badge-modal img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.badge-modal span {
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* Styles for the Messages column icon and badge */
+.message-cell-wrapper {
+  display: inline-flex; /* Ensures the wrapper only takes content width */
+  align-items: center;
+  position: relative; /* For positioning the unread count */
+  /* Add some padding to the right if you need more space for the bubble */
+  padding-right: 12px !important; /* Added to make space for the bubble and ensure it applies */
+}
+
+.message-cell-wrapper .fa-comment {
+  font-size: 1.8rem;
+  color: var(--primary, #3498db);
+}
+
+.unread-message-count {
+  position: absolute;
+  top: 0px; /* Moved down to align top with icon's top */
+  right: 15px; /* Moved left to overlap icon slightly */
+  background-color: #E74C3C; /* Red color */
+  color: white;
+  font-size: 0.75rem;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  line-height: 20px; /* Helps center single-digit numbers */
+  border: 1px solid white; /* Optional: adds a small border to the badge */
+}
+
+.chat-icon-small {
+  width: 38px;
+  height: 38px;
+}
+
+.message-bubble-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.message-bubble-btn:hover {
+  transform: scale(1.1);
+} 

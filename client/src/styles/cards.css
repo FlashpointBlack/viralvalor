@@ -1,0 +1,385 @@
+/*
+ * Card System - Centralized Card Styles
+ * Provides consistent card styling across the application
+ */
+
+/* Base card */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  color: var(--text-color);
+  overflow: hidden;
+  position: relative;
+  transition: background-color var(--transition-base) var(--transition-timing-default),
+              border-color var(--transition-base) var(--transition-timing-default),
+              box-shadow var(--transition-base) var(--transition-timing-default),
+              transform var(--transition-base) var(--transition-timing-default);
+}
+
+/* Card with hover effect */
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Card with click effect */
+.card-clickable {
+  cursor: pointer;
+}
+
+.card-clickable:active {
+  transform: translateY(1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Card padding variants */
+.card-padding-none {
+  padding: 0;
+}
+
+.card-padding-sm {
+  padding: var(--space-2);
+}
+
+.card-padding-md {
+  padding: var(--space-4);
+}
+
+.card-padding-lg {
+  padding: var(--space-6);
+}
+
+/* Card sections */
+.card-header {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-header h1, .card-header h2, .card-header h3, 
+.card-header h4, .card-header h5, .card-header h6 {
+  margin: 0;
+}
+
+.card-body {
+  padding: var(--space-4);
+}
+
+.card-footer {
+  padding: var(--space-4);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* Card with no borders */
+.card-borderless {
+  border: none;
+}
+
+/* Card with highlight */
+.card-highlight {
+  border-left: 4px solid var(--primary);
+}
+
+.card-highlight-success {
+  border-left: 4px solid var(--success);
+}
+
+.card-highlight-warning {
+  border-left: 4px solid var(--warning);
+}
+
+.card-highlight-danger {
+  border-left: 4px solid var(--error);
+}
+
+.card-highlight-info {
+  border-left: 4px solid var(--info);
+}
+
+/* Card with background color */
+.card-primary {
+  background-color: rgba(var(--primary-rgb), 0.1);
+}
+
+.card-success {
+  background-color: rgba(var(--success-rgb), 0.1);
+}
+
+.card-warning {
+  background-color: rgba(var(--warning-rgb), 0.1);
+}
+
+.card-danger {
+  background-color: rgba(var(--error-rgb), 0.1);
+}
+
+.card-info {
+  background-color: rgba(var(--info-rgb), 0.1);
+}
+
+/* Card layouts */
+.card-horizontal {
+  display: flex;
+}
+
+.card-horizontal .card-media {
+  flex: 0 0 33.333%;
+  max-width: 33.333%;
+}
+
+.card-horizontal .card-content {
+  flex: 1;
+}
+
+/* Card with image */
+.card-media {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-media img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Card image with overlay text */
+.card-media-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--space-4);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
+  color: white;
+}
+
+/* Card grid system */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+/* Content card for primary content display */
+.content-card {
+  background-color: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-base) var(--transition-timing-default),
+              box-shadow var(--transition-base) var(--transition-timing-default);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-card h3 {
+  margin-top: 0;
+  color: var(--text-color);
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-3);
+}
+
+.content-card-body {
+  flex: 1;
+}
+
+.content-card-actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Welcome section card */
+.welcome-section {
+  background-color: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-md);
+  border-left: 5px solid var(--primary);
+  margin-bottom: var(--space-6);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card-horizontal {
+    flex-direction: column;
+  }
+  
+  .card-horizontal .card-media {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Profile Cards (from ProfileSearch.css) */
+.profile-card {
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px var(--shadow);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+}
+
+.profile-card:hover {
+  box-shadow: 0 5px 15px var(--shadow);
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.profile-card-header {
+  padding: 1rem;
+  background-color: var(--bg-alt);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-name {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.profile-level {
+  background-color: var(--primary);
+  color: var(--button-text);
+  font-weight: bold;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.profile-card-body {
+  padding: 1rem;
+  flex-grow: 1;
+  color: var(--text-color);
+}
+
+.profile-location {
+  margin-bottom: 0.75rem;
+  color: var(--text-color);
+  font-size: 0.95rem;
+}
+
+.profile-location .label {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.profile-bio {
+  color: var(--text-color);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.profile-bio.empty {
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.profile-card-footer {
+  padding: 1rem;
+  background-color: var(--bg-alt);
+  border-top: 1px solid var(--border-color);
+}
+
+.profile-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat .value {
+  font-weight: bold;
+  color: var(--primary);
+  font-size: 1.1rem;
+}
+
+.stat .label {
+  color: var(--text-tertiary);
+  font-size: 0.8rem;
+}
+
+.profile-last-seen {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  text-align: right;
+}
+
+.profile-card .btn {
+  margin-top: auto;
+  width: 100%;
+  border-radius: 0 0 8px 8px;
+}
+
+/* Result card - From Preferences.css (lines 85-102) */
+.result-card {
+  margin-bottom: 15px;
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+
+.result-card.success {
+  background-color: rgba(46, 204, 113, 0.1);
+  border-left: 4px solid var(--success);
+}
+
+.result-card.failure {
+  background-color: rgba(231, 76, 60, 0.1);
+  border-left: 4px solid var(--error);
+}
+
+.result-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.result-message {
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  padding: 8px;
+  background: var(--bg-alt);
+  border-radius: 3px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.no-results {
+  font-style: italic;
+  color: var(--text-secondary);
+  padding: 20px;
+  text-align: center;
+  background: var(--bg-alt);
+  border-radius: 4px;
+} 

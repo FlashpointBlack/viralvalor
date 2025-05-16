@@ -1,0 +1,10 @@
+.inline-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  color: var(--text-secondary, #555);
+  font-size: 0.875rem;
+}
+
+/* Remove the old styles that had the full-screen black overlay */ 

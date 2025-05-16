@@ -1,0 +1,46 @@
+/* 
+ * USER MANAGEMENT STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In layout.css:
+ * - .user-management → Added to layout.css (lines 2012-2018)
+ * - .user-management-header → Added to layout.css (lines 2020-2028)
+ * - .user-controls → Added to layout.css (lines 2030-2036)
+ * - .search-filter → Added to layout.css (lines 2038-2044)
+ * - .users-table-container → Added to layout.css (lines 2046-2050)
+ * - .users-table → Added to layout.css (lines 2052-2098)
+ * - .email-cell, .verified-badge → Added to layout.css (lines 2100-2117)
+ * - .role-styling → Added to layout.css (lines 2119-2134)
+ * - .action-buttons → Similar to existing flex utilities (lines 35-52)
+ * - .no-results → Added to layout.css (lines 2136-2143)
+ * - .pagination → Added to layout.css (lines 2145-2175)
+ * - .user-modal-overlay, .user-modal → Added to layout.css (lines 2177-2203)
+ * - .user-modal-header → Added to layout.css (lines 2205-2214)
+ * - .form-group, .form-row, .form-column styles → Added to forms.css
+ * - .form-check → Added to forms.css
+ * - .modal-actions → Added to layout.css (lines 2216-2222)
+ * - .loading-spinner → Added to layout.css (lines 2224-2232)
+ * - .user-badges-section → Added to layout.css (lines 2234-2331)
+ * - .form-container → Added to layout.css (lines 2333-2359)
+ * - Media queries for responsive layout → Merged with existing media queries
+ * 
+ * In buttons.css:
+ * - .add-user-btn → Similar to .btn-primary (lines 45-53)
+ * - .close-button → Added to buttons.css (lines 488-504)
+ * - .cancel-button, .save-button → Similar to .btn-secondary and .btn-primary (lines 45-68)
+ * - .remove-badge-btn → Similar to .btn-danger (lines 75-83)
+ * - .add-badge-btn → Similar to .btn-success (lines 75-83)
+ * - .pagination-button → Similar to existing button styles
+ * 
+ * In forms.css:
+ * - .search-input, .role-filter → Similar to existing form field styles
+ * - .form-group → Similar to existing form group styles
+ * - .badge-select → Similar to existing select styles
+ * 
+ * In typography.css:
+ * - Text styling → Already covered by existing styles
+ * - .error-message → Similar to existing error styles
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

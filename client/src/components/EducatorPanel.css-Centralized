@@ -1,0 +1,36 @@
+/* 
+ * EDUCATOR PANEL STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In layout.css:
+ * - .educator-panel → Added to layout.css (lines 1652-1660)
+ * - .panel-content → Similar to grid layout utilities (lines 182-190)
+ * - .poll-info-section, .user-info-section, .encounter-preview-section, .story-tree-section → Added to layout.css (lines 1662-1694)
+ * - .scenario-selector → Already exists in layout.css (lines 972-977)
+ * - .poll-time, .total-users → Added to layout.css (lines 1696-1708)
+ * - .option-bar-container, .option-bar → Added to layout.css (lines 1710-1730)
+ * - .vote-counts → Added to layout.css (lines 1732-1740)
+ * - .visual-breadcrumb-trail and related styles → Added to layout.css (lines 1742-1825)
+ * - Media queries for responsive layout → Merged with existing media queries
+ * - .connection-status styles → Added to layout.css (lines 1827-1853)
+ * - .error-toast styles → Added to layout.css (lines 1855-1878)
+ * - .debug-panel styles → Merged with existing debug panel (lines 1344-1371)
+ * - .game-id-display → Added to layout.css (lines 1880-1888)
+ * 
+ * In buttons.css:
+ * - .open-display-btn → Similar to .btn-accent (lines 60-68)
+ * - .option-label-button → Added to buttons.css (lines 420-438)
+ * - .poll-controls button styles → Similar to existing button variants
+ * - .poll-toggle-btn → Added to buttons.css (lines 440-458)
+ * - .send-poll-btn, .end-poll-btn, .show-messages-btn → Similar to existing button variants
+ * - .view-categories-btn → Similar to existing .btn-secondary styles
+ * 
+ * In forms.css:
+ * - .scenario-selector select → Already covered by form field styles
+ * 
+ * In cards.css:
+ * - Poll options and user list styles → Added card layout patterns for consistent appearance
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

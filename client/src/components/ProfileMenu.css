@@ -1,0 +1,107 @@
+.profile-menu-container {
+  position: relative;
+  z-index: 100;
+}
+
+.profile-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-alt);
+  color: var(--text-color);
+  font-weight: bold;
+  font-size: 24px;
+  border-radius: 50%;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 20px;
+  right: 0;
+  width: 220px;
+  background: var(--bg-card) !important;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+/* Profile name at top of dropdown */
+.profile-name {
+  font-weight: 600;
+  margin: 0;
+  padding: 10px 16px;
+  font-size: 14px;
+  display: block;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.profile-email {
+  margin: 0;
+  font-size: 0px;
+  color: #666;
+  word-break: break-all;
+}
+
+.profile-menu-items {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 8px 8px;
+}
+
+.profile-menu-item {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  text-decoration: none;
+  color: var(--text-color) !important;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.profile-menu-item:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-color) !important;
+}
+
+/* logout button uses .btn now */
+
+/* FINAL override – ensure dropdown logout button is neutral (not blue) */
+.profile-menu-container .logout-button {
+  background: none !important;
+  color: var(--text-color) !important;
+  border: none !important;
+  width: 100%;
+  display: block;
+  text-align: left;
+  padding: 10px 16px;
+  border-radius: 4px;
+}
+
+.profile-menu-container .logout-button:hover {
+  background-color: var(--hover-bg) !important;
+  color: var(--text-color) !important;
+} 

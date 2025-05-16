@@ -1,0 +1,402 @@
+body {
+  font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
+  padding: 0px;
+  margin: 0px;
+  line-height: 1.6;
+}
+
+html {
+  padding: 0px;
+}
+
+td {
+  text-align: center;
+  vertical-align: top;
+  padding: 10px;
+}
+.modal-header {
+  display: flex;
+  justify-content: flex-end;
+  background-color: #fefefe;
+  padding: 10px;
+  border-bottom: 1px solid #888;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 98%;
+  display: flex;
+  flex-wrap: wrap;
+  overflow-y:scroll;
+  gap: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+.close-button {
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.modal {
+  display: block;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+
+.close-button:hover,
+.close-button:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modal-list-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.modal-list-item:last-child {
+  border-bottom: none;
+}
+
+.modal-list-item:hover {
+  background-color: #f1f1f1;
+}
+
+.WidthFull {
+  width: 100%;
+}
+
+.popup {
+  display: grid;
+  grid-template-columns: 200px;
+  grid-template-rows: 40px 250px;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "Title"
+    "ItemList";
+  background-color: lightgray;
+  z-index: 1000;
+  position: absolute;
+}
+
+.Title {
+  grid-area: Title;
+  margin: 10px;
+  margin-bottom: 10px;
+}
+
+.ItemList {
+  grid-area: ItemList;
+  height: 250px;
+  overflow-y: auto;
+  margin: 20px;
+  margin-top: 10px;
+
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 200px auto;
+  grid-template-rows: 75px 500px 75px;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "Header Header"
+    "Navigation InterfaceBody"
+    "Footer Footer";
+  height: 100%;
+}
+
+.Header {
+  grid-area: Header;
+  display: flex;
+  align-items: center;
+  /* valign */
+  justify-content: center;
+  background-image: url("/images/HeaderBG.png");
+  background-size: cover;
+}
+
+.Footer {
+  grid-area: Footer;
+}
+
+.EncounterImagePreview {
+  max-width: 200px;
+  max-height: 200px;
+}
+
+.FileInput {
+  max-width: 200px;
+  max-height: 200px;
+}
+
+.Navigation {
+  grid-area: Navigation;
+  background-image: url("/images/NavBG.png");
+  background-size: cover;
+}
+
+.encounter-choice-row {
+  display: flex;
+  /* Aligns items in a row */
+  align-items: center;
+  /* Centers items vertically */
+  gap: 10px;
+  /* Adds some space between items */
+}
+
+.InterfaceBody {
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: 75px auto;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "InterfaceHeader"
+    "ChatWindow"
+    "StoryLine"
+    "LivePolling"
+    "Badges";
+  grid-area: InterfaceBody;
+  align-items: top;
+  /* valign */
+  background-color: #00b318;
+}
+
+.InterfaceHeader {
+  grid-area: InterfaceHeader;
+  background-color: #0056b3;
+}
+
+.LivePolling {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "PollingQuestions PollingResults";
+  grid-area: LivePolling;
+  display: inline-flex;
+}
+
+.ChatWindow {
+  grid-area: ChatWindow;
+  display: none;
+}
+
+.StoryLine {
+  grid-area: StoryLine;
+  display: none;
+  background-color: #00ff26;
+}
+
+.BackdropsWindow {
+  grid-area: StoryLine;
+  display: none;
+  background-color: #00ff26;
+}
+
+.BadgesWindow {
+  grid-area: Badges;
+  display: none;
+  background-color: #00ff26;
+}
+.CharacterModelsWindow {
+  grid-area: Badges;
+  display: none;
+  background-color: #00ff26;
+}
+
+.PollingQuestions {
+  grid-area: PollingQuestions;
+  width: 100%;
+  display: block;
+  align-items: top;
+  /* valign */
+  background-color: #e83e8c;
+  /* Pink */
+}
+
+.PollingResults {
+  grid-area: PollingResults;
+  width: 100%;
+  display: inline-block;
+  justify-items: center;
+  background-color: #6610f2;
+  /* Purple */
+}
+
+.header-button {
+  margin-left: 10px;
+  /* Spacing between buttons */
+  padding: 10px 20px;
+  /* Padding inside buttons */
+  background: #444;
+  /* Button background */
+  color: white;
+  /* Text color */
+  border: none;
+  /* Removes border */
+  cursor: pointer;
+  /* Changes cursor to pointer on hover */
+}
+
+.header-button:hover {
+  background: #555;
+  /* Button background on hover */
+}
+
+.question-block {
+  margin-bottom: 20px;
+}
+
+.option-input {
+  margin-bottom: 10px;
+}
+
+.btn {
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #0056b3;
+}
+.badges-list-container,
+.characters-list-container,
+.backdrops-list-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-height: 400px; /* Adjust this value based on your layout */
+  overflow-y: auto; /* Enables vertical scrolling */
+  overflow-x: hidden; /* Hides horizontal scrollbar */
+  /* Add other styles as needed (e.g., padding, max-width) */
+}
+
+
+
+.BadgeImageView {
+max-width: 400px;
+max-height: 400px;
+}
+.badge-item {
+  display: flex;
+  flex-direction: column; /* Stack image and text vertically */
+  align-items: center; /* Center-align items */
+  cursor: pointer;
+  padding:15px;
+  /* background-color: white; */
+}
+
+.badge-thumbnail {
+  max-width: 120px;
+  max-height: 120px;
+  object-fit: cover; /* Keeps image aspect ratio */
+  margin-bottom: 5px; /* Space between image and text */
+}
+
+.badge-title,
+.badge-description {
+  text-align: center; /* Center-align text */
+  margin: 2px 0; /* Adjust spacing as needed */
+}
+
+
+#notificationBar {
+  position: fixed;
+  bottom: -50px;
+  /* Changed from top to bottom */
+  left: 0;
+  width: 100%;
+  background-color: blue;
+  color: white;
+  text-align: center;
+  padding: 10px;
+  z-index: 1000;
+  transition: bottom 0.5s ease;
+  /* Changed from top to bottom */
+}
+
+
+.resultsChart {
+  width: 90%;
+  height: 90%;
+  background-color: #00ff26;
+  display: block;
+  align-self: stretch;
+}
+#SelectedBadgeVitals {
+  display:none;
+}
+
+.bar-container {
+  width: 90%;
+  height: 20px;
+  /* Adjust as needed */
+  margin-bottom: 10px;
+  background-color: #5f3535;
+  display: flex;
+  /* This makes the container a flexbox container */
+  align-items: center;
+  /* This vertically centers the items in the container */
+  margin: 10px;
+  /* This adds some space between the button and the bar */
+}
+
+.bar {
+  width: 90%;
+  height: 20px;
+  /* flex-grow: 1; This allows the bar to take up the remaining space */
+  width: 0%;
+  /* Start with an empty bar */
+  transition: width 1s;
+  /* Animate changes to width */
+}
+
+.innerBar {
+  font-weight: bold;
+  padding: 5px;
+  text-align: center
+}
+
+.correct-bar {
+  background-color: green;
+  /* Color for the correct answer */
+}
+
+.route-button {
+  width: 300px;
+  /* Color for the correct answer */
+}
+
+.result-container {
+  display: flex;
+  /* This makes the container a flexbox container */
+  /* Color for the correct answer */
+}
+
+.incorrect-bar {
+  background-color: red;
+  /* Color for the incorrect answers */
+}

@@ -1,0 +1,244 @@
+.journal-mgr-container {
+  padding: 1rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+.add-btn {
+  margin-bottom: 8px;
+  padding: 6px 12px;
+  background-color: var(--primary, #1976d2);
+  color: var(--button-text, white);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.prompt-table {
+  width: 100%;
+  border-collapse: collapse;
+  box-sizing: border-box;
+}
+.prompt-table th, .prompt-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  box-sizing: border-box;
+}
+.prompt-table th {
+  background: #f5f5f5;
+}
+.prompt-table button {
+  margin-right: 4px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Simple modal */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+.modal-panel {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  position: relative;
+  box-sizing: border-box;
+}
+.modal-panel label {
+  display: block;
+  margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.modal-panel textarea, .modal-panel input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+.modal-actions {
+  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.modal-actions button {
+  margin-left: 8px;
+}
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  box-sizing: border-box;
+}
+.stats-table th, .stats-table td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  box-sizing: border-box;
+}
+.stats-table th {
+  background: #f0f0f0;
+}
+
+.btn-primary { background: #1976d2; color: #fff; }
+.btn-primary:hover { background: #11529b; }
+
+.btn-secondary { background: #607d8b; color: #fff; }
+.btn-secondary:hover { background: #455a64; }
+
+.btn-warning { background: #f9a825; color: #fff; }
+.btn-warning:hover { background: #c17900; }
+
+.btn-danger { background: #c62828; color: #fff; }
+.btn-danger:hover { background: #8e0000; }
+
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.admin-explanation {
+  color: var(--text-muted, #666);
+  margin-bottom: 20px;
+  max-width: 800px;
+  line-height: 1.5;
+}
+
+/* Mobile-friendly styles */
+@media (max-width: 768px) {
+  .journal-mgr-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+  
+  .add-btn {
+    width: 100% !important;
+    margin-bottom: 1rem !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Make tables responsive on mobile */
+  .prompt-table {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: auto !important;
+  }
+  
+  .prompt-table tbody tr {
+    display: flex !important;
+    flex-direction: column !important;
+    border-bottom: 2px solid var(--border-color, #ddd) !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .prompt-table thead {
+    display: none !important; /* Hide table headers on mobile */
+  }
+  
+  .prompt-table td {
+    display: flex !important;
+    padding: 0.5rem !important;
+    border: none !important;
+    border-bottom: 1px solid var(--border-color-light, #eee) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+  }
+  
+  /* Add labels for td's */
+  .prompt-table td:nth-of-type(1):before { content: "ID: "; font-weight: bold; margin-right: 0.5rem; }
+  .prompt-table td:nth-of-type(2):before { content: "Title: "; font-weight: bold; margin-right: 0.5rem; }
+  .prompt-table td:nth-of-type(3):before { content: "Created: "; font-weight: bold; margin-right: 0.5rem; }
+  .prompt-table td:nth-of-type(4):before { content: "Last Released: "; font-weight: bold; margin-right: 0.5rem; }
+  .prompt-table td:nth-of-type(5) { flex-direction: row !important; flex-wrap: wrap !important; gap: 0.5rem !important; }
+  
+  .prompt-table td:last-child {
+    border-bottom: none !important;
+  }
+  
+  /* Buttons in action cells */
+  .prompt-table td:nth-of-type(5) button {
+    flex: 1 !important;
+    margin: 0.25rem !important;
+    min-width: calc(50% - 0.5rem) !important; /* Two buttons per row */
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Modal styling */
+  .modal-panel {
+    width: 95% !important;
+    max-width: 95% !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+  
+  .modal-actions {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 0.5rem !important;
+  }
+  
+  .modal-actions button {
+    width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Stats table in modal */
+  .stats-table {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: auto !important;
+  }
+  
+  .stats-table tbody tr {
+    display: flex !important;
+    flex-direction: column !important;
+    border-bottom: 2px solid var(--border-color, #ddd) !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .stats-table thead {
+    display: none !important;
+  }
+  
+  .stats-table td {
+    display: flex !important;
+    padding: 0.5rem !important;
+    border: none !important;
+    border-bottom: 1px solid var(--border-color-light, #eee) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+  }
+  
+  .stats-table td:nth-of-type(1):before { content: "User: "; font-weight: bold; margin-right: 0.5rem; }
+  .stats-table td:nth-of-type(2):before { content: "Released: "; font-weight: bold; margin-right: 0.5rem; }
+  .stats-table td:nth-of-type(3):before { content: "Characters: "; font-weight: bold; margin-right: 0.5rem; }
+  .stats-table td:nth-of-type(4):before { content: "Submitted: "; font-weight: bold; margin-right: 0.5rem; }
+} 

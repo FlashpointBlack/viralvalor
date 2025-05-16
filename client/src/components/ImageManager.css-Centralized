@@ -1,0 +1,40 @@
+/* 
+ * IMAGE MANAGER STYLES
+ * Styles from this file have been centralized in the following files:
+ * 
+ * In layout.css:
+ * - .image-manager → Added to layout.css (lines 2794-2798)
+ * - .image-manager h2 → Added to layout.css (lines 2800-2803)
+ * - .image-manager-tabs → Added to layout.css (lines 2805-2809)
+ * - .tab-button and related → Added to layout.css (lines 2811-2827)
+ * - .image-manager-content → Added to layout.css (lines 2829-2837)
+ * - .upload-section → Added to layout.css (lines 2839-2844)
+ * - .upload-section h3 → Added to layout.css (lines 2846-2849)
+ * - .upload-form and form-group → Added to layout.css (lines 2851-2885)
+ * - .progress-bar-* → Added to layout.css (lines 2887-2907)
+ * - .images-gallery → Added to layout.css (lines 2909-2914)
+ * - .loading, .error, .no-images → Added to layout.css (lines 2916-2928)
+ * - .edit-form and form-actions → Added to layout.css (lines 2930-2941)
+ * - .btn and button states → Added to layout.css (lines 2943-2956)
+ * 
+ * In images.css:
+ * - .images-grid → Already in images.css (lines 163-167)
+ * - .image-item → Already in images.css (lines 169-176)
+ * - .image-item:hover → Added to images.css (lines 232-236)
+ * - .image-item.selected → Added to images.css (lines 238-241)
+ * - .image-container → Already in images.css (lines 186-191)
+ * - .image-thumbnail → Already in images.css (lines 193-197)
+ * - .image-actions → Added to images.css (lines 243-253) 
+ * - .image-container:hover .image-actions → Added to images.css (lines 255-257)
+ * - .image-title → Already in images.css (lines 220-229)
+ * - .image-description-tooltip → Already in images.css (lines 199-212)
+ * - .image-container:hover .image-description-tooltip → Already in images.css (lines 214-218)
+ * - .image-preview-modal → Added to images.css (lines 259-270)
+ * - .full-size-preview → Added to images.css (lines 272-277)
+ * - .image-details → Added to images.css (lines 279-289)
+ * 
+ * Note: .modal-content, .modal-header, .close-btn, and .modal-body were already centralized from ImageSelector.css
+ * 
+ * These styles are now maintained in the centralized CSS files
+ * using CSS custom properties for better consistency.
+ */ 

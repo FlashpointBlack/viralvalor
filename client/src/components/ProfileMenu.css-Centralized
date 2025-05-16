@@ -1,0 +1,16 @@
+/* 
+ * PROFILE MENU STYLES
+ * All styles from this file have been centralized in layout.css (lines 639-681+)
+ * 
+ * The original styles were:
+ * - .profile-menu-container
+ * - .profile-dropdown
+ * - .profile-name
+ * - .profile-email (now added to layout.css)
+ * - .profile-menu-items
+ * - .profile-menu-item
+ * - .profile-menu-container .logout-button (now added to layout.css)
+ * 
+ * These styles are now maintained in the centralized layout.css file
+ * using CSS custom properties for better consistency.
+ */ 

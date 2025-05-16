@@ -1,0 +1,16 @@
+/* 
+ * ENCOUNTER THUMBNAIL STYLES
+ * All styles from this file have been centralized in layout.css 
+ * 
+ * The original styles were:
+ * - .encounter-thumbnail → Added to layout.css (lines 3175-3181)
+ * - .thumbnail-container → Added to layout.css (lines 3183-3192)
+ * - .thumbnail-backdrop img → Added to layout.css (lines 3194-3199)
+ * - .thumbnail-character → Added to layout.css (lines 3201-3207)
+ * - .character-left → Added to layout.css (lines 3209-3211)
+ * - .character-right → Added to layout.css (lines 3213-3215)
+ * - .thumbnail-content → Added to layout.css (lines 3217-3232)
+ * - .thumbnail-title → Added to layout.css (lines 3234-3239)
+ * - .thumbnail-description → Added to layout.css (lines 3241-3248)
+ * - .thumbnail-character img → Added to layout.css (lines 3250-3254)
+ */ 

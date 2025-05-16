@@ -1,0 +1,36 @@
+/*
+ * App-specific styles
+ * Only includes styles specifically for the App component
+ * Most styles are now handled by the centralized style system
+ */
+
+/* These styles are kept to ensure backward compatibility during the transition */
+/* Remove when all components have been updated to use the new style system */
+
+.app {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden !important; /* Prevent horizontal scrolling at app level */
+}
+
+/* Full width content for report pages */
+.main-content {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important; /* Prevent horizontal scrolling */
+  overflow-y: auto !important; /* Allow vertical scrolling */
+}
+
+/* Force all direct children of main-content to respect container width */
+.main-content > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+/* Everything else has been moved to the centralized style system */ 

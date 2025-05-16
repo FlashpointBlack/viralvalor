@@ -1,0 +1,140 @@
+/*
+ * Mobile Layout System
+ * Provides mobile-responsive layouts for the application
+ */
+
+/* Header styles for mobile */
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Logo size specific for mobile */
+@media (max-width: 768px) {
+  .header-logo {
+    width: 250px !important; /* 50% of the original 500px */
+    height: auto !important;
+  }
+  
+  /* Main header adjustments */
+  .main-header {
+    flex-wrap: wrap;
+    position: relative;
+  }
+  
+  /* Mobile nav container */
+  .mobile-nav-container {
+    display: none;
+    width: 100%;
+  }
+  
+  .mobile-nav-container.open {
+    display: flex;
+  }
+  
+  /* Hamburger button styles */
+  .hamburger-btn {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 28px;
+    height: 22px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    z-index: 101;
+  }
+  
+  .hamburger-btn .bar {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: #ffffff;
+    transition: all 0.3s ease;
+  }
+  
+  .hamburger-btn.open .bar:nth-child(1) {
+    transform: translateY(9px) rotate(45deg);
+  }
+  
+  .hamburger-btn.open .bar:nth-child(2) {
+    opacity: 0;
+  }
+  
+  .hamburger-btn.open .bar:nth-child(3) {
+    transform: translateY(-9px) rotate(-45deg);
+  }
+  
+  /* Mobile navigation */
+  .main-nav {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem 0;
+    gap: 0;
+  }
+  
+  /* Mobile tabs */
+  .main-tabs.mobile {
+    flex-direction: column;
+    width: 100%;
+    gap: 0;
+  }
+  
+  .main-tabs.mobile .main-tab {
+    width: 100%;
+    text-align: left;
+    padding: 1rem;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  /* Mobile dropdown */
+  .main-tabs.mobile .dropdown {
+    width: 100%;
+  }
+  
+  .main-tabs.mobile .dropdown-content.mobile {
+    position: relative;
+    width: 100%;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    background-color: var(--bg-alt);
+  }
+  
+  .main-tabs.mobile .dropdown-item {
+    padding-left: 2rem;
+    background-color: var(--bg-alt);
+  }
+  
+  /* Content adjustments */
+  .main-content {
+    padding: var(--space-4) !important;
+  }
+  
+  /* Adjust the welcome banner */
+  .welcome-banner {
+    height: calc(100vh - 120px) !important; /* account for taller header */
+  }
+  
+  .welcome-banner .splash-image {
+    object-fit: cover !important;
+  }
+}
+
+/* Desktop overrides */
+@media (min-width: 769px) {
+  .hamburger-btn {
+    display: none !important;
+  }
+  
+  .header-logo {
+    width: 500px;
+    height: auto;
+    max-width: 100%;
+  }
+} 
