@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import socket from '../socket'; // We'll create this shared socket file
 import { gameExists, getCurrentEncounter } from '../utils/multiplayerGameManager';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext'; // Add AuthContext
+import DebugPanel from './DebugPanel';
+import PollOverlay from './PollOverlay';
+import useSocketSync from '../hooks/useSocketSync';
+import sanitize from '../utils/sanitizeHtml';
+import useMessageBridge from '../hooks/useMessageBridge';
+import useTextAutosize from '../hooks/useTextAutosize';
 
 // Debug mode can be controlled via URL or localStorage
 const getDebugMode = () => {
@@ -48,36 +54,6 @@ window.addEventListener('message', (event) => {
   console.log(`GLOBAL: Window received message:`, event.data);
 });
 
-// Local implementation of the message listener utility
-const createMessageListener = (handler) => {
-  return (event) => {
-    try {
-      // Log all received messages at the listener level
-      debugLog(`MessageListener: Received message from ${event.origin}:`, event.data);
-      
-      // Validate origin (allow same origin or localhost during development)
-      const isSameOrigin = event.origin === window.location.origin;
-      const isLocalhost = event.origin.includes('localhost') || event.origin.includes('127.0.0.1');
-      
-      if (!isSameOrigin && !isLocalhost) {
-        logError(`Ignoring message from unauthorized origin: ${event.origin}`, { data: event.data });
-        return;
-      }
-
-      // Validate message structure
-      if (!event.data || typeof event.data !== 'object' || !event.data.type) {
-        logError(`Ignoring invalid message format`, { data: event.data });
-        return;
-      }
-
-      // Call the handler with the validated message
-      handler(event.data, event);
-    } catch (err) {
-      logError('Error in message listener', err);
-    }
-  };
-};
-
 const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = null }) => {
   const { id: urlId, gameId: urlGameId } = useParams(); // Get encounter ID and game ID from URL
   // Determine the initial IDs based on props or URL parameters
@@ -86,22 +62,17 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
 
   const [currentId, setCurrentId] = useState(initialEncounterId); // Track current encounter ID
   const [currentGameId, setCurrentGameId] = useState(initialGameId); // Track game ID
-  const navigate = useNavigate();
   const location = useLocation();
   const [encounter, setEncounter] = useState(null);
   const [previousEncounter, setPreviousEncounter] = useState(null);
   const [routes, setRoutes] = useState([]);
   const [pollActive, setPollActive] = useState(false);
-  const [pollTime, setPollTime] = useState('0:00');
   const [isEducatorDisplay, setIsEducatorDisplay] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [transitionDirection, setTransitionDirection] = useState('fade');
   const displayRef = useRef(null);
   const transitionTimeoutRef = useRef(null);
   const [newEncounterData, setNewEncounterData] = useState(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
-  const messageListenerRef = useRef(null);
-  const componentIdRef = useRef(`encounter-display-${Date.now()}`); // Unique ID for this component instance
   const [transitionError, setTransitionError] = useState(null);
   const [debugInfo, setDebugInfo] = useState({
     transitions: 0,
@@ -118,6 +89,7 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
   const imagePreloadingRef = useRef(new Map()); // Cache for preloaded images
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const fetchAbortRef = useRef(null);
 
   // Add AuthContext state
   const { user } = useAuth();
@@ -209,13 +181,23 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
     setError(null); // Clear previous errors
     
     try {
+      // Abort any in-flight request
+      if (fetchAbortRef.current) {
+        fetchAbortRef.current.abort();
+      }
+
+      const controller = new AbortController();
+      fetchAbortRef.current = controller;
+
       const response = await axios({
         method: 'get',
         url: `/GetEncounterData/${encounterId}`,
         withCredentials: true, 
         headers: { 'x-user-sub': userSub },
-        params: { _t: new Date().getTime() } 
+        params: { _t: new Date().getTime() },
+        signal: controller.signal,
       });
+      fetchAbortRef.current = null;
 
       if (!response.data || !response.data.Encounter) {
         throw new Error(`Invalid data structure received for encounter ${encounterId}`);
@@ -247,6 +229,11 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
       return response.data; // Return the fetched data
       
     } catch (error) {
+      // Ignore request if it was aborted in favour of a newer one
+      if (axios.isCancel?.(error) || error.code === 'ERR_CANCELED' || error.name === 'CanceledError') {
+        debugLog('Fetch aborted for encounter', encounterId);
+        return null;
+      }
       const statusCode = error.response?.status;
       const responseData = error.response?.data;
       const errorMsg = `Error fetching encounter ${encounterId}: ${error.message}`; 
@@ -270,7 +257,7 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
       setDebugInfo(prev => ({ ...prev, status: `ERROR: ${errorMsg}` }));
       return null; // Indicate failure
     } finally {
-      setLoading(false); // Ensure loading is always turned off
+      setLoading(false);
     }
   }, [userSub, currentId]);
 
@@ -630,28 +617,8 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
     }
   }, [currentId, currentGameId, handleEncounterTransition]);
 
-  // Setup message listener
-  useEffect(() => {
-    debugLog(`Setting up message listener for encounter ID: ${currentId}`);
-    
-    // Clean up previous listener if it exists
-    if (messageListenerRef.current) {
-      debugLog(`Removing previous message listener`);
-      window.removeEventListener('message', messageListenerRef.current);
-    }
-    
-    // Create and attach a new message listener
-    messageListenerRef.current = createMessageListener(handleMessage);
-    window.addEventListener('message', messageListenerRef.current);
-    debugLog(`New message listener attached`);
-    
-    return () => {
-      if (messageListenerRef.current) {
-        debugLog(`Cleanup: removing message listener`);
-        window.removeEventListener('message', messageListenerRef.current);
-      }
-    };
-  }, [handleMessage, currentId]);
+  // Attach the window message bridge
+  useMessageBridge({ handleMessage, debugLog, logError });
 
   // Listen for custom DOM events for encounter transitions
   useEffect(() => {
@@ -705,98 +672,22 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
     };
   }, []);
 
-  // -------------------------------------------------------------------
-  // Sync with active presentation (game) when component mounts or socket
-  // reconnects.  This ensures a freshly-opened display immediately joins
-  // the current game session and will start receiving TravelToID events.
-  // -------------------------------------------------------------------
-  useEffect(() => {
-    // Helper to request presenter / active game info from the server
-    const requestPresenterInfo = () => {
-      debugLog('Requesting presenter info to sync active game');
-      try {
-        socket.emit('get presenter', currentGameId || null);
-      } catch (err) {
-        logError('Failed to emit get presenter', err);
-      }
-    };
-
-    const handlePresenterInfo = ({ gameId: infoGameId, isActive }) => {
-      debugLog('Presenter info received:', { infoGameId, isActive });
-      if (infoGameId && isActive && infoGameId !== currentGameId) {
-        debugLog(`Syncing currentGameId to ${infoGameId} from presenter info`);
-        setCurrentGameId(infoGameId);
-        setDebugInfo(prev => ({ ...prev, gameId: infoGameId, status: 'Synced via presenter info' }));
-      }
-    };
-
-    const handlePresentationStarted = ({ gameId: startedGameId }) => {
-      if (startedGameId && startedGameId !== currentGameId) {
-        debugLog(`Presentation started for game ${startedGameId} – updating currentGameId`);
-        setCurrentGameId(startedGameId);
-        setDebugInfo(prev => ({ ...prev, gameId: startedGameId, status: 'Presentation started' }));
-      }
-    };
-
-    const handlePresentationEnded = ({ gameId: endedGameId }) => {
-      if (!endedGameId || endedGameId === currentGameId) {
-        debugLog('Presentation ended – clearing currentGameId');
-        setCurrentGameId(null);
-        setDebugInfo(prev => ({ ...prev, status: 'Presentation ended' }));
-      }
-    };
-
-    // Wire up socket listeners
-    socket.on('presenter info', handlePresenterInfo);
-    socket.on('presentation started', handlePresentationStarted);
-    socket.on('presentation ended', handlePresentationEnded);
-    socket.on('connect', requestPresenterInfo);
-
-    // Immediately request info on mount
-    requestPresenterInfo();
-
-    // Cleanup on unmount / re-run
-    return () => {
-      socket.off('presenter info', handlePresenterInfo);
-      socket.off('presentation started', handlePresentationStarted);
-      socket.off('presentation ended', handlePresentationEnded);
-      socket.off('connect', requestPresenterInfo);
-    };
-  }, [currentGameId]);
-
-  // ------------------------------------------------------------
-  // When we have a game ID but no encounter yet, ask the server
-  // for the current encounter so late joiners sync immediately.
-  // ------------------------------------------------------------
-  useEffect(() => {
-    if (!currentGameId) return;
-    if (encounter) return; // already synced
-
-    debugLog(`Requesting current encounter for game ${currentGameId}`);
-    try {
-      socket.emit('request current encounter', currentGameId);
-    } catch (err) {
-      logError('Failed to emit request current encounter', err);
-    }
-
-    const handleCurrentEncounter = ({ gameId: infoGameId, encounterId }) => {
-      debugLog('Current encounter info received:', { infoGameId, encounterId });
-      if (!infoGameId || infoGameId !== currentGameId) return; // ignore other games
-      if (!encounterId) return; // no encounter chosen yet
-      // Load immediately (treat as TravelToID to reuse logic)
-      if (encounterId !== currentId) {
-        handleEncounterTransition(encounterId);
-      } else {
-        fetchEncounterData(encounterId, false);
-      }
-    };
-
-    socket.on('current encounter', handleCurrentEncounter);
-
-    return () => {
-      socket.off('current encounter', handleCurrentEncounter);
-    };
-  }, [currentGameId, encounter, currentId, fetchEncounterData, handleEncounterTransition]);
+  // Tie in shared socket listeners
+  useSocketSync({
+    currentGameId,
+    setCurrentGameId,
+    currentId,
+    encounter,
+    fetchEncounterData,
+    handleEncounterTransition,
+    setPollActive,
+    debugLog,
+    logError,
+    setDebugInfo,
+    isTransitioning,
+    setIsTransitioning,
+    setPreviousEncounter,
+  });
 
   // Load initial encounter data
   useEffect(() => {
@@ -841,67 +732,7 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
       debugLog(`No ID in URL. Waiting for external trigger (message/socket) to load encounter.`);
       // To load a default, you would call fetchRootEncounters first, then fetchEncounterData(defaultId)
     }
-
-    // --- Socket listeners setup remains the same --- 
-    debugLog(`Setting up socket listeners`);
-    const handleTravelToID = (encounterId, gameId) => {
-      debugLog(`Socket event: TravelToID - ${encounterId}, gameId: ${gameId || 'none'}`);
-
-      // Ignore messages for a different active game session
-      if (currentGameId && gameId && gameId !== currentGameId) {
-        debugLog(`Ignoring TravelToID – mismatched game. Expected ${currentGameId}, received ${gameId}`);
-        return;
-      }
-
-      // Adopt gameId if we don't have one yet
-      if (gameId && !currentGameId) {
-        debugLog(`Adopting game ID from socket event: ${gameId}`);
-        setCurrentGameId(gameId);
-        setDebugInfo(prev => ({ ...prev, gameId }));
-      }
-
-      // Even if this is the current ID, we should refresh the data
-      if (encounterId === currentId) {
-        debugLog('TravelToID matches current ID - refreshing data');
-        fetchEncounterData(encounterId, false);
-        return;
-      }
-
-      // If we're in the middle of a transition, finish it immediately
-      if (isTransitioning) {
-        debugLog('TravelToID during transition - forcing completion first');
-        setIsTransitioning(false);
-        setPreviousEncounter(null);
-        debugLog('Ignoring TravelToID – already at this encounter or mid-transition');
-        return;
-      }
-
-      debugLog(`Proceeding with transition to encounter ${encounterId}`);
-      handleEncounterTransition(encounterId);
-    };
-    socket.on('TravelToID', handleTravelToID);
-    // ... other socket listeners ...
-    socket.on('new quiz', () => { setPollActive(true); });
-    socket.on('end quiz', () => { setPollActive(false); });
-    socket.on('poll started', () => { setPollActive(true); });
-    socket.on('poll ended', () => { setPollActive(false); });
-
-    debugLog(`EncounterDisplay (ID: ${currentId}, gameId: ${currentGameId || 'none'}) listening`);
-    
-    return () => {
-      // --- Cleanup remains the same --- 
-      debugLog(`Component unmounting - cleaning up socket listeners`);
-      socket.off('TravelToID', handleTravelToID);
-      socket.off('new quiz');
-      socket.off('end quiz');
-      socket.off('poll started');
-      socket.off('poll ended');
-      if (transitionTimeoutRef.current) {
-        clearTimeout(transitionTimeoutRef.current);
-      }
-    };
-    // Depend on urlId to refetch if URL changes, userSub for auth, and other relevant states
-  }, [urlId, userSub, currentId, encounter, loading, isTransitioning, currentGameId, fetchEncounterData, handleEncounterTransition]); 
+  }, [urlId, userSub, currentId, encounter, loading, isTransitioning, currentGameId, fetchEncounterData]); 
 
   // Handle toggling fullscreen mode
   const toggleFullscreen = () => {
@@ -929,24 +760,6 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
     }
   };
 
-  // Manual transition trigger for testing
-  const triggerManualTransition = (id) => {
-    debugLog(`Manual transition triggered to ID: ${id}`);
-    
-    // If we're stuck in a transition state, force reset before trying again
-    if (isTransitioning) {
-      debugLog('Forcing reset before manual transition');
-      forceResetTransition();
-      
-      // Give a short delay before attempting the new transition
-      setTimeout(() => {
-        handleEncounterTransition(id);
-      }, 100);
-    } else {
-      handleEncounterTransition(id);
-    }
-  };
-
   // Hide transition error after a few seconds
   useEffect(() => {
     let timer;
@@ -965,130 +778,60 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
     return pollActive; // If poll is active, buttons are disabled
   };
 
-  /* -------------------------------------------------------------
-     Auto‐shrink text inside the encounter box so it never overflows
-     its 80% height container. It resets styles for each encounter.
-  ---------------------------------------------------------------*/
-  const adjustTextFit = useCallback(() => {
-    const contentEl = document.querySelector('.encounter-content');
-    if (!contentEl) return;
+  // Automatic text autosize
+  useTextAutosize(encounter);
 
-    const titleEl = contentEl.querySelector('.encounter-title');
-    const descEl  = contentEl.querySelector('.encounter-description');
-    if (!descEl || !titleEl) return;
-
-    // Reset any inline sizing first
-    titleEl.style.fontSize = '';
-    descEl.style.fontSize  = '';
-
-    // Get computed starting sizes (px)
-    let titleSize = parseFloat(window.getComputedStyle(titleEl).fontSize);
-    let descSize  = parseFloat(window.getComputedStyle(descEl ).fontSize);
-
-    // Shrink stepwise until the content fits or minimum reached
-    const MIN_DESC = 6;  // px – no size too small for preview
-    const MIN_TITLE = 8;
-
-    const STEP = 0.5;
-
-    // Loop guard – max 100 iterations
-    let guard = 0;
-    const MAX_ITER = 100;
-    while (guard < MAX_ITER && contentEl.scrollHeight > contentEl.clientHeight) {
-      guard++;
-      if (descSize <= MIN_DESC) break;
-
-      descSize  = Math.max(descSize  - STEP, MIN_DESC);
-      titleSize = Math.max(titleSize - STEP, MIN_TITLE);
-
-      titleEl.style.fontSize = `${titleSize}px`;
-      descEl.style.fontSize  = `${descSize}px`;
-    }
-  }, []);
-
-  // Run whenever encounter changes or window resizes
-  useEffect(() => {
-    // Delay slightly to allow images/fonts to load then measure
-    const t = setTimeout(adjustTextFit, 100);
-
-    window.addEventListener('resize', adjustTextFit);
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener('resize', adjustTextFit);
-    };
-  }, [encounter, adjustTextFit]);
-
-  // Preload images when new data arrives
+  // Preload images when new encounter data arrives
   useEffect(() => {
     if (newEncounterData && !imagesLoaded) {
       const { Encounter } = newEncounterData;
-      
+
       debugLog(`Preloading images for new encounter ID ${Encounter.ID}`);
-      
-      // Gather all image URLs in the encounter object
+
       const imagesToLoad = gatherImageUrlsFromEncounter(Encounter);
       debugLog(`Encounter preload list built (${imagesToLoad.length} images)`);
-      
-      // If there are no images to load, mark as loaded immediately
+
       if (imagesToLoad.length === 0) {
-        debugLog(`No images to preload, marking as loaded`);
         setImagesLoaded(true);
         return;
       }
-      
-      // Load all images and track when they're complete
-      debugLog(`Starting preload of ${imagesToLoad.length} images`);
+
       let loadedCount = 0;
-      
-      const imageLoadPromises = imagesToLoad.map(url => {
+
+      const imageLoadPromises = imagesToLoad.map((url) => {
         return new Promise((resolve) => {
-          // Check cache first
           if (imagePreloadingRef.current.has(url)) {
-            debugLog(`Using cached image for ${url}`);
             loadedCount++;
             resolve();
             return;
           }
-          
+
           const img = new Image();
           img.onload = () => {
-            debugLog(`Image loaded: ${url}`);
             imagePreloadingRef.current.set(url, true);
             loadedCount++;
             if (loadedCount === imagesToLoad.length) {
-              debugLog(`All ${loadedCount} images loaded`);
               setImagesLoaded(true);
             }
             resolve();
           };
-          
           img.onerror = () => {
-            debugLog(`Image failed to load: ${url}`);
             loadedCount++;
             if (loadedCount === imagesToLoad.length) {
-              debugLog(`All ${loadedCount} images loaded (with errors)`);
               setImagesLoaded(true);
             }
             resolve();
           };
-          
-          debugLog(`Starting load for image: ${url}`);
           img.src = url;
         });
       });
-      
-      // Set a timeout to mark as loaded even if images fail
+
       const timeoutId = setTimeout(() => {
-        debugLog(`Image loading timeout reached, marking as loaded anyway`);
         setImagesLoaded(true);
-      }, 5000); // 5 second timeout
-      
-      // When all images are loaded, clear the timeout
-      Promise.all(imageLoadPromises).then(() => {
-        debugLog(`All image promises resolved`);
-        clearTimeout(timeoutId);
-      });
-      
+      }, 5000);
+
+      Promise.all(imageLoadPromises).then(() => clearTimeout(timeoutId));
+
       return () => clearTimeout(timeoutId);
     }
   }, [newEncounterData, imagesLoaded, gatherImageUrlsFromEncounter]);
@@ -1101,14 +844,21 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
         {transitionError && <p className="error-message">Error: {transitionError}</p>}
         
         {showDebug && (
-          <div className="debug-panel">
-            <h3>Debug Info</h3>
-            <p>Status: {debugInfo.status}</p>
-            <p>Current ID: {currentId || 'none'}</p>
-            <p>Game ID: {currentGameId || 'none'}</p>
-            <p>Message Count: {debugInfo.messageCount}</p>
-            <button onClick={() => setShowDebug(false)}>Hide Debug</button>
-          </div>
+          <DebugPanel
+            show={showDebug}
+            debugInfo={debugInfo}
+            currentId={currentId}
+            currentGameId={currentGameId}
+            isTransitioning={false}
+            transitionError={transitionError}
+            onHide={() => setShowDebug(false)}
+            onTriggerTransition={handleEncounterTransition}
+            onResetTransition={() => {
+              setIsTransitioning(false);
+              setPreviousEncounter(null);
+              setTransitionError(null);
+            }}
+          />
         )}
       </div>
     );
@@ -1125,47 +875,21 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
     >
       {/* Debug panel - show when debug mode is enabled */}
       {showDebug && (
-        <div className="debug-panel">
-          <h3>Debug Panel (Ctrl+D to toggle)</h3>
-          <p><strong>Current Status:</strong> {debugInfo.status}</p>
-          <p><strong>Current ID:</strong> {currentId}</p>
-          <p><strong>Game ID:</strong> {currentGameId || 'none'}</p>
-          <p><strong>Transitions:</strong> {debugInfo.transitions}</p>
-          <p><strong>Messages Received:</strong> {debugInfo.messageCount}</p>
-          <p><strong>Transitioning:</strong> {isTransitioning ? 'YES' : 'NO'}</p>
-          <p><strong>Last From:</strong> {debugInfo.lastTransitionFrom}</p>
-          <p><strong>Last To:</strong> {debugInfo.lastTransitionTo}</p>
-          
-          {transitionError && (
-            <div className="debug-error">
-              <h4>Error</h4>
-              <p>{transitionError}</p>
-            </div>
-          )}
-          
-          <h4>Test Controls</h4>
-          <div className="debug-controls">
-            <input 
-              type="number" 
-              placeholder="Encounter ID" 
-              id="manual-transition-id" 
-            />
-            <button 
-              onClick={() => {
-                const id = document.getElementById('manual-transition-id').value;
-                if (id) handleEncounterTransition(id);
-              }}
-            >
-              Trigger Transition
-            </button>
-            <button onClick={() => {
-              setIsTransitioning(false);
-              setPreviousEncounter(null);
-              setTransitionError(null);
-            }}>Reset Transition State</button>
-            <button onClick={() => setShowDebug(false)}>Hide Debug</button>
-          </div>
-        </div>
+        <DebugPanel
+          show={showDebug}
+          debugInfo={debugInfo}
+          currentId={currentId}
+          currentGameId={currentGameId}
+          isTransitioning={isTransitioning}
+          transitionError={transitionError}
+          onHide={() => setShowDebug(false)}
+          onTriggerTransition={handleEncounterTransition}
+          onResetTransition={() => {
+            setIsTransitioning(false);
+            setPreviousEncounter(null);
+            setTransitionError(null);
+          }}
+        />
       )}
 
       {/* Status indicator - shows errors and loading status */}
@@ -1176,13 +900,7 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
       )}
 
       {/* Poll timer overlay - show in both modes */}
-      {pollActive && (
-        <div className="poll-overlay">
-          <div className="poll-timer">
-            <h2>A POLL HAS BEEN RUNNING FOR {pollTime}</h2>
-          </div>
-        </div>
-      )}
+      {pollActive && <PollOverlay />}
 
       {/* Previous encounter (fading out) */}
       {isTransitioning && previousEncounter && (
@@ -1197,21 +915,21 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
           {previousEncounter.BackdropImage && (
             <div 
               className="encounter-backdrop"
-              dangerouslySetInnerHTML={{ __html: previousEncounter.BackdropImage }}
+              dangerouslySetInnerHTML={{ __html: sanitize(previousEncounter.BackdropImage) }}
             />
           )}
           
           {previousEncounter.Character1Image && (
             <div 
               className="encounter-character character-1"
-              dangerouslySetInnerHTML={{ __html: previousEncounter.Character1Image }}
+              dangerouslySetInnerHTML={{ __html: sanitize(previousEncounter.Character1Image) }}
             />
           )}
           
           {previousEncounter.Character2Image && (
             <div 
               className="encounter-character character-2"
-              dangerouslySetInnerHTML={{ __html: previousEncounter.Character2Image }}
+              dangerouslySetInnerHTML={{ __html: sanitize(previousEncounter.Character2Image) }}
             />
           )}
         </div>
@@ -1250,21 +968,21 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
         {encounter.BackdropImage && (
           <div 
             className="encounter-backdrop"
-            dangerouslySetInnerHTML={{ __html: encounter.BackdropImage }}
+            dangerouslySetInnerHTML={{ __html: sanitize(encounter.BackdropImage) }}
           />
         )}
         
         {encounter.Character1Image && (
           <div 
             className="encounter-character character-1"
-            dangerouslySetInnerHTML={{ __html: encounter.Character1Image }}
+            dangerouslySetInnerHTML={{ __html: sanitize(encounter.Character1Image) }}
           />
         )}
         
         {encounter.Character2Image && (
           <div 
             className="encounter-character character-2"
-            dangerouslySetInnerHTML={{ __html: encounter.Character2Image }}
+            dangerouslySetInnerHTML={{ __html: sanitize(encounter.Character2Image) }}
           />
         )}
       </div>
