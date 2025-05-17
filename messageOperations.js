@@ -1,6 +1,6 @@
 // Message operations for chat/messaging feature
 // Uses same MySQL connection pattern as other *Operations files
-const { db } = require('./db');
+const { dbPromise } = require('./db');
 
 /*
   Conversation / Messaging schema (MySQL):
@@ -33,13 +33,9 @@ const { db } = require('./db');
 */
 
 // Helper to run query returning promise
-function runQuery(query, params = []) {
-  return new Promise((resolve, reject) => {
-    db.query(query, params, (err, results) => {
-      if (err) return reject(err);
-      resolve(results);
-    });
-  });
+async function runQuery(query, params = []) {
+  const [results] = await dbPromise.query(query, params);
+  return results;
 }
 
 /**

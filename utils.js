@@ -1,7 +1,7 @@
 /**
  * Utilities for database operations and validation
  */
-const { db } = require('./db');
+const { dbPromise } = require('./db');
 
 /**
  * Execute a database query using promises
@@ -9,16 +9,14 @@ const { db } = require('./db');
  * @param {Array} params - Parameters for the query
  * @returns {Promise} - Promise that resolves with query results
  */
-function executeQuery(query, params = []) {
-    return new Promise((resolve, reject) => {
-        db.query(query, params, (error, results) => {
-            if (error) {
-                console.error('Database query error:', error);
-                return reject(error);
-            }
-            resolve(results);
-        });
-    });
+async function executeQuery(query, params = []) {
+    try {
+        const [results] = await dbPromise.query(query, params);
+        return results;
+    } catch (error) {
+        console.error('Database query error:', error);
+        throw error;
+    }
 }
 
 /**

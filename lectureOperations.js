@@ -14,88 +14,64 @@
 //   );
 // At least one of linkUrl or fileNameServer should be non-null.
 
-const { db } = require('./db');
+const { db, dbPromise } = require('./db');
 
-function createLectureLink(title, url, userSub, description = '') {
-  return new Promise((resolve, reject) => {
-    if (!title || !url || !userSub) return reject(new Error('Missing required params'));
-    const q = `INSERT INTO lectures (title, description, linkUrl, createdBy) VALUES (?, ?, ?, ?)`;
-    db.query(q, [title, description, url, userSub], (err, results) => {
-      if (err) return reject(err);
-      resolve(results.insertId);
-    });
-  });
+async function createLectureLink(title, url, userSub, description = '') {
+  if (!title || !url || !userSub) throw new Error('Missing required params');
+  const q = `INSERT INTO lectures (title, description, linkUrl, createdBy) VALUES (?, ?, ?, ?)`;
+  const [results] = await dbPromise.query(q, [title, description, url, userSub]);
+  return results.insertId;
 }
 
-function createLectureFile(title, fileNameServer, originalName, userSub, description = '') {
-  return new Promise((resolve, reject) => {
-    if (!title || !fileNameServer || !originalName || !userSub) return reject(new Error('Missing required params'));
-    const q = `INSERT INTO lectures (title, description, fileNameServer, originalName, createdBy) VALUES (?, ?, ?, ?, ?)`;
-    db.query(q, [title, description, fileNameServer, originalName, userSub], (err, results) => {
-      if (err) return reject(err);
-      resolve(results.insertId);
-    });
-  });
+async function createLectureFile(title, fileNameServer, originalName, userSub, description = '') {
+  if (!title || !fileNameServer || !originalName || !userSub) throw new Error('Missing required params');
+  const q = `INSERT INTO lectures (title, description, fileNameServer, originalName, createdBy) VALUES (?, ?, ?, ?, ?)`;
+  const [results] = await dbPromise.query(q, [title, description, fileNameServer, originalName, userSub]);
+  return results.insertId;
 }
 
-function getLecturesForUser(userSub) {
-  return new Promise((resolve, reject) => {
-    if (!userSub) return reject(new Error('userSub required'));
-    const q = `SELECT id, title, description, linkUrl, fileNameServer, originalName, approvalStatus, approvedBy, approvedAt, createdAt, lastReleasedAt FROM lectures WHERE createdBy = ? ORDER BY id DESC`;
-    db.query(q, [userSub], (err, rows) => {
-      if (err) return reject(err);
-      resolve(rows);
-    });
-  });
+async function getLecturesForUser(userSub) {
+  if (!userSub) throw new Error('userSub required');
+  const q = `SELECT id, title, description, linkUrl, fileNameServer, originalName, approvalStatus, approvedBy, approvedAt, createdAt, lastReleasedAt FROM lectures WHERE createdBy = ? ORDER BY id DESC`;
+  const [rows] = await dbPromise.query(q, [userSub]);
+  return rows;
 }
 
-function getAllLectures() {
-  return new Promise((resolve, reject) => {
-    const q = `SELECT id, title, description, linkUrl, fileNameServer, originalName, approvalStatus, approvedBy, approvedAt, createdBy, createdAt, lastReleasedAt FROM lectures ORDER BY id DESC`;
-    db.query(q, (err, rows) => {
-      if (err) return reject(err);
-      resolve(rows);
-    });
-  });
+async function getAllLectures() {
+  const q = `SELECT id, title, description, linkUrl, fileNameServer, originalName, approvalStatus, approvedBy, approvedAt, createdBy, createdAt, lastReleasedAt FROM lectures ORDER BY id DESC`;
+  const [rows] = await dbPromise.query(q);
+  return rows;
 }
 
-function updateLecture(id, fields) {
-  return new Promise((resolve, reject) => {
-    if (!id) return reject(new Error('Lecture id is required'));
+async function updateLecture(id, fields) {
+  if (!id) throw new Error('Lecture id is required');
 
-    const allowed = ['title', 'description', 'linkUrl'];
-    const setClauses = [];
-    const params = [];
+  const allowed = ['title', 'description', 'linkUrl'];
+  const setClauses = [];
+  const params = [];
 
-    allowed.forEach((f) => {
-      if (fields.hasOwnProperty(f)) {
-        setClauses.push(`${f} = ?`);
-        params.push(fields[f]);
-      }
-    });
-
-    if (setClauses.length === 0) return reject(new Error('No fields to update'));
-
-    const q = `UPDATE lectures SET ${setClauses.join(', ')}, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`;
-    params.push(id);
-
-    db.query(q, params, (err) => {
-      if (err) return reject(err);
-      resolve();
-    });
+  allowed.forEach((f) => {
+    if (fields.hasOwnProperty(f)) {
+      setClauses.push(`${f} = ?`);
+      params.push(fields[f]);
+    }
   });
+
+  if (setClauses.length === 0) throw new Error('No fields to update');
+
+  const q = `UPDATE lectures SET ${setClauses.join(', ')}, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`;
+  params.push(id);
+
+  await dbPromise.query(q, params);
+  return;
 }
 
-function createBlankLecture(userSub, title = 'Untitled Lecture', description = '') {
-  return new Promise((resolve, reject) => {
-    if (!userSub) return reject(new Error('userSub required'));
-    if (!title) title = 'Untitled Lecture';
-    const q = `INSERT INTO lectures (title, description, createdBy) VALUES (?, ?, ?)`;
-    db.query(q, [title, description, userSub], (err, results) => {
-      if (err) return reject(err);
-      resolve(results.insertId);
-    });
-  });
+async function createBlankLecture(userSub, title = 'Untitled Lecture', description = '') {
+  if (!userSub) throw new Error('userSub required');
+  if (!title) title = 'Untitled Lecture';
+  const q = `INSERT INTO lectures (title, description, createdBy) VALUES (?, ?, ?)`;
+  const [results] = await dbPromise.query(q, [title, description, userSub]);
+  return results.insertId;
 }
 
 /**
@@ -115,144 +91,126 @@ function createBlankLecture(userSub, title = 'Untitled Lecture', description = '
  * Give access for a lecture to every currently-registered student user.
  * Returns count of rows inserted (ignored duplicates not counted).
  */
-function releaseLectureToAllStudents(lectureId) {
-  return new Promise((resolve, reject) => {
-    if (!lectureId) return reject(new Error('lectureId is required'));
+async function releaseLectureToAllStudents(lectureId) {
+  if (!lectureId) throw new Error('lectureId is required');
 
-    // Step 1: fetch all student auth0_sub values (non-admin, non-educator)
-    const studentQuery = `SELECT auth0_sub FROM UserAccounts WHERE (iseducator IS NULL OR iseducator = 0)`;
-    db.query(studentQuery, async (err, rows) => {
-      if (err) return reject(err);
-      if (!rows || rows.length === 0) return resolve(0);
+  // 1. Fetch all student subs
+  const studentQuery = `SELECT auth0_sub FROM UserAccounts WHERE (iseducator IS NULL OR iseducator = 0)`;
+  const [rows] = await dbPromise.query(studentQuery);
+  if (!rows || rows.length === 0) return 0;
 
-      const values = rows.map(r => [lectureId, r.auth0_sub]);
-      // MySQL bulk insert with IGNORE to avoid duplicates if already released
-      const insertSql = 'INSERT IGNORE INTO lecture_access (lectureId, userSub) VALUES ?';
-      db.query(insertSql, [values], (insertErr, result) => {
-        if (insertErr) return reject(insertErr);
-        const inserted = result ? result.affectedRows : 0;
-        // update lastReleasedAt timestamp
-        db.query('UPDATE lectures SET lastReleasedAt = NOW() WHERE id = ?', [lectureId], () => {});
-        resolve(inserted);
-      });
-    });
-  });
+  const values = rows.map(r => [lectureId, r.auth0_sub]);
+
+  // 2. Bulk insert – IGNORE duplicates
+  const insertSql = 'INSERT IGNORE INTO lecture_access (lectureId, userSub) VALUES ?';
+  const [result] = await dbPromise.query(insertSql, [values]);
+  const inserted = result ? result.affectedRows : 0;
+
+  // 3. Update lecture timestamp (fire-and-forget)
+  await dbPromise.query('UPDATE lectures SET lastReleasedAt = NOW() WHERE id = ?', [lectureId]);
+
+  return inserted;
 }
 
 /**
  * Fetch all lectures that have been released to a given user via lecture_access.
  * Returns array with the core lecture fields plus the release timestamp.
  */
-function getAccessibleLecturesForUser(userSub) {
-  return new Promise((resolve, reject) => {
-    if (!userSub) return reject(new Error('userSub required'));
-    const sql = `SELECT l.id, l.title, l.description, l.linkUrl, l.fileNameServer, l.originalName,
-                        l.lastReleasedAt, la.releasedAt
-                 FROM lectures l
-                 INNER JOIN lecture_access la ON la.lectureId = l.id
-                 WHERE la.userSub = ?
-                 ORDER BY la.releasedAt DESC`;
-    db.query(sql, [userSub], (err, rows) => {
-      if (err) return reject(err);
-      resolve(rows);
-    });
-  });
+async function getAccessibleLecturesForUser(userSub) {
+  if (!userSub) throw new Error('userSub required');
+  const sql = `SELECT l.id, l.title, l.description, l.linkUrl, l.fileNameServer, l.originalName,
+                      l.lastReleasedAt, la.releasedAt
+               FROM lectures l
+               INNER JOIN lecture_access la ON la.lectureId = l.id
+               WHERE la.userSub = ?
+               ORDER BY la.releasedAt DESC`;
+  const [rows] = await dbPromise.query(sql, [userSub]);
+  return rows;
 }
 
-function submitLectureForApproval(lectureId, userSub) {
-  return new Promise((resolve, reject) => {
-    if (!lectureId || !userSub) return reject(new Error('lectureId and userSub required'));
-    // Ensure the user is the owner of the lecture and it is currently in DRAFT status
-    const selectSql = 'SELECT approvalStatus, createdBy FROM lectures WHERE id = ? LIMIT 1';
-    db.query(selectSql, [lectureId], (selErr, rows) => {
-      if (selErr) return reject(selErr);
-      if (!rows || rows.length === 0) return reject(new Error('Lecture not found'));
-      const row = rows[0];
-      if (row.createdBy !== userSub) return reject(new Error('You are not the owner of this lecture'));
-      const status = row.approvalStatus;
-      if (status && status !== 'DRAFT') {
-        return reject(new Error('Lecture cannot be submitted for approval in its current state'));
-      }
-      const updateSql = "UPDATE lectures SET approvalStatus = 'PENDING', approvedBy = NULL, approvedAt = NULL WHERE id = ?";
-      db.query(updateSql, [lectureId], (updErr) => {
-        if (updErr) return reject(updErr);
-        resolve();
-      });
-    });
-  });
+async function submitLectureForApproval(lectureId, userSub) {
+  if (!lectureId || !userSub) throw new Error('lectureId and userSub required');
+
+  const selectSql = 'SELECT approvalStatus, createdBy FROM lectures WHERE id = ? LIMIT 1';
+  const [rows] = await dbPromise.query(selectSql, [lectureId]);
+  if (!rows || rows.length === 0) throw new Error('Lecture not found');
+
+  const row = rows[0];
+  if (row.createdBy !== userSub) throw new Error('You are not the owner of this lecture');
+  if (row.approvalStatus && row.approvalStatus !== 'DRAFT') {
+    throw new Error('Lecture cannot be submitted for approval in its current state');
+  }
+
+  const updateSql = "UPDATE lectures SET approvalStatus = 'PENDING', approvedBy = NULL, approvedAt = NULL WHERE id = ?";
+  await dbPromise.query(updateSql, [lectureId]);
 }
 
-function approveLecture(lectureId, adminSub) {
-  return new Promise((resolve, reject) => {
-    if (!lectureId || !adminSub) return reject(new Error('lectureId and adminSub required'));
-    const selectSql = 'SELECT approvalStatus FROM lectures WHERE id = ? LIMIT 1';
-    db.query(selectSql, [lectureId], (selErr, rows) => {
-      if (selErr) return reject(selErr);
-      if (!rows || rows.length === 0) return reject(new Error('Lecture not found'));
-      const status = rows[0].approvalStatus;
-      if (status && status !== 'PENDING' && status !== 'DRAFT') {
-        return reject(new Error('Lecture cannot be approved in its current state'));
-      }
+async function approveLecture(lectureId, adminSub) {
+  if (!lectureId || !adminSub) throw new Error('lectureId and adminSub required');
 
-      // --- New validation: ensure lecture has questions and that each question has at least one tag ---
-      // 1) Ensure at least one question exists for the lecture
-      const countQuestionsSql = 'SELECT COUNT(*) AS cnt FROM questions WHERE lectureId = ?';
-      db.query(countQuestionsSql, [lectureId], (cntErr, cntRows) => {
-        if (cntErr) return reject(cntErr);
-        const totalQuestions = cntRows && cntRows.length ? cntRows[0].cnt : 0;
-        if (totalQuestions === 0) {
-          return reject(new Error('Lecture must contain at least one question before approval'));
-        }
+  // Validate lecture exists + status
+  const selectSql = 'SELECT approvalStatus FROM lectures WHERE id = ? LIMIT 1';
+  const [rows] = await dbPromise.query(selectSql, [lectureId]);
+  if (!rows || rows.length === 0) throw new Error('Lecture not found');
 
-        // 2) Ensure every question linked to this lecture has at least one tag
-        const missingTagsSql = `SELECT q.id
-                                 FROM questions q
-                                 LEFT JOIN question_tags qt ON qt.questionId = q.id
-                                 WHERE q.lectureId = ?
-                                 GROUP BY q.id
-                                 HAVING COUNT(qt.tagId) = 0
-                                 LIMIT 1`;
-        db.query(missingTagsSql, [lectureId], (tagErr, tagRows) => {
-          if (tagErr) return reject(tagErr);
-          if (tagRows && tagRows.length > 0) {
-            return reject(new Error('All questions must have at least one tag before lecture can be approved'));
-          }
+  const status = rows[0].approvalStatus;
+  if (status && status !== 'PENDING' && status !== 'DRAFT') {
+    throw new Error('Lecture cannot be approved in its current state');
+  }
 
-          // If validation passes, proceed to approve lecture
-          const updateSql = "UPDATE lectures SET approvalStatus = 'APPROVED', approvedBy = ?, approvedAt = NOW() WHERE id = ?";
-          db.query(updateSql, [adminSub, lectureId], (updErr) => {
-            if (updErr) return reject(updErr);
-            resolve();
-          });
-        });
-      });
-    });
-  });
+  // 1) Ensure at least one question exists
+  const countQuestionsSql = 'SELECT COUNT(*) AS cnt FROM questions WHERE lectureId = ?';
+  const [cntRows] = await dbPromise.query(countQuestionsSql, [lectureId]);
+  const totalQuestions = cntRows && cntRows.length ? cntRows[0].cnt : 0;
+  if (totalQuestions === 0) {
+    throw new Error('Lecture must contain at least one question before approval');
+  }
+
+  // 2) Ensure each question has at least one tag
+  const missingTagsSql = `SELECT q.id
+                           FROM questions q
+                           LEFT JOIN question_tags qt ON qt.questionId = q.id
+                           WHERE q.lectureId = ?
+                           GROUP BY q.id
+                           HAVING COUNT(qt.tagId) = 0
+                           LIMIT 1`;
+  const [tagRows] = await dbPromise.query(missingTagsSql, [lectureId]);
+  if (tagRows && tagRows.length > 0) {
+    throw new Error('All questions must have at least one tag before lecture can be approved');
+  }
+
+  // Approve the lecture
+  const updateSql = "UPDATE lectures SET approvalStatus = 'APPROVED', approvedBy = ?, approvedAt = NOW() WHERE id = ?";
+  await dbPromise.query(updateSql, [adminSub, lectureId]);
 }
 
-function denyLecture(lectureId, adminSub) {
-  return new Promise((resolve, reject) => {
-    if (!lectureId || !adminSub) return reject(new Error('lectureId and adminSub required'));
-    // Fetch lecture to obtain current status and owner for downstream processing
-    const selectSql = 'SELECT approvalStatus, createdBy, title FROM lectures WHERE id = ? LIMIT 1';
-    db.query(selectSql, [lectureId], async (selErr, rows) => {
-      if (selErr) return reject(selErr);
-      if (!rows || rows.length === 0) return reject(new Error('Lecture not found'));
+async function denyLecture(lectureId, adminSub) {
+  if (!lectureId || !adminSub) throw new Error('lectureId and adminSub required');
 
-      const { approvalStatus: status, createdBy, title } = rows[0];
-      if (status === 'DRAFT') {
-        // Already draft – nothing to do but still resolve with owner/title so caller can notify
-        return resolve({ createdBy, title });
-      }
-      // Only lectures that are not approved can be denied; if already approved, require un-approve flow
-      // but for now allow reverting any non-draft status back to draft
-      const updateSql = "UPDATE lectures SET approvalStatus = 'DRAFT', approvedBy = NULL, approvedAt = NULL WHERE id = ?";
-      db.query(updateSql, [lectureId], (updErr) => {
-        if (updErr) return reject(updErr);
-        resolve({ createdBy, title });
-      });
-    });
-  });
+  const selectSql = 'SELECT approvalStatus, createdBy, title FROM lectures WHERE id = ? LIMIT 1';
+  const [rows] = await dbPromise.query(selectSql, [lectureId]);
+  if (!rows || rows.length === 0) throw new Error('Lecture not found');
+
+  const { approvalStatus: status, createdBy, title } = rows[0];
+
+  if (status !== 'DRAFT') {
+    const updateSql = "UPDATE lectures SET approvalStatus = 'DRAFT', approvedBy = NULL, approvedAt = NULL WHERE id = ?";
+    await dbPromise.query(updateSql, [lectureId]);
+  }
+
+  return { createdBy, title };
 }
 
-module.exports = { createLectureLink, createLectureFile, getLecturesForUser, getAllLectures, updateLecture, createBlankLecture, releaseLectureToAllStudents, getAccessibleLecturesForUser, submitLectureForApproval, approveLecture, denyLecture }; 
+module.exports = {
+  createLectureLink,
+  createLectureFile,
+  getLecturesForUser,
+  getAllLectures,
+  updateLecture,
+  createBlankLecture,
+  releaseLectureToAllStudents,
+  getAccessibleLecturesForUser,
+  submitLectureForApproval,
+  approveLecture,
+  denyLecture
+}; 

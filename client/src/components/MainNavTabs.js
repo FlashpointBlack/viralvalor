@@ -47,6 +47,7 @@ const BASE_MENU_CONFIG = [
     items: [
       { key: 'users', label: 'Users' },
       { key: 'sendsysmsg', label: 'Send System Message' },
+      { key: 'selftest', label: 'Ops Self-Test', path: '/api/admin/selftest', external: true },
 
       // REPORTS SECTION
       { type: 'header', label: 'Reports' },
@@ -266,7 +267,10 @@ const MainNavTabs = ({
                 className={`dropdown-item ${activeTab === item.key ? 'active' : ''}`}
                 onClick={() => {
                   if (isActivitiesProtected) return; // ignore clicks when disabled
-                  if (item.path) {
+                  if (item.external) {
+                    const url = item.path + (userSub ? `?sub=${encodeURIComponent(userSub)}` : '');
+                    window.open(url, '_blank');
+                  } else if (item.path) {
                     navigate(item.path);
                     onMenuItemClick(); // Close mobile menu after navigation
                   } else {

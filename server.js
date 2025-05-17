@@ -1,5 +1,5 @@
 // My includes
-const { db } = require('./db');
+const { db, dbPromise } = require('./db');
 const { setupRoutes } = require('./routes');
 const { connectedUsers } = require('./globals');
 var { quizResponses, currentQuiz } = require('./globals');
@@ -18,6 +18,7 @@ const server = http.createServer(app);
 const io = socketIO(server);
 app.set('io', io);
 const path = require('path');
+const errorHandler = require('./utils/errorHandler');
 
 // Pending quiz waiting to be sent
 let pendingQuiz = null;
@@ -26,6 +27,9 @@ let pendingQuiz = null;
 let currentInstruction = null;
 
 setupRoutes(app);
+
+// Add centralized error handler AFTER routes
+app.use(errorHandler);
 
 // Serve static files from the React app in production
 if (process.env.NODE_ENV === 'production') {
@@ -475,16 +479,10 @@ io.on('connection', (socket) => {
             // Fetch a nice display name for the sender (fallback to email/sub)
             let displayName = senderName;
             try {
-              const nameRows = await new Promise((resolve, reject) => {
-                db.query(
-                  'SELECT COALESCE(display_name, nickname, name, email, auth0_sub) AS name FROM UserAccounts WHERE auth0_sub = ? LIMIT 1',
-                  [senderSub],
-                  (err, res) => {
-                    if (err) return reject(err);
-                    resolve(res);
-                  }
-                );
-              });
+              const [nameRows] = await dbPromise.query(
+                'SELECT COALESCE(display_name, nickname, name, email, auth0_sub) AS name FROM UserAccounts WHERE auth0_sub = ? LIMIT 1',
+                [senderSub]
+              );
               if (nameRows && nameRows.length) {
                 displayName = nameRows[0].name;
               }

@@ -1,100 +1,73 @@
 const fs = require('fs');
+const fsPromises = fs.promises;
 const path = require('path');
-const { db } = require('./db');
+const { dbPromise } = require('./db');
 
 // This handles Encounter Image Uploads
 const EncounterUploadHandler = (req, res) => {
-    if (!req.file) {
-        return res.status(400).send('No file uploaded.');
-    }
+    (async () => {
+        try {
+            if (!req.file) return res.status(400).send('No file uploaded.');
 
-    let uploadedFileName = req.file.filename;
-    let fileExtension = path.extname(req.file.originalname);
-    let newFileName = uploadedFileName + fileExtension;
-    let ImageType = req.body.ImageType;
-    let userSub = req.body.userSub;
-    let EncounterID = req.body.EncounterID;
-    let EncountersFieldName = req.body.EncountersField;
+            const uploadedFileName = req.file.filename;
+            const fileExtension = path.extname(req.file.originalname);
+            const newFileName = uploadedFileName + fileExtension;
 
-    // Rename the file on the server
-    fs.rename(req.file.path, req.file.destination + '/' + newFileName, function (err) {
-        if (err) {
-            return res.status(500).send('Error renaming file.');
-        }
+            const { ImageType, userSub, EncounterID, EncountersField } = req.body;
 
-        // Insert into database
-        db.query('INSERT INTO Images (FileNameOriginal, FileNameServer, FileType, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, ?, ?, ?)',
-            [req.file.originalname, newFileName, ImageType, userSub, userSub], function (error, results, fields) {
-                if (error) {
-                    console.error(error);
-                    return res.status(500).send('Error saving image information to the database.');
-                }
-                let ImageID = results.insertId;
+            await fsPromises.rename(req.file.path, path.join(req.file.destination, newFileName));
 
-                // Prepare the SQL query to update the Encounters table
-                let updateQuery = 'UPDATE Encounters SET ?? = ? WHERE ID = ?';
+            const [imgRes] = await dbPromise.query(
+                'INSERT INTO Images (FileNameOriginal, FileNameServer, FileType, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, ?, ?, ?)',
+                [req.file.originalname, newFileName, ImageType, userSub, userSub]
+            );
 
-                // Execute the query
-                db.query(updateQuery, [EncountersFieldName, ImageID, EncounterID], function (updateError) {
-                    if (updateError) {
-                        console.error(updateError);
-                        return res.status(500).send('Error updating Encounters table.');
-                    }
+            const ImageID = imgRes.insertId;
 
-                    // If everything is successful, send a response back
-                    res.status(200).json({
-                        message: 'File uploaded, saved, and Encounter updated successfully',
-                        fileName: newFileName,
-                        ID: ImageID
-                    });
-                });
+            await dbPromise.query('UPDATE Encounters SET ?? = ? WHERE ID = ?', [EncountersField || req.body.EncountersField, ImageID, EncounterID]);
+
+            res.status(200).json({
+                message: 'File uploaded, saved, and Encounter updated successfully',
+                fileName: newFileName,
+                ID: ImageID
             });
-    });
+        } catch (err) {
+            console.error('EncounterUploadHandler error:', err);
+            res.status(500).send('Server error during encounter upload');
+        }
+    })();
 };
 
 // This handles Badge Image Uploads
 const BadgeUploadHandler = (req, res) => {
-    if (!req.file) {
-        return res.status(400).send('No file uploaded.');
-    }
+    (async () => {
+        try {
+            if (!req.file) return res.status(400).send('No file uploaded.');
 
-    let uploadedFileName = req.file.filename;
-    let fileExtension = path.extname(req.file.originalname);
-    let newFileName = uploadedFileName + fileExtension;
-    let userSub = req.body.userSub;
+            const uploadedFileName = req.file.filename;
+            const fileExtension = path.extname(req.file.originalname);
+            const newFileName = uploadedFileName + fileExtension;
+            const userSub = req.body.userSub;
 
-    // Rename the file on the server with the proper extension
-    fs.rename(req.file.path, req.file.destination + '/' + newFileName, function (err) {
-        if (err) {
-            return res.status(500).send('Error renaming file.');
+            await fsPromises.rename(req.file.path, path.join(req.file.destination, newFileName));
+
+            const [imgRes] = await dbPromise.query(
+                'INSERT INTO Images (FileNameOriginal, FileNameServer, FileType, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, "ImageBadge", ?, ?)',
+                [req.file.originalname, newFileName, userSub, userSub]
+            );
+            const ImageID = imgRes.insertId;
+
+            const [badgeRes] = await dbPromise.query(
+                'INSERT INTO Badges (Image, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, ?)',
+                [ImageID, userSub, userSub]
+            );
+
+            res.status(200).json({ message: 'File uploaded', BadgeID: badgeRes.insertId });
+        } catch (err) {
+            console.error('BadgeUploadHandler error:', err);
+            res.status(500).send('Server error during badge upload');
         }
-
-        // Insert into database
-        db.query('INSERT INTO Images (FileNameOriginal, FileNameServer, FileType, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, "ImageBadge", ?, ?)',
-            [req.file.originalname, newFileName, userSub, userSub], function (error, results, fields) {
-                if (error) {
-                    console.error(error);
-                    return res.status(500).send('Error saving image information to the database.');
-                }
-                let ImageID = results.insertId;
-
-                // Execute the query
-                db.query('INSERT INTO Badges (Image, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, ?)',
-                    [ImageID, userSub, userSub], function (error, results, fields) {
-                        if (error) {
-                            console.error(error);
-                            return res.status(500).send('Error saving image information to the database.');
-                        }
-                        let BadgeID = results.insertId;
-
-                        // If everything is successful, send a response back
-                        res.status(200).json({
-                            message: 'File uploaded',
-                            BadgeID: BadgeID
-                        });
-                    });
-            });
-    });
+    })();
 };
 
 // This handles Character Image Uploads
@@ -131,26 +104,8 @@ const CharacterUploadHandler = (req, res) => {
         fs.mkdirSync(destination, { recursive: true });
     }
 
-    // Log the SQL structure for debugging
-    console.log('Database structure check:');
-    db.query('DESCRIBE Images', (err, results) => {
-        if (err) {
-            console.error('Error checking Images table structure:', err);
-        } else {
-            console.log('Images table structure:', JSON.stringify(results));
-        }
-    });
-    
-    db.query('DESCRIBE CharacterModels', (err, results) => {
-        if (err) {
-            console.error('Error checking CharacterModels table structure:', err);
-        } else {
-            console.log('CharacterModels table structure:', JSON.stringify(results));
-        }
-    });
-
     // Rename the file on the server with the proper extension
-    fs.rename(req.file.path, destination + '/' + newFileName, function (err) {
+    fs.rename(req.file.path, destination + '/' + newFileName, async function (err) {
         if (err) {
             console.error('Error renaming file:', err);
             return res.status(500).send('Error renaming file: ' + err.message);
@@ -158,34 +113,22 @@ const CharacterUploadHandler = (req, res) => {
 
         // Include _REC_Creation_User field
         const insertImageQuery = 'INSERT INTO Images (FileNameOriginal, FileNameServer, FileType, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, ?, ?, ?)';
-        db.query(insertImageQuery, [req.file.originalname, newFileName, "ImageCharacter", userSub, userSub], function (error, results) {
-            if (error) {
-                console.error('Error inserting image to database:', error);
-                console.error('Query params:', JSON.stringify([req.file.originalname, newFileName, "ImageCharacter", userSub, userSub]));
-                return res.status(500).send('Error saving image information to the database: ' + error.message);
-            }
-            
-            let ImageID = results.insertId;
-            console.log('Successfully inserted image with ID:', ImageID);
+        const [imgRes] = await dbPromise.query(insertImageQuery, [req.file.originalname, newFileName, "ImageCharacter", userSub, userSub]);
+        
+        let ImageID = imgRes.insertId;
+        console.log('Successfully inserted image with ID:', ImageID);
 
-            // Include _REC_Creation_User field in character model query
-            const insertCharacterQuery = 'INSERT INTO CharacterModels (Image, Title, Description, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, ?, ?, ?)';
-            db.query(insertCharacterQuery, [ImageID, title, description, userSub, userSub], function (error, results) {
-                if (error) {
-                    console.error('Error inserting character model to database:', error);
-                    console.error('Query params:', JSON.stringify([ImageID, title, description, userSub, userSub]));
-                    return res.status(500).send('Error saving character model information to the database: ' + error.message);
-                }
-                
-                let CharacterID = results.insertId;
-                console.log('Successfully inserted character with ID:', CharacterID);
+        // Include _REC_Creation_User field in character model query
+        const insertCharacterQuery = 'INSERT INTO CharacterModels (Image, Title, Description, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, ?, ?, ?)';
+        const [charRes] = await dbPromise.query(insertCharacterQuery, [ImageID, title, description, userSub, userSub]);
+        
+        let CharacterID = charRes.insertId;
+        console.log('Successfully inserted character with ID:', CharacterID);
 
-                // If everything is successful, send a response back
-                res.status(200).json({
-                    message: 'File uploaded',
-                    CharacterID: CharacterID
-                });
-            });
+        // If everything is successful, send a response back
+        res.status(200).json({
+            message: 'File uploaded',
+            CharacterID: CharacterID
         });
     });
 };
@@ -224,26 +167,8 @@ const BackdropUploadHandler = (req, res) => {
         fs.mkdirSync(destination, { recursive: true });
     }
 
-    // Log the SQL structure for debugging
-    console.log('Database structure check:');
-    db.query('DESCRIBE Images', (err, results) => {
-        if (err) {
-            console.error('Error checking Images table structure:', err);
-        } else {
-            console.log('Images table structure:', JSON.stringify(results));
-        }
-    });
-    
-    db.query('DESCRIBE Backdrops', (err, results) => {
-        if (err) {
-            console.error('Error checking Backdrops table structure:', err);
-        } else {
-            console.log('Backdrops table structure:', JSON.stringify(results));
-        }
-    });
-
     // Rename the file on the server with the proper extension
-    fs.rename(req.file.path, destination + '/' + newFileName, function (err) {
+    fs.rename(req.file.path, destination + '/' + newFileName, async function (err) {
         if (err) {
             console.error('Error renaming file:', err);
             return res.status(500).send('Error renaming file: ' + err.message);
@@ -251,34 +176,22 @@ const BackdropUploadHandler = (req, res) => {
 
         // Include _REC_Creation_User field
         const insertImageQuery = 'INSERT INTO Images (FileNameOriginal, FileNameServer, FileType, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, ?, ?, ?)';
-        db.query(insertImageQuery, [req.file.originalname, newFileName, "ImageBackdrop", userSub, userSub], function (error, results) {
-            if (error) {
-                console.error('Error inserting image to database:', error);
-                console.error('Query params:', JSON.stringify([req.file.originalname, newFileName, "ImageBackdrop", userSub, userSub]));
-                return res.status(500).send('Error saving image information to the database: ' + error.message);
-            }
-            
-            let ImageID = results.insertId;
-            console.log('Successfully inserted image with ID:', ImageID);
+        const [imgRes] = await dbPromise.query(insertImageQuery, [req.file.originalname, newFileName, "ImageBackdrop", userSub, userSub]);
+        
+        let ImageID = imgRes.insertId;
+        console.log('Successfully inserted image with ID:', ImageID);
 
-            // Include _REC_Creation_User field in backdrop query
-            const insertBackdropQuery = 'INSERT INTO Backdrops (Image, Title, Description, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, ?, ?, ?)';
-            db.query(insertBackdropQuery, [ImageID, title, description, userSub, userSub], function (error, results) {
-                if (error) {
-                    console.error('Error inserting backdrop to database:', error);
-                    console.error('Query params:', JSON.stringify([ImageID, title, description, userSub, userSub]));
-                    return res.status(500).send('Error saving backdrop information to the database: ' + error.message);
-                }
-                
-                let BackdropID = results.insertId;
-                console.log('Successfully inserted backdrop with ID:', BackdropID);
+        // Include _REC_Creation_User field in backdrop query
+        const insertBackdropQuery = 'INSERT INTO Backdrops (Image, Title, Description, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, ?, ?, ?)';
+        const [backdropRes] = await dbPromise.query(insertBackdropQuery, [ImageID, title, description, userSub, userSub]);
+        
+        let BackdropID = backdropRes.insertId;
+        console.log('Successfully inserted backdrop with ID:', BackdropID);
 
-                // If everything is successful, send a response back
-                res.status(200).json({
-                    message: 'File uploaded',
-                    BackdropID: BackdropID
-                });
-            });
+        // If everything is successful, send a response back
+        res.status(200).json({
+            message: 'File uploaded',
+            BackdropID: BackdropID
         });
     });
 };
@@ -306,37 +219,27 @@ const ProfileUploadHandler = (req, res) => {
     const newFileName = uploadedFileName + fileExtension;
 
     // Rename the temporary file so it includes the original extension
-    fs.rename(req.file.path, req.file.destination + '/' + newFileName, function (err) {
+    fs.rename(req.file.path, req.file.destination + '/' + newFileName, async function (err) {
         if (err) {
             console.error('Error renaming uploaded profile picture:', err);
             return res.status(500).send('Error renaming file.');
         }
 
-        // Store the image reference
-        const imageInsertQuery = 'INSERT INTO Images (FileNameOriginal, FileNameServer, FileType, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, "ImageProfile", ?, ?)';
-        db.query(imageInsertQuery, [req.file.originalname, newFileName, userSub, userSub], function (imageErr) {
-            if (imageErr) {
-                console.error('Error inserting profile image into Images table:', imageErr);
-                return res.status(500).send('Error saving image information to the database.');
-            }
+        try {
+            const imageInsertQuery = 'INSERT INTO Images (FileNameOriginal, FileNameServer, FileType, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, "ImageProfile", ?, ?)';
+            const [imgRes] = await dbPromise.query(imageInsertQuery, [req.file.originalname, newFileName, userSub, userSub]);
 
             // Build the relative URL that the frontend can use (served by the /images static route)
             const imageUrl = `/images/uploads/profiles/${newFileName}`;
 
-            // Update the UserAccounts record with the new picture URL
             const updateUserQuery = 'UPDATE UserAccounts SET picture_url = ? WHERE id = ?';
-            db.query(updateUserQuery, [imageUrl, userId], function (updateErr) {
-                if (updateErr) {
-                    console.error('Error updating user profile picture:', updateErr);
-                    return res.status(500).send('Error updating user with new profile picture.');
-                }
+            await dbPromise.query(updateUserQuery, [imageUrl, userId]);
 
-                return res.status(200).json({
-                    message: 'Profile picture uploaded successfully',
-                    imageUrl
-                });
-            });
-        });
+            return res.status(200).json({ message: 'Profile picture uploaded successfully', imageUrl });
+        } catch (dbErr) {
+            console.error('ProfileUploadHandler DB error:', dbErr);
+            return res.status(500).send('Database error during profile upload.');
+        }
     });
 };
 
@@ -358,32 +261,26 @@ const InstructionUploadHandler = (req, res) => {
         fs.mkdirSync(destination, { recursive: true });
     }
 
-    fs.rename(req.file.path, destination + '/' + newFileName, function (err) {
+    fs.rename(req.file.path, destination + '/' + newFileName, async function (err) {
         if (err) {
             console.error('Error renaming file:', err);
             return res.status(500).send('Error renaming file: ' + err.message);
         }
 
-        const insertImageQuery = 'INSERT INTO Images (FileNameOriginal, FileNameServer, FileType, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, ?, ?, ?)';
-        db.query(insertImageQuery, [req.file.originalname, newFileName, 'ImageInstruction', userSub, userSub], function (error, results) {
-            if (error) {
-                console.error('Error inserting image to database:', error);
-                return res.status(500).send('Error saving image information to the database: ' + error.message);
-            }
+        try {
+            const insertImageQuery = 'INSERT INTO Images (FileNameOriginal, FileNameServer, FileType, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, ?, ?, ?)';
+            const [imgRes] = await dbPromise.query(insertImageQuery, [req.file.originalname, newFileName, 'ImageInstruction', userSub, userSub]);
 
-            let ImageID = results.insertId;
+            const ImageID = imgRes.insertId;
 
             const insertInstrQuery = 'INSERT INTO StudentInstructions (Image, Title, Description, _REC_Creation_User, _REC_Modification_User) VALUES (?, ?, ?, ?, ?)';
-            db.query(insertInstrQuery, [ImageID, title, description, userSub, userSub], function (error, results) {
-                if (error) {
-                    console.error('Error inserting instruction into database:', error);
-                    return res.status(500).send('Error saving instruction information to the database: ' + error.message);
-                }
+            const [instrRes] = await dbPromise.query(insertInstrQuery, [ImageID, title, description, userSub, userSub]);
 
-                let InstructionID = results.insertId;
-                res.status(200).json({ message: 'File uploaded', InstructionID });
-            });
-        });
+            res.status(200).json({ message: 'File uploaded', InstructionID: instrRes.insertId });
+        } catch (dbErr) {
+            console.error('InstructionUploadHandler DB error:', dbErr);
+            return res.status(500).send('Database error during instruction upload.');
+        }
     });
 };
 

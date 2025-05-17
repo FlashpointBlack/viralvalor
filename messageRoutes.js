@@ -9,7 +9,7 @@ const {
   getOtherParticipant,
   sendSystemDirectMessage
 } = require('./messageOperations');
-const { db } = require('./db');
+const { dbPromise } = require('./db');
 
 // Middleware to ensure userSub is present (expects it on req.body or req.query)
 function requireUserSub(req, res, next) {
@@ -110,12 +110,7 @@ router.post('/admin/system-messages', async (req, res) => {
     if (!requestSub) return res.status(401).json({ error: 'Unauthorized' });
 
     // Verify requester is admin
-    const adminRows = await new Promise((resolve, reject) => {
-      db.query('SELECT isadmin FROM UserAccounts WHERE auth0_sub = ? LIMIT 1', [requestSub], (err, rows) => {
-        if (err) return reject(err);
-        resolve(rows);
-      });
-    });
+    const [adminRows] = await dbPromise.query('SELECT isadmin FROM UserAccounts WHERE auth0_sub = ? LIMIT 1', [requestSub]);
     if (!adminRows.length || adminRows[0].isadmin !== 1) {
       return res.status(403).json({ error: 'Only admins may send system messages' });
     }
@@ -159,12 +154,7 @@ router.post('/admin/system-messages', async (req, res) => {
     }
 
     const query = `SELECT DISTINCT auth0_sub AS sub FROM UserAccounts WHERE ${whereSQL}`;
-    const targetRows = await new Promise((resolve, reject) => {
-      db.query(query, (err, rows) => {
-        if (err) return reject(err);
-        resolve(rows);
-      });
-    });
+    const [targetRows] = await dbPromise.query(query);
 
     if (!targetRows.length) {
       return res.status(200).json({ message: 'No users matched selected groups', count: 0 });

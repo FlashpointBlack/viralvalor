@@ -2,7 +2,7 @@
 // Helper functions for MySQL operations related to Question Bank functionality.
 // Similar structure to encounterOperations.js but scoped for questions and their multiple-choice options.
 
-const { db } = require('./db');
+const { dbPromise } = require('./db');
 
 /**
  * Create a new blank question owned by the given user.
@@ -14,10 +14,10 @@ function createBlankQuestion(userSub, lectureId = null) {
     return new Promise((resolve, reject) => {
         const query = `INSERT INTO questions (text, options, correctOptionIndex, rationale_correct, rationale_incorrect, createdBy, lectureId, createdAt, updatedAt)
                        VALUES ('', '[]', NULL, '', '', ?, ?, NOW(), NOW())`;
-        db.query(query, [userSub, lectureId], (err, results) => {
-            if (err) return reject(err);
-            resolve(results.insertId);
-        });
+        dbPromise
+            .query(query, [userSub, lectureId])
+            .then(([results]) => resolve(results.insertId))
+            .catch((err) => reject(err));
     });
 }
 
@@ -38,10 +38,10 @@ function updateQuestionField(id, field, value) {
 
     return new Promise((resolve, reject) => {
         const query = 'UPDATE questions SET ?? = ?, updatedAt = NOW() WHERE id = ?';
-        db.query(query, [column, value, id], (err) => {
-            if (err) return reject(err);
-            resolve();
-        });
+        dbPromise
+            .query(query, [column, value, id])
+            .then(() => resolve())
+            .catch((err) => reject(err));
     });
 }
 
@@ -51,10 +51,10 @@ function updateQuestionField(id, field, value) {
 function deleteQuestion(id) {
     return new Promise((resolve, reject) => {
         const query = 'DELETE FROM questions WHERE id = ?';
-        db.query(query, [id], (err) => {
-            if (err) return reject(err);
-            resolve();
-        });
+        dbPromise
+            .query(query, [id])
+            .then(() => resolve())
+            .catch((err) => reject(err));
     });
 }
 
@@ -62,21 +62,23 @@ function deleteQuestion(id) {
 
 function _getQuestionRow(id) {
     return new Promise((resolve, reject) => {
-        db.query('SELECT * FROM questions WHERE id = ? LIMIT 1', [id], (err, rows) => {
-            if (err) return reject(err);
-            if (!rows.length) return reject(new Error('Question not found'));
-            resolve(rows[0]);
-        });
+        dbPromise
+            .query('SELECT * FROM questions WHERE id = ? LIMIT 1', [id])
+            .then(([rows]) => {
+                if (!rows.length) return reject(new Error('Question not found'));
+                resolve(rows[0]);
+            })
+            .catch((err) => reject(err));
     });
 }
 
 function _saveOptions(questionId, options, correctOptionIndex = null) {
     return new Promise((resolve, reject) => {
         const query = 'UPDATE questions SET options = ?, correctOptionIndex = ?, updatedAt = NOW() WHERE id = ?';
-        db.query(query, [JSON.stringify(options), correctOptionIndex, questionId], (err) => {
-            if (err) return reject(err);
-            resolve();
-        });
+        dbPromise
+            .query(query, [JSON.stringify(options), correctOptionIndex, questionId])
+            .then(() => resolve())
+            .catch((err) => reject(err));
     });
 }
 
@@ -109,7 +111,7 @@ function updateQuestionOption(optionId, text = undefined, rationale = undefined,
             } else {
                 // Fallback: need to search across questions (inefficient but acceptable for small dataset)
                 const [rows] = await new Promise((res, rej) => {
-                    db.query('SELECT * FROM questions', (err, rs) => (err ? rej(err) : res([rs])));
+                    dbPromise.query('SELECT * FROM questions').then(([rs]) => res([rs]));
                 });
                 row = rows.find(r => {
                     const opts = parseOptions(r.options);
@@ -139,7 +141,7 @@ function deleteQuestionOption(optionId) {
         try {
             // locate question row
             const [rows] = await new Promise((res, rej) => {
-                db.query('SELECT * FROM questions', (err, rs) => (err ? rej(err) : res([rs])));
+                dbPromise.query('SELECT * FROM questions').then(([rs]) => res([rs]));
             });
             const row = rows.find(r => {
                 const opts = parseOptions(r.options);
@@ -180,15 +182,17 @@ function setCorrectOption(questionId, optionId) {
 function getQuestionsByUser(userSub) {
     return new Promise((resolve, reject) => {
         const query = 'SELECT id, text, options, correctOptionIndex, createdBy FROM questions WHERE createdBy = ? ORDER BY id DESC';
-        db.query(query, [userSub], (err, results) => {
-            if (err) return reject(err);
-            const transformed = results.map(r => ({
-                ID: r.id,
-                QuestionText: r.text,
-                // Not including options here for list view
-            }));
-            resolve(transformed);
-        });
+        dbPromise
+            .query(query, [userSub])
+            .then(([results]) => {
+                const transformed = results.map(r => ({
+                    ID: r.id,
+                    QuestionText: r.text,
+                    // Not including options here for list view
+                }));
+                resolve(transformed);
+            })
+            .catch((err) => reject(err));
     });
 }
 
@@ -198,35 +202,37 @@ function getQuestionsByUser(userSub) {
 function getQuestionWithOptions(questionId) {
     return new Promise((resolve, reject) => {
         const query = 'SELECT * FROM questions WHERE id = ? LIMIT 1';
-        db.query(query, [questionId], async (err, rows) => {
-            if (err) return reject(err);
-            if (!rows.length) return reject(new Error('Question not found'));
-            const r = rows[0];
-            // Fetch tags for this question
-            let tags = [];
-            try {
-                const { getTagsForQuestion } = require('./tagOperations');
-                tags = await getTagsForQuestion(questionId);
-            } catch (tagErr) {
-                console.error('[getQuestionWithOptions] Failed to fetch tags', tagErr);
-            }
-            const optionsRaw = parseOptions(r.options);
-            const options = optionsRaw.map(o => ({
-                ID: o.ID,
-                OptionText: o.OptionText,
-                Rationale: o.Rationale || '',
-                IsCorrect: r.correctOptionIndex !== null && o.ID === r.correctOptionIndex ? 1 : 0
-            }));
-            resolve({
-                ID: r.id,
-                QuestionText: r.text,
-                RationaleCorrect: r.rationale_correct || '',
-                RationaleIncorrect: r.rationale_incorrect || '',
-                options,
-                tags, // array of {id, name}
-                _REC_Creation_User: r.createdBy
-            });
-        });
+        dbPromise
+            .query(query, [questionId])
+            .then(async ([rows]) => {
+                if (!rows.length) return reject(new Error('Question not found'));
+                const r = rows[0];
+                // Fetch tags for this question
+                let tags = [];
+                try {
+                    const { getTagsForQuestion } = require('./tagOperations');
+                    tags = await getTagsForQuestion(questionId);
+                } catch (tagErr) {
+                    console.error('[getQuestionWithOptions] Failed to fetch tags', tagErr);
+                }
+                const optionsRaw = parseOptions(r.options);
+                const options = optionsRaw.map(o => ({
+                    ID: o.ID,
+                    OptionText: o.OptionText,
+                    Rationale: o.Rationale || '',
+                    IsCorrect: r.correctOptionIndex !== null && o.ID === r.correctOptionIndex ? 1 : 0
+                }));
+                resolve({
+                    ID: r.id,
+                    QuestionText: r.text,
+                    RationaleCorrect: r.rationale_correct || '',
+                    RationaleIncorrect: r.rationale_incorrect || '',
+                    options,
+                    tags, // array of {id, name}
+                    _REC_Creation_User: r.createdBy
+                });
+            })
+            .catch((err) => reject(err));
     });
 }
 
@@ -236,11 +242,13 @@ function getQuestionWithOptions(questionId) {
 function getAllQuestions() {
     return new Promise((resolve, reject) => {
         const query = 'SELECT id, text FROM questions ORDER BY id DESC';
-        db.query(query, (err, results) => {
-            if (err) return reject(err);
-            const transformed = results.map(r => ({ ID: r.id, QuestionText: r.text }));
-            resolve(transformed);
-        });
+        dbPromise
+            .query(query)
+            .then(([results]) => {
+                const transformed = results.map(r => ({ ID: r.id, QuestionText: r.text }));
+                resolve(transformed);
+            })
+            .catch((err) => reject(err));
     });
 }
 
@@ -278,25 +286,27 @@ function recordQuestionAttempt(questionId, userSub, selectedOptionId, timeTakenM
             const attemptInsertQuery = `INSERT INTO question_attempts
                 (questionId, userSub, selectedOptionId, isCorrect, timeTakenMs, attemptDate)
                 VALUES (?, ?, ?, ?, ?, NOW())`;
-            db.query(attemptInsertQuery, [questionId, userSub, selectedOptionId, isCorrect, timeTakenMs], (err, results) => {
-                if (err) return reject(err);
-                // Determine rationale: prefer option-specific rationale if provided
-                let rationale = '';
-                try {
-                    const opts = parseOptions(questionRow.options);
-                    const selectedOpt = opts.find(o => o.ID == selectedOptionId);
-                    if (selectedOpt && selectedOpt.Rationale && selectedOpt.Rationale.trim() !== '') {
-                        rationale = selectedOpt.Rationale;
-                    } else {
-                        // Fallback to generic correct/incorrect rationale columns for backward compatibility
+            dbPromise
+                .query(attemptInsertQuery, [questionId, userSub, selectedOptionId, isCorrect, timeTakenMs])
+                .then(([results]) => {
+                    // Determine rationale: prefer option-specific rationale if provided
+                    let rationale = '';
+                    try {
+                        const opts = parseOptions(questionRow.options);
+                        const selectedOpt = opts.find(o => o.ID == selectedOptionId);
+                        if (selectedOpt && selectedOpt.Rationale && selectedOpt.Rationale.trim() !== '') {
+                            rationale = selectedOpt.Rationale;
+                        } else {
+                            // Fallback to generic correct/incorrect rationale columns for backward compatibility
+                            rationale = isCorrect ? (questionRow.rationale_correct || '') : (questionRow.rationale_incorrect || '');
+                        }
+                    } catch (e) {
+                        // In case of parsing errors, fallback to generic
                         rationale = isCorrect ? (questionRow.rationale_correct || '') : (questionRow.rationale_incorrect || '');
                     }
-                } catch (e) {
-                    // In case of parsing errors, fallback to generic
-                    rationale = isCorrect ? (questionRow.rationale_correct || '') : (questionRow.rationale_incorrect || '');
-                }
-                resolve({ attemptId: results.insertId, isCorrect, rationale });
-            });
+                    resolve({ attemptId: results.insertId, isCorrect, rationale });
+                })
+                .catch((err) => reject(err));
         } catch (err) {
             reject(err);
         }
@@ -316,10 +326,10 @@ function getAttemptsForUser(userSub, questionId = null) {
             params.push(questionId);
         }
         query += ' ORDER BY attemptDate DESC';
-        db.query(query, params, (err, rows) => {
-            if (err) return reject(err);
-            resolve(rows);
-        });
+        dbPromise
+            .query(query, params)
+            .then(([rows]) => resolve(rows))
+            .catch((err) => reject(err));
     });
 }
 
@@ -329,14 +339,16 @@ function getAttemptsForUser(userSub, questionId = null) {
 function getQuestionForStudent(questionId) {
     return new Promise((resolve, reject) => {
         const query = 'SELECT id, text, options FROM questions WHERE id = ? LIMIT 1';
-        db.query(query, [questionId], (err, rows) => {
-            if (err) return reject(err);
-            if (!rows.length) return reject(new Error('Question not found'));
-            const r = rows[0];
-            const optionsRaw = parseOptions(r.options);
-            const options = optionsRaw.map(o => ({ ID: o.ID, OptionText: o.OptionText }));
-            resolve({ ID: r.id, QuestionText: r.text, options });
-        });
+        dbPromise
+            .query(query, [questionId])
+            .then(([rows]) => {
+                if (!rows.length) return reject(new Error('Question not found'));
+                const r = rows[0];
+                const optionsRaw = parseOptions(r.options);
+                const options = optionsRaw.map(o => ({ ID: o.ID, OptionText: o.OptionText }));
+                resolve({ ID: r.id, QuestionText: r.text, options });
+            })
+            .catch((err) => reject(err));
     });
 }
 
@@ -361,11 +373,13 @@ function getQuestionsByLecture(lectureId, tagId = null) {
         }
         sql += ` ORDER BY q.id DESC`;
 
-        db.query(sql, params, (err, rows) => {
-            if (err) return reject(err);
-            const transformed = rows.map(r => ({ ID: r.id, QuestionText: r.text }));
-            resolve(transformed);
-        });
+        dbPromise
+            .query(sql, params)
+            .then(([rows]) => {
+                const transformed = rows.map(r => ({ ID: r.id, QuestionText: r.text }));
+                resolve(transformed);
+            })
+            .catch((err) => reject(err));
     });
 }
 
@@ -381,11 +395,13 @@ function getQuestionsByTag(tagId) {
                      INNER JOIN question_tags qt ON qt.questionId = q.id
                      WHERE qt.tagId = ?
                      ORDER BY q.id DESC`;
-        db.query(sql, [tagId], (err, rows) => {
-            if (err) return reject(err);
-            const transformed = rows.map(r => ({ ID: r.id, QuestionText: r.text }));
-            resolve(transformed);
-        });
+        dbPromise
+            .query(sql, [tagId])
+            .then(([rows]) => {
+                const transformed = rows.map(r => ({ ID: r.id, QuestionText: r.text }));
+                resolve(transformed);
+            })
+            .catch((err) => reject(err));
     });
 }
 
@@ -401,11 +417,13 @@ function getStudentAccessibleQuestions(userSub) {
                     INNER JOIN lecture_access la ON la.lectureId = q.lectureId
                     WHERE la.userSub = ?
                     ORDER BY q.id DESC`;
-        db.query(sql, [userSub], (err, rows) => {
-            if (err) return reject(err);
-            const transformed = rows.map(r => ({ ID: r.id, QuestionText: r.text }));
-            resolve(transformed);
-        });
+        dbPromise
+            .query(sql, [userSub])
+            .then(([rows]) => {
+                const transformed = rows.map(r => ({ ID: r.id, QuestionText: r.text }));
+                resolve(transformed);
+            })
+            .catch((err) => reject(err));
     });
 }
 
@@ -437,69 +455,74 @@ function getAttemptStatsForUser(userSub, startDate = null, endDate = null) {
             sql += ' AND attemptDate < DATE_ADD(?, INTERVAL 1 DAY)';
             params.push(endDate);
         }
-        db.query(sql, params, (err, rows) => {
-            if (err) return reject(err);
-            const stats = rows && rows.length ? rows[0] : null;
-            // Coerce numeric fields to numbers (they may come back as strings in MySQL driver)
-            if (stats) {
-                Object.keys(stats).forEach(k => {
-                    if (k !== 'lastAttemptDate' && stats[k] !== null && stats[k] !== undefined) {
-                        stats[k] = Number(stats[k]);
-                    }
-                });
-            }
-            // Fetch fastest & slowest question texts
-            const dateFilter = {
-                start: startDate ? ' AND attemptDate >= ?' : '',
-                end: endDate ? ' AND attemptDate < DATE_ADD(?, INTERVAL 1 DAY)' : ''
-            };
-
-            const fastParams = [userSub];
-            if (startDate) fastParams.push(startDate);
-            if (endDate) fastParams.push(endDate);
-            const slowParams = [...fastParams];
-
-            const fastSql = `SELECT qa.timeTakenMs, q.text AS questionText
-                             FROM question_attempts qa
-                             JOIN questions q ON q.id = qa.questionId
-                             WHERE qa.userSub = ?${dateFilter.start}${dateFilter.end}
-                             ORDER BY qa.timeTakenMs ASC LIMIT 1`;
-
-            const slowSql = `SELECT qa.timeTakenMs, q.text AS questionText
-                             FROM question_attempts qa
-                             JOIN questions q ON q.id = qa.questionId
-                             WHERE qa.userSub = ?${dateFilter.start}${dateFilter.end}
-                             ORDER BY qa.timeTakenMs DESC LIMIT 1`;
-
-            db.query(fastSql, fastParams, (fastErr, fastRows) => {
-                if (fastErr) return reject(fastErr);
-                db.query(slowSql, slowParams, (slowErr, slowRows) => {
-                    if (slowErr) return reject(slowErr);
-
-                    const fastest = fastRows && fastRows.length ? fastRows[0] : null;
-                    const slowest = slowRows && slowRows.length ? slowRows[0] : null;
-
-                    resolve({
-                        ...(stats || {}),
-                        fastestQuestionText: fastest ? fastest.questionText : null,
-                        fastestTimeMs: fastest ? Number(fastest.timeTakenMs) : (stats ? stats.fastestTimeMs : null),
-                        slowestQuestionText: slowest ? slowest.questionText : null,
-                        slowestTimeMs: slowest ? Number(slowest.timeTakenMs) : (stats ? stats.slowestTimeMs : null)
-                    } || {
-                totalAttempts: 0,
-                distinctQuestions: 0,
-                correctCount: 0,
-                accuracy: 0,
-                avgTimeMs: null,
-                fastestTimeMs: null,
-                slowestTimeMs: null,
-                        fastestQuestionText: null,
-                        slowestQuestionText: null,
-                lastAttemptDate: null
+        dbPromise
+            .query(sql, params)
+            .then(([rows]) => {
+                const stats = rows && rows.length ? rows[0] : null;
+                // Coerce numeric fields to numbers (they may come back as strings in MySQL driver)
+                if (stats) {
+                    Object.keys(stats).forEach(k => {
+                        if (k !== 'lastAttemptDate' && stats[k] !== null && stats[k] !== undefined) {
+                            stats[k] = Number(stats[k]);
+                        }
                     });
-                });
-            });
-        });
+                }
+                // Fetch fastest & slowest question texts
+                const dateFilter = {
+                    start: startDate ? ' AND attemptDate >= ?' : '',
+                    end: endDate ? ' AND attemptDate < DATE_ADD(?, INTERVAL 1 DAY)' : ''
+                };
+
+                const fastParams = [userSub];
+                if (startDate) fastParams.push(startDate);
+                if (endDate) fastParams.push(endDate);
+                const slowParams = [...fastParams];
+
+                const fastSql = `SELECT qa.timeTakenMs, q.text AS questionText
+                                 FROM question_attempts qa
+                                 JOIN questions q ON q.id = qa.questionId
+                                 WHERE qa.userSub = ?${dateFilter.start}${dateFilter.end}
+                                 ORDER BY qa.timeTakenMs ASC LIMIT 1`;
+
+                const slowSql = `SELECT qa.timeTakenMs, q.text AS questionText
+                                 FROM question_attempts qa
+                                 JOIN questions q ON q.id = qa.questionId
+                                 WHERE qa.userSub = ?${dateFilter.start}${dateFilter.end}
+                                 ORDER BY qa.timeTakenMs DESC LIMIT 1`;
+
+                dbPromise
+                    .query(fastSql, fastParams)
+                    .then(([fastRows]) => {
+                        dbPromise
+                            .query(slowSql, slowParams)
+                            .then(([slowRows]) => {
+                                const fastest = fastRows && fastRows.length ? fastRows[0] : null;
+                                const slowest = slowRows && slowRows.length ? slowRows[0] : null;
+
+                                resolve({
+                                    ...(stats || {}),
+                                    fastestQuestionText: fastest ? fastest.questionText : null,
+                                    fastestTimeMs: fastest ? Number(fastest.timeTakenMs) : (stats ? stats.fastestTimeMs : null),
+                                    slowestQuestionText: slowest ? slowest.questionText : null,
+                                    slowestTimeMs: slowest ? Number(slowest.timeTakenMs) : (stats ? stats.slowestTimeMs : null)
+                                } || {
+                                    totalAttempts: 0,
+                                    distinctQuestions: 0,
+                                    correctCount: 0,
+                                    accuracy: 0,
+                                    avgTimeMs: null,
+                                    fastestTimeMs: null,
+                                    slowestTimeMs: null,
+                                    fastestQuestionText: null,
+                                    slowestQuestionText: null,
+                                    lastAttemptDate: null
+                                });
+                            })
+                            .catch((err) => reject(err));
+                    })
+                    .catch((err) => reject(err));
+            })
+            .catch((err) => reject(err));
     });
 }
 
@@ -530,23 +553,25 @@ function getAttemptStatsForAllUsers(startDate = null, endDate = null) {
             params.push(endDate);
         }
         sql += ' GROUP BY qa.userSub ORDER BY totalAttempts DESC';
-        db.query(sql, params, (err, rows) => {
-            if (err) return reject(err);
-            // Coerce numeric fields to numbers for consistency
-            const processed = rows.map(r => {
-                return {
-                    ...r,
-                    totalAttempts: Number(r.totalAttempts),
-                    distinctQuestions: Number(r.distinctQuestions),
-                    correctCount: Number(r.correctCount),
-                    accuracy: r.accuracy !== null ? Number(r.accuracy) : 0,
-                    avgTimeMs: r.avgTimeMs !== null ? Number(r.avgTimeMs) : null,
-                    fastestTimeMs: r.fastestTimeMs !== null ? Number(r.fastestTimeMs) : null,
-                    slowestTimeMs: r.slowestTimeMs !== null ? Number(r.slowestTimeMs) : null
-                };
-            });
-            resolve(processed);
-        });
+        dbPromise
+            .query(sql, params)
+            .then(([rows]) => {
+                // Coerce numeric fields to numbers for consistency
+                const processed = rows.map(r => {
+                    return {
+                        ...r,
+                        totalAttempts: Number(r.totalAttempts),
+                        distinctQuestions: Number(r.distinctQuestions),
+                        correctCount: Number(r.correctCount),
+                        accuracy: r.accuracy !== null ? Number(r.accuracy) : 0,
+                        avgTimeMs: r.avgTimeMs !== null ? Number(r.avgTimeMs) : null,
+                        fastestTimeMs: r.fastestTimeMs !== null ? Number(r.fastestTimeMs) : null,
+                        slowestTimeMs: r.slowestTimeMs !== null ? Number(r.slowestTimeMs) : null
+                    };
+                });
+                resolve(processed);
+            })
+            .catch((err) => reject(err));
     });
 }
 
@@ -600,52 +625,48 @@ JOIN questions q ON q.id = b.questionId
 LEFT JOIN acc ON acc.questionId = b.questionId
 ORDER BY b.slowestTimeMs DESC`;
 
-        db.query(sql, params, async (err, rows) => {
-            if (err) return reject(err);
-
-            // Collect all unique userSubs for name resolution
-            const subsSet = new Set();
-            rows.forEach(r => {
-                ['fastestUserSub', 'slowestUserSub', 'highestAccUserSub', 'lowestAccUserSub'].forEach(k => {
-                    if (r[k]) subsSet.add(r[k]);
-                });
-            });
-
-            let subNameMap = {};
-            if (subsSet.size > 0) {
-                const subArr = Array.from(subsSet);
-                const placeholders = subArr.map(() => '?').join(',');
-                const nameRows = await new Promise((res, rej) => {
-                    db.query(`SELECT auth0_sub, COALESCE(display_name, nickname, name, email, auth0_sub) AS displayName FROM UserAccounts WHERE auth0_sub IN (${placeholders})`, subArr, (e, rs) => {
-                        if (e) return rej(e);
-                        res(rs);
+        dbPromise
+            .query(sql, params)
+            .then(async ([rows]) => {
+                // Collect all unique userSubs for name resolution
+                const subsSet = new Set();
+                rows.forEach(r => {
+                    ['fastestUserSub', 'slowestUserSub', 'highestAccUserSub', 'lowestAccUserSub'].forEach(k => {
+                        if (r[k]) subsSet.add(r[k]);
                     });
                 });
-                nameRows.forEach(nr => { subNameMap[nr.auth0_sub] = nr.displayName; });
-            }
 
-            const processed = rows.map(r => ({
-                questionId: r.questionId,
-                questionText: r.questionText,
-                totalAttempts: Number(r.totalAttempts),
-                distinctUsers: Number(r.distinctUsers),
-                totalQuestions: Number(r.questionCount),
-                correctCount: Number(r.correctCount),
-                accuracy: r.accuracy !== null ? Number(r.accuracy) : 0,
-                avgTimeMs: r.avgTimeMs !== null ? Number(r.avgTimeMs) : null,
-                fastestTimeMs: r.fastestTimeMs !== null ? Number(r.fastestTimeMs) : null,
-                fastestUser: r.fastestUserSub ? (subNameMap[r.fastestUserSub] || r.fastestUserSub) : null,
-                slowestTimeMs: r.slowestTimeMs !== null ? Number(r.slowestTimeMs) : null,
-                slowestUser: r.slowestUserSub ? (subNameMap[r.slowestUserSub] || r.slowestUserSub) : null,
-                highestAccuracy: r.highestAccuracy !== null ? Number(r.highestAccuracy) : null,
-                highestAccUser: r.highestAccUserSub ? (subNameMap[r.highestAccUserSub] || r.highestAccUserSub) : null,
-                lowestAccuracy: r.lowestAccuracy !== null ? Number(r.lowestAccuracy) : null,
-                lowestAccUser: r.lowestAccUserSub ? (subNameMap[r.lowestAccUserSub] || r.lowestAccUserSub) : null,
-                lastAttemptDate: r.lastAttemptDate
-            }));
+                let subNameMap = {};
+                if (subsSet.size > 0) {
+                    const subArr = Array.from(subsSet);
+                    const placeholders = subArr.map(() => '?').join(',');
+                    const [nameRows] = await dbPromise.query(`SELECT auth0_sub, COALESCE(display_name, nickname, name, email, auth0_sub) AS displayName FROM UserAccounts WHERE auth0_sub IN (${placeholders})`, subArr);
+                    nameRows.forEach(nr => { subNameMap[nr.auth0_sub] = nr.displayName; });
+                }
 
-            resolve(processed);
-        });
+                const processed = rows.map(r => ({
+                    questionId: r.questionId,
+                    questionText: r.questionText,
+                    totalAttempts: Number(r.totalAttempts),
+                    distinctUsers: Number(r.distinctUsers),
+                    totalQuestions: Number(r.questionCount),
+                    correctCount: Number(r.correctCount),
+                    accuracy: r.accuracy !== null ? Number(r.accuracy) : 0,
+                    avgTimeMs: r.avgTimeMs !== null ? Number(r.avgTimeMs) : null,
+                    fastestTimeMs: r.fastestTimeMs !== null ? Number(r.fastestTimeMs) : null,
+                    fastestUser: r.fastestUserSub ? (subNameMap[r.fastestUserSub] || r.fastestUserSub) : null,
+                    slowestTimeMs: r.slowestTimeMs !== null ? Number(r.slowestTimeMs) : null,
+                    slowestUser: r.slowestUserSub ? (subNameMap[r.slowestUserSub] || r.slowestUserSub) : null,
+                    highestAccuracy: r.highestAccuracy !== null ? Number(r.highestAccuracy) : null,
+                    highestAccUser: r.highestAccUserSub ? (subNameMap[r.highestAccUserSub] || r.highestAccUserSub) : null,
+                    lowestAccuracy: r.lowestAccuracy !== null ? Number(r.lowestAccuracy) : null,
+                    lowestAccUser: r.lowestAccUserSub ? (subNameMap[r.lowestAccUserSub] || r.lowestAccUserSub) : null,
+                    lastAttemptDate: r.lastAttemptDate
+                }));
+
+                resolve(processed);
+            })
+            .catch((err) => reject(err));
     });
 }
 
@@ -674,50 +695,42 @@ function getAttemptStatsForAllTags(startDate = null, endDate = null) {
         if (endDate) { sql += ' AND qa.attemptDate < DATE_ADD(?, INTERVAL 1 DAY)'; params.push(endDate); }
         sql += ` GROUP BY qt.tagId`;
 
-        db.query(sql, params, async (err, rows) => {
-            if (err) return reject(err);
+        dbPromise
+            .query(sql, params)
+            .then(async ([rows]) => {
+                // Collect question IDs to resolve text
+                const qSet = new Set();
+                rows.forEach(r => {
+                    if (r.fastestQuestionId) qSet.add(Number(r.fastestQuestionId));
+                    if (r.slowestQuestionId) qSet.add(Number(r.slowestQuestionId));
+                });
 
-            // Collect question IDs to resolve text
-            const qSet = new Set();
-            rows.forEach(r => {
-                if (r.fastestQuestionId) qSet.add(Number(r.fastestQuestionId));
-                if (r.slowestQuestionId) qSet.add(Number(r.slowestQuestionId));
-            });
-
-            // Fetch question texts
-            let qTextMap = {};
-            if (qSet.size > 0) {
-                const qArr = Array.from(qSet);
-                const placeholders = qArr.map(() => '?').join(',');
-                try {
-                    const qRows = await new Promise((res, rej) => {
-                        db.query(`SELECT id, text FROM questions WHERE id IN (${placeholders})`, qArr, (e, rs) => {
-                            if (e) return rej(e);
-                            res(rs);
-                        });
-                    });
+                // Fetch question texts
+                let qTextMap = {};
+                if (qSet.size > 0) {
+                    const qArr = Array.from(qSet);
+                    const placeholders = qArr.map(() => '?').join(',');
+                    const [qRows] = await dbPromise.query(`SELECT id, text FROM questions WHERE id IN (${placeholders})`, qArr);
                     qRows.forEach(qr => { qTextMap[qr.id] = qr.text; });
-                } catch (e) {
-                    console.error('Error fetching question texts for tag stats', e);
                 }
-            }
 
-            const processed = rows.map(r => ({
-                tagId: r.tagId,
-                tagName: r.tagName,
-                totalAttempts: Number(r.totalAttempts),
-                distinctQuestions: Number(r.distinctQuestions),
-                correctCount: Number(r.correctCount),
-                accuracy: r.accuracy !== null ? Number(r.accuracy) : 0,
-                avgTimeMs: r.avgTimeMs !== null ? Number(r.avgTimeMs) : null,
-                fastestTimeMs: r.fastestTimeMs !== null ? Number(r.fastestTimeMs) : null,
-                slowestTimeMs: r.slowestTimeMs !== null ? Number(r.slowestTimeMs) : null,
-                fastestQuestionText: r.fastestQuestionId ? (qTextMap[Number(r.fastestQuestionId)] || null) : null,
-                slowestQuestionText: r.slowestQuestionId ? (qTextMap[Number(r.slowestQuestionId)] || null) : null
-            }));
+                const processed = rows.map(r => ({
+                    tagId: r.tagId,
+                    tagName: r.tagName,
+                    totalAttempts: Number(r.totalAttempts),
+                    distinctQuestions: Number(r.distinctQuestions),
+                    correctCount: Number(r.correctCount),
+                    accuracy: r.accuracy !== null ? Number(r.accuracy) : 0,
+                    avgTimeMs: r.avgTimeMs !== null ? Number(r.avgTimeMs) : null,
+                    fastestTimeMs: r.fastestTimeMs !== null ? Number(r.fastestTimeMs) : null,
+                    slowestTimeMs: r.slowestTimeMs !== null ? Number(r.slowestTimeMs) : null,
+                    fastestQuestionText: r.fastestQuestionId ? (qTextMap[Number(r.fastestQuestionId)] || null) : null,
+                    slowestQuestionText: r.slowestQuestionId ? (qTextMap[Number(r.slowestQuestionId)] || null) : null
+                }));
 
-            resolve(processed);
-        });
+                resolve(processed);
+            })
+            .catch((err) => reject(err));
     });
 }
 
@@ -746,49 +759,41 @@ function getAttemptStatsByTagForUser(userSub, startDate = null, endDate = null) 
         if (endDate) { sql += ' AND qa.attemptDate < DATE_ADD(?, INTERVAL 1 DAY)'; params.push(endDate); }
         sql += ' GROUP BY qt.tagId ORDER BY t.name';
 
-        db.query(sql, params, async (err, rows) => {
-            if (err) return reject(err);
+        dbPromise
+            .query(sql, params)
+            .then(async ([rows]) => {
+                // Resolve question texts for fastest/slowest
+                const qSet = new Set();
+                rows.forEach(r => {
+                    if (r.fastestQuestionId) qSet.add(Number(r.fastestQuestionId));
+                    if (r.slowestQuestionId) qSet.add(Number(r.slowestQuestionId));
+                });
 
-            // Resolve question texts for fastest/slowest
-            const qSet = new Set();
-            rows.forEach(r => {
-                if (r.fastestQuestionId) qSet.add(Number(r.fastestQuestionId));
-                if (r.slowestQuestionId) qSet.add(Number(r.slowestQuestionId));
-            });
-
-            let qTextMap = {};
-            if (qSet.size > 0) {
-                const qArr = Array.from(qSet);
-                const placeholders = qArr.map(() => '?').join(',');
-                try {
-                    const qRows = await new Promise((res, rej) => {
-                        db.query(`SELECT id, text FROM questions WHERE id IN (${placeholders})`, qArr, (e, rs) => {
-                            if (e) return rej(e);
-                            res(rs);
-                        });
-                    });
+                let qTextMap = {};
+                if (qSet.size > 0) {
+                    const qArr = Array.from(qSet);
+                    const placeholders = qArr.map(() => '?').join(',');
+                    const [qRows] = await dbPromise.query(`SELECT id, text FROM questions WHERE id IN (${placeholders})`, qArr);
                     qRows.forEach(qr => { qTextMap[qr.id] = qr.text; });
-                } catch (e) {
-                    console.error('Error fetching question texts for tag user stats', e);
                 }
-            }
 
-            const processed = rows.map(r => ({
-                tagId: r.tagId,
-                tagName: r.tagName,
-                totalAttempts: Number(r.totalAttempts),
-                distinctQuestions: Number(r.distinctQuestions),
-                correctCount: Number(r.correctCount),
-                accuracy: r.accuracy !== null ? Number(r.accuracy) : 0,
-                avgTimeMs: r.avgTimeMs !== null ? Number(r.avgTimeMs) : null,
-                fastestTimeMs: r.fastestTimeMs !== null ? Number(r.fastestTimeMs) : null,
-                slowestTimeMs: r.slowestTimeMs !== null ? Number(r.slowestTimeMs) : null,
-                fastestQuestionText: r.fastestQuestionId ? (qTextMap[Number(r.fastestQuestionId)] || null) : null,
-                slowestQuestionText: r.slowestQuestionId ? (qTextMap[Number(r.slowestQuestionId)] || null) : null
-            }));
+                const processed = rows.map(r => ({
+                    tagId: r.tagId,
+                    tagName: r.tagName,
+                    totalAttempts: Number(r.totalAttempts),
+                    distinctQuestions: Number(r.distinctQuestions),
+                    correctCount: Number(r.correctCount),
+                    accuracy: r.accuracy !== null ? Number(r.accuracy) : 0,
+                    avgTimeMs: r.avgTimeMs !== null ? Number(r.avgTimeMs) : null,
+                    fastestTimeMs: r.fastestTimeMs !== null ? Number(r.fastestTimeMs) : null,
+                    slowestTimeMs: r.slowestTimeMs !== null ? Number(r.slowestTimeMs) : null,
+                    fastestQuestionText: r.fastestQuestionId ? (qTextMap[Number(r.fastestQuestionId)] || null) : null,
+                    slowestQuestionText: r.slowestQuestionId ? (qTextMap[Number(r.slowestQuestionId)] || null) : null
+                }));
 
-            resolve(processed);
-        });
+                resolve(processed);
+            })
+            .catch((err) => reject(err));
     });
 }
 

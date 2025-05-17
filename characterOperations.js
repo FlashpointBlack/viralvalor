@@ -1,17 +1,14 @@
-const { db } = require('./db');
+const { dbPromise } = require('./db');
 
 // Update a specific field in a character model
-function updateCharacterField(id, field, value) {
-    return new Promise((resolve, reject) => {
+async function updateCharacterField(id, field, value) {
+    try {
         const query = 'UPDATE CharacterModels SET ?? = ? WHERE ID = ?';
-        db.query(query, [field, value, id], (error) => {
-            if (error) {
-                console.error('Error updating character field:', error);
-                return reject(error);
-            }
-            resolve();
-        });
-    });
+        await dbPromise.query(query, [field, value, id]);
+    } catch (error) {
+        console.error('Error updating character field:', error);
+        throw error;
+    }
 }
 
 // The rest of the character operations are already handled by routesfunctions.js

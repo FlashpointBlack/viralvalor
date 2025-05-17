@@ -48,7 +48,7 @@ const {
 const { setupUserRoutes } = require('./userRoutes');
 const { setupMessageRoutes } = require('./messageRoutes');
 const { setupJournalRoutes } = require('./journalRoutes');
-const setupArticleRoutes = require('./articleRoutes');
+const setupArticleRoutes = require('./src/articles/article.routes');
 const {
 	createBlankQuestion,
 	updateQuestionField,
@@ -65,6 +65,7 @@ const {
 } = require('./questionOperations');
 const { createLectureLink, createLectureFile, getLecturesForUser, getAllLectures, updateLecture, createBlankLecture, releaseLectureToAllStudents, getAccessibleLecturesForUser, submitLectureForApproval, approveLecture, denyLecture } = require('./lectureOperations');
 const { getOrCreateDirectConversation, addMessage, getConversationParticipants, sendSystemDirectMessage } = require('./messageOperations');
+const { setupSelfTestRoutes } = require('./selfTestRoutes');
 
 // other includes
 const express = require('express');
@@ -74,10 +75,12 @@ const { auth, requiresAuth } = require('express-openid-connect'); // for auth0
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const fs = require('fs');
-const { db } = require('./db');
+const { db, dbPromise } = require('./db');
 const crypto = require('crypto');
 const util = require('util');
-const dbQuery = util.promisify(db.query).bind(db);
+// The main codebase now prefers the promise pool – expose a helper alias for
+// concise awaitable calls that preserves the existing `dbQuery(...)` usage.
+const dbQuery = dbPromise.query.bind(dbPromise);
 
 
 
@@ -96,8 +99,8 @@ const config = { //auth0 config
 
 const setupRoutes = (app) => {
 	console.log('>>> setupRoutes function entered.'); // Log entry
-	app.set('view engine', 'ejs');
-	app.set('views', path.join(__dirname, 'public'));
+	// app.set('view engine', 'ejs'); // Deprecated – EJS pages have been removed
+	// app.set('views', path.join(__dirname, 'public')); // Deprecated – React SPA is now sole front-end
 	app.use(bodyParser.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
 
 
@@ -107,7 +110,6 @@ const setupRoutes = (app) => {
 	}));
 	app.use('/images', express.static(path.join(__dirname, 'public/images'))); // allow image downloads from here
 
-	app.use(express.static('public')); // Sets the working directory or something or another
 	// INSERT: serve lecture uploaded files
 	app.use('/lectures/uploads', express.static(path.join(__dirname, 'public/lectures/uploads')));
 	app.use(auth(config)); // auth router attaches /login, /logout, and /callback routes to the baseURL
@@ -117,6 +119,8 @@ const setupRoutes = (app) => {
     setupMessageRoutes(app);
     setupJournalRoutes(app);
     setupArticleRoutes(app);
+    // Admin self-test endpoint
+    setupSelfTestRoutes(app);
 
 	app.use((req, res, next) => { // Logging middleware to show all requests
 		const date = new Date();
@@ -784,51 +788,49 @@ const setupRoutes = (app) => {
 	});
 
 	console.log('>>> Defining /root-encounters route...'); // Log before definition
-	app.get('/root-encounters', async (req, res) => {
-		const requestSub = (req.oidc && req.oidc.user && req.oidc.user.sub) || req.headers['x-user-sub'];
-		const requestedScope = req.query.scope; // Check for scope query parameter
-		
-		let sql = 'SELECT ID, Title FROM Encounters WHERE IsRootEncounter = 1';
-		const params = [];
-		let isAdminFlag = false;
-		let applyOwnershipFilter = true; // Default to filtering
+	app.get('/root-encounters', async (req, res, next) => { // WRAP WITH TRY CATCH
+		try {
+			const { dbPromise } = require('./db');
+			const requestSub = (req.oidc && req.oidc.user && req.oidc.user.sub) || req.headers['x-user-sub'];
+			const requestedScope = req.query.scope; // Check for scope query parameter
 
-		// Check if admin
-		if (requestSub) {
-			isAdminFlag = await isUserAdminBySub(requestSub);
-		}
-		
-		// Determine if ownership filter should be applied
-		if (isAdminFlag || requestedScope === 'public') {
-		    // Admins or requests explicitly asking for public scope get everything
-		    applyOwnershipFilter = false;
-		    console.log(`[/root-encounters] Skipping ownership filter (Admin: ${isAdminFlag}, Scope: ${requestedScope})`);
-		} else if (!requestSub) {
-		    // If not admin, not public scope, AND user is not identified (shouldn't happen if requiresAuth is used, but good failsafe)
-		    // This case might need review depending on whether truly anonymous access is intended.
-		    // For now, assume public means public, otherwise require auth & filter.
-		    console.log('[/root-encounters] No user identified and not public scope. Returning empty.');
-            return res.json([]); // Return empty if no user and not explicitly public
-		}
-		
-		// Apply the filter if needed
-		if (applyOwnershipFilter) {
-		    console.log(`[/root-encounters] Applying ownership filter for user: ${requestSub ? requestSub.substring(0,8) : 'N/A'}...`);
-			sql += ' AND _REC_Creation_User = ?';
-			params.push(requestSub);
-		}
+			let sql = 'SELECT ID, Title FROM Encounters WHERE IsRootEncounter = 1';
+			const params = [];
+			let isAdminFlag = false;
+			let applyOwnershipFilter = true; // Default to filtering
 
-		const finalSql = sql + ' ORDER BY Title';
-		console.log(`[/root-encounters] Executing SQL: ${finalSql} with PARAMS:`, params);
-
-		db.query(finalSql, params, (error, results) => {
-			if (error) {
-				console.error('Error fetching root encounters:', error);
-				return res.status(500).send('Error fetching root encounters.');
+			// Check if admin
+			if (requestSub) {
+				isAdminFlag = await isUserAdminBySub(requestSub);
 			}
-			console.log(`[/root-encounters] DB returned ${results?.length ?? 0} rows.`);
-			res.status(200).json(results);
-		});
+
+			// Determine if ownership filter should be applied
+			if (isAdminFlag || requestedScope === 'public') {
+				// Admins or requests explicitly asking for public scope get everything
+				applyOwnershipFilter = false;
+				console.log(`[/root-encounters] Skipping ownership filter (Admin: ${isAdminFlag}, Scope: ${requestedScope})`);
+			} else if (!requestSub) {
+				console.log('[/root-encounters] No user identified and not public scope. Returning empty.');
+				return res.json([]);
+			}
+
+			// Apply the filter if needed
+			if (applyOwnershipFilter) {
+				console.log(`[/root-encounters] Applying ownership filter for user: ${requestSub ? requestSub.substring(0,8) : 'N/A'}...`);
+				sql += ' AND _REC_Creation_User = ?';
+				params.push(requestSub);
+			}
+
+			const finalSql = sql + ' ORDER BY Title';
+			console.log(`[/root-encounters] Executing SQL: ${finalSql} with PARAMS:`, params);
+
+			const [rows] = await dbPromise.query(finalSql, params);
+			console.log(`[/root-encounters] DB returned ${rows?.length ?? 0} rows.`);
+			res.status(200).json(rows);
+		} catch (error) {
+			console.error('Error fetching root encounters:', error);
+			next(error); // pass to error middleware
+		}
 	});
 
 	// NEW: Delete an entire root scenario and its nested encounters/routes
@@ -959,7 +961,7 @@ const setupRoutes = (app) => {
 	});
 
 	// Delete a badge
-	app.post('/delete-badge', (req, res) => {
+	app.post('/delete-badge', async (req, res) => {
 		const { ID } = req.body;
 		
 		// Validate required fields
@@ -971,15 +973,13 @@ const setupRoutes = (app) => {
 			});
 		}
 
-		// Delete badge using ID
-		db.query('DELETE FROM Badges WHERE ID = ?', [ID], function(error, results) {
-			if (error) {
-				console.error('Error deleting badge:', error);
-				return res.status(500).json({ error: 'Error deleting badge: ' + error.message });
-			}
-			
+		try {
+			await dbPromise.query('DELETE FROM Badges WHERE ID = ?', [ID]);
 			res.status(200).json({ message: 'Badge deleted successfully' });
-		});
+		} catch (error) {
+			console.error('Error deleting badge:', error);
+			res.status(500).json({ error: 'Error deleting badge: ' + error.message });
+		}
 	});
 
 	// Character Models
@@ -1013,7 +1013,7 @@ const setupRoutes = (app) => {
 	});
 
 	// Delete a character
-	app.post('/delete-character', (req, res) => {
+	app.post('/delete-character', async (req, res) => {
 		const { ID } = req.body;
 		
 		// Validate required fields
@@ -1025,15 +1025,13 @@ const setupRoutes = (app) => {
 			});
 		}
 
-		// Delete character using ID
-		db.query('DELETE FROM CharacterModels WHERE ID = ?', [ID], function(error, results) {
-			if (error) {
-				console.error('Error deleting character:', error);
-				return res.status(500).json({ error: 'Error deleting character: ' + error.message });
-			}
-			
+		try {
+			await dbPromise.query('DELETE FROM CharacterModels WHERE ID = ?', [ID]);
 			res.status(200).json({ message: 'Character deleted successfully' });
-		});
+		} catch (error) {
+			console.error('Error deleting character:', error);
+			res.status(500).json({ error: 'Error deleting character: ' + error.message });
+		}
 	});
 
 	app.get('/GetCharacterData/:id', (req, res) => {
@@ -1094,7 +1092,7 @@ const setupRoutes = (app) => {
 	});
 
 	// Delete a backdrop
-	app.post('/delete-backdrop', (req, res) => {
+	app.post('/delete-backdrop', async (req, res) => {
 		const { ID } = req.body;
 		
 		// Validate required fields
@@ -1106,15 +1104,13 @@ const setupRoutes = (app) => {
 			});
 		}
 
-		// Delete backdrop using ID
-		db.query('DELETE FROM Backdrops WHERE ID = ?', [ID], function(error, results) {
-			if (error) {
-				console.error('Error deleting backdrop:', error);
-				return res.status(500).json({ error: 'Error deleting backdrop: ' + error.message });
-			}
-			
+		try {
+			await dbPromise.query('DELETE FROM Backdrops WHERE ID = ?', [ID]);
 			res.status(200).json({ message: 'Backdrop deleted successfully' });
-		});
+		} catch (error) {
+			console.error('Error deleting backdrop:', error);
+			res.status(500).json({ error: 'Error deleting backdrop: ' + error.message });
+		}
 	});
 
 	app.get('/GetBackdropData/:id', (req, res) => {
@@ -1144,36 +1140,27 @@ const setupRoutes = (app) => {
 		});
 	});
 
-	// Temporary -OR- Testing
-	app.get('/encounter', async (req, res) => {
-		res.sendFile(path.join(__dirname, 'index.html'));
+	// Redirect legacy HTML endpoints to SPA
+	const legacyHtmlRoutes = ['/encounter', '/encounter2', '/hollingshead'];
+	legacyHtmlRoutes.forEach(route => {
+		app.get(route, (req, res) => res.redirect('/'));
 	});
-	app.get('/encounter2', async (req, res) => {
-		res.sendFile(path.join(__dirname, 'multi.html'));
-	});
-	app.get('/hollingshead', (req, res) => {
-        res.sendFile(path.join(__dirname, 'UTMC.html'));
-    });
 
-	// Landing Page as Root
+	// Root route now serves the React SPA
 	app.get('/', (req, res) => {
-		res.sendFile(path.join(__dirname, 'LandingPage.html'));
+		if (process.env.NODE_ENV === 'production') {
+			return res.sendFile(path.join(__dirname, 'client/build/index.html'));
+		}
+		// In development assume CRA dev server is running on localhost:3000
+		res.redirect('http://localhost:3000' + req.originalUrl);
 	});
 
-	// Chat
+	// Chat – handled inside SPA; keep auth check to prevent exposing data
 	app.get('/chat', requiresAuth(), (req, res) => {
-		// Check if the user has already completed their profile
-		const userDetails = req.oidc.user;
-		checkUserProfileCompletion(userDetails.sub).then(isComplete => {
-			if (!isComplete) {
-				// Redirect to profile editor within SPA if the profile isn't complete
-				res.redirect('/?tab=profile');
-			} else {
-				// Render the chat if the profile is complete
-				res.render('chat', {
-					userDetails: userDetails
-				});
-			}
+		// If user profile incomplete, still send them to SPA profile tab
+		checkUserProfileCompletion(req.oidc.user.sub).then(isComplete => {
+			const dest = isComplete ? '/?tab=chat' : '/?tab=profile';
+			res.redirect(dest);
 		});
 	});
 
@@ -1532,8 +1519,15 @@ const setupRoutes = (app) => {
 	async function isUserEducatorBySub(userSub) {
 		if (!userSub) return false;
 		try {
-			const rows = await dbQuery('SELECT iseducator FROM UserAccounts WHERE auth0_sub = ? LIMIT 1', [userSub]);
-			return rows.length > 0 && rows[0].iseducator === 1;
+			// mysql2 promise-pool returns [rows, fields]
+			const [resultRows] = await dbQuery(
+				'SELECT iseducator FROM UserAccounts WHERE auth0_sub = ? LIMIT 1',
+				[userSub]
+			);
+
+			return Array.isArray(resultRows) &&
+			       resultRows.length > 0 &&
+			       Number(resultRows[0].iseducator) === 1;   // ← numeric comparison
 		} catch (err) {
 			console.error('isUserEducatorBySub DB error', err);
 			return false;
@@ -1571,8 +1565,15 @@ const setupRoutes = (app) => {
 	async function isUserAdminBySub(userSub) {
 		if (!userSub) return false;
 		try {
-			const rows = await dbQuery('SELECT isadmin FROM UserAccounts WHERE auth0_sub = ? LIMIT 1', [userSub]);
-			return rows.length > 0 && rows[0].isadmin === 1;
+			// mysql2 promise-pool returns [rows, fields]
+			const [resultRows] = await dbQuery(
+				'SELECT isadmin FROM UserAccounts WHERE auth0_sub = ? LIMIT 1',
+				[userSub]
+			);
+
+			return Array.isArray(resultRows) &&
+				   resultRows.length > 0 &&
+				   Number(resultRows[0].isadmin) === 1; // numeric comparison ensures truthiness
 		} catch (err) {
 			console.error('isUserAdminBySub DB error', err);
 			return false;
@@ -1975,7 +1976,7 @@ const setupRoutes = (app) => {
 	});
 
 	// Delete an instruction
-	app.post('/delete-instruction', (req, res) => {
+	app.post('/delete-instruction', async (req, res) => {
 		const { ID } = req.body;
 		const validation = validateRequiredFields(req.body, ['ID']);
 		if (!validation.isValid) {
@@ -1985,13 +1986,13 @@ const setupRoutes = (app) => {
 			});
 		}
 
-		db.query('DELETE FROM StudentInstructions WHERE ID = ?', [ID], function(error) {
-			if (error) {
-				console.error('Error deleting instruction:', error);
-				return res.status(500).json({ error: 'Error deleting instruction: ' + error.message });
-			}
+		try {
+			await dbPromise.query('DELETE FROM StudentInstructions WHERE ID = ?', [ID]);
 			res.status(200).json({ message: 'Instruction deleted successfully' });
-		});
+		} catch (error) {
+			console.error('Error deleting instruction:', error);
+			res.status(500).json({ error: 'Error deleting instruction: ' + error.message });
+		}
 	});
 
 	app.get('/GetInstructionData/:id', (req, res) => {

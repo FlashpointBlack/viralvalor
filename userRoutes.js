@@ -1,5 +1,5 @@
 const express = require('express');
-const { db } = require('./db');
+const { dbPromise } = require('./db');
 const { requiresAuth } = require('express-openid-connect');
 const { 
     validateRequiredFields, 
@@ -8,10 +8,19 @@ const {
     sanitizeValue 
 } = require('./utils');
 
+// ---------------------------------------------------------------------------
+// Helper utility – executes a query using the promise-based pool and returns
+// only the rows (discarding `fields`).  This keeps the call-sites concise.
+// ---------------------------------------------------------------------------
+async function runQuery(sql, params = []) {
+    const [rows] = await dbPromise.query(sql, params);
+    return rows;
+}
+
 // User management routes
 const setupUserRoutes = (app) => {
     // Get all users
-    app.get('/api/users', (req, res) => {
+    app.get('/api/users', async (req, res) => {
         const query = `
             SELECT id, sid, nickname, name, picture_url, updated_at, email, 
             email_verified, auth0_sub, display_name, creation_date, 
@@ -22,23 +31,23 @@ const setupUserRoutes = (app) => {
             ORDER BY id DESC
         `;
         
-        db.query(query, (err, results) => {
-            if (err) {
-                console.error('Database error details:', {
-                    message: err.message,
-                    code: err.code,
-                    errno: err.errno,
-                    sqlState: err.sqlState,
-                    sqlMessage: err.sqlMessage
-                });
-                return res.status(500).json({ error: 'Failed to fetch users' });
-            }
+        try {
+            const results = await runQuery(query);
             res.json(results);
-        });
+        } catch (err) {
+            console.error('Database error details:', {
+                message: err.message,
+                code: err.code,
+                errno: err.errno,
+                sqlState: err.sqlState,
+                sqlMessage: err.sqlMessage
+            });
+            res.status(500).json({ error: 'Failed to fetch users' });
+        }
     });
 
     // Get profile status for current authenticated user
-    app.get('/api/user/profile-status', (req, res) => {
+    app.get('/api/user/profile-status', async (req, res) => {
         console.log('>>> ENTERED /api/user/profile-status handler in userRoutes.js');
         const auth0SubFromOIDC = (req.oidc && req.oidc.user && req.oidc.user.sub) ? req.oidc.user.sub : null;
         const auth0SubFromHeader = req.headers['x-user-sub'] || null;
@@ -56,28 +65,25 @@ const setupUserRoutes = (app) => {
             WHERE auth0_sub = ?
         `;
         
-        db.query(query, [auth0Sub], (err, results) => {
-            if (err) {
-                console.error('Error checking profile status:', err);
-                return res.status(500).json({ error: 'Failed to check profile status' });
-            }
-            
+        try {
+            const results = await runQuery(query, [auth0Sub]);
             if (results.length === 0) {
-                // No DB user – DO NOT create one on-the-fly here.
-                // Let the client-initiated POST /api/users handle explicit creation with its fresh authUser.sub.
                 console.log(`[profile-status] No DB row for ${auth0Sub}. Returning profileComplete: false.`);
                 return res.json({ profileComplete: false, isAdmin: false });
-            } else {
-                res.json({ 
-                    profileComplete: results[0].profile_complete === 1,
-                    isAdmin: results[0].isadmin === 1
-                });
             }
-        });
+
+            res.json({
+                profileComplete: results[0].profile_complete === 1,
+                isAdmin: results[0].isadmin === 1
+            });
+        } catch (err) {
+            console.error('Error checking profile status:', err);
+            res.status(500).json({ error: 'Failed to check profile status' });
+        }
     });
 
     // Get single user by ID
-    app.get('/api/users/:id', (req, res) => {
+    app.get('/api/users/:id', async (req, res) => {
         const userId = req.params.id;
         
         // Validate user ID
@@ -95,18 +101,15 @@ const setupUserRoutes = (app) => {
             WHERE id = ?
         `;
         
-        db.query(userQuery, [userId], (err, userResults) => {
-            if (err) {
-                console.error('Error fetching user:', err);
-                return res.status(500).json({ error: 'Failed to fetch user' });
-            }
-            
+        try {
+            const userResults = await runQuery(userQuery, [userId]);
+
             if (userResults.length === 0) {
                 return res.status(404).json({ error: 'User not found' });
             }
-            
+
             const user = userResults[0];
-            
+
             // Fetch user badges
             const badgesQuery = `
                 SELECT b.ID, b.Title, b.Description, b.Image, ub.date_earned,
@@ -116,23 +119,23 @@ const setupUserRoutes = (app) => {
                 WHERE ub.user_id = ?
                 ORDER BY ub.date_earned DESC
             `;
-            
-            db.query(badgesQuery, [userId], (badgeErr, badgeResults) => {
-                if (badgeErr) {
-                    console.error('Error fetching user badges:', badgeErr);
-                    // Return user without badges
-                    return res.json(user);
-                }
-                
-                // Add badges to user object
+
+            try {
+                const badgeResults = await runQuery(badgesQuery, [userId]);
                 user.badges = badgeResults;
-                res.json(user);
-            });
-        });
+            } catch (badgeErr) {
+                console.error('Error fetching user badges:', badgeErr);
+            }
+
+            res.json(user);
+        } catch (err) {
+            console.error('Error fetching user:', err);
+            res.status(500).json({ error: 'Failed to fetch user' });
+        }
     });
 
     // Create new user
-    app.post('/api/users', (req, res) => {
+    app.post('/api/users', async (req, res) => {
         // Determine the canonical Auth0 sub for this request
         const subFromBody   = req.body?.auth0_sub || null;
         const subFromOIDC   = (req.oidc && req.oidc.user && req.oidc.user.sub) || null;
@@ -199,73 +202,49 @@ const setupUserRoutes = (app) => {
             isadmin ? 1 : 0
         ];
         
-        db.query(query, values, (err, result) => {
-            if (err) {
-                // Handle duplicate entry (e.g., unique email or auth0_sub)
-                if (err.code === 'ER_DUP_ENTRY') {
-                    console.warn('[POST /api/users] Duplicate detected');
+        try {
+            const insertResult = await runQuery(query, values);
+            // Successful insert – fetch and return the row
+            const createdRows = await runQuery('SELECT * FROM UserAccounts WHERE id = ?', [insertResult.insertId]);
+            return res.status(201).json(createdRows[0]);
+        } catch (err) {
+            if (err && err.code === 'ER_DUP_ENTRY') {
+                console.warn('[POST /api/users] Duplicate detected');
 
-                    // 1. Attempt to fetch by auth0_sub (maybe user already exists)
+                try {
+                    // Try lookup by auth0_sub first
                     if (auth0_sub) {
-                        return db.query('SELECT * FROM UserAccounts WHERE auth0_sub = ? LIMIT 1', [auth0_sub], (selErr1, selRows1) => {
-                            if (selErr1) {
-                                console.error('Error fetching by sub after duplicate entry error during INSERT:', selErr1);
-                                // If select fails, it's a server issue, not necessarily a conflict.
-                                return res.status(500).json({ error: 'Database error while checking for existing user by Auth0 ID.' });
-                            }
-
-                            if (selRows1 && selRows1.length) {
-                                // User with this auth0_sub already exists. This is the correct record.
-                                console.log(`[POST /api/users] User with auth0_sub ${auth0_sub} already exists (ID: ${selRows1[0].id}). Returning existing record.`);
-                                return res.status(200).json(selRows1[0]);
-                            }
-
-                            // No user found with this auth0_sub. The duplicate is therefore on some other unique key – very likely the email.
-
-                            db.query('SELECT * FROM UserAccounts WHERE email = ? LIMIT 1', [email], (selErr2, selRows2) => {
-                                if (selErr2) {
-                                    console.error('Error fetching by email after duplicate entry error during INSERT:', selErr2);
-                                    return res.status(500).json({ error: 'Database error while checking for existing user by email.' });
-                                }
-
-                                if (selRows2 && selRows2.length) {
-                                    const existing = selRows2[0];
-
-                                    // If a row with the same email exists but with a different auth0_sub, refuse to create.
-                                    if (existing.auth0_sub && existing.auth0_sub !== auth0_sub) {
-                                        console.error(`[POST /api/users] Email ${email} already exists with a different Auth0 ID (${existing.auth0_sub}). Creation blocked.`);
-                                    }
-                                    // No automatic repair – caller must resolve.
-                                    console.error(`[POST /api/users] ER_DUP_ENTRY and unable to auto-repair. auth0_sub: ${auth0_sub}, email: ${email}`);
-                                    return res.status(409).json({ error: 'User profile creation conflicted with existing data. Please contact support.' });
-                                }
-                            });
-                        });
+                        const rowsBySub = await runQuery('SELECT * FROM UserAccounts WHERE auth0_sub = ? LIMIT 1', [auth0_sub]);
+                        if (rowsBySub.length) {
+                            return res.status(200).json(rowsBySub[0]);
+                        }
                     }
 
-                    // ER_DUP_ENTRY but no auth0_sub was provided in the request (highly unlikely given client)
-                    console.error('[POST /api/users] ER_DUP_ENTRY on INSERT, but no auth0_sub was in the request to check against.');
-                    return res.status(409).json({ error: 'User creation failed due to a conflict and missing Auth0 ID in request.' });
+                    // Fallback: lookup by email
+                    const rowsByEmail = await runQuery('SELECT * FROM UserAccounts WHERE email = ? LIMIT 1', [email]);
+                    if (rowsByEmail.length) {
+                        const existing = rowsByEmail[0];
+                        if (existing.auth0_sub && existing.auth0_sub !== auth0_sub) {
+                            console.error(`[POST /api/users] Email ${email} already exists with a different Auth0 ID (${existing.auth0_sub}). Creation blocked.`);
+                        }
+                        return res.status(409).json({ error: 'User profile creation conflicted with existing data. Please contact support.' });
+                    }
+                } catch (lookupErr) {
+                    console.error('Lookup error after duplicate entry:', lookupErr);
+                    return res.status(500).json({ error: 'Database error while resolving duplicate user.' });
                 }
 
-                console.error('Error creating user (not ER_DUP_ENTRY):', err);
-                return res.status(500).json({ error: 'Failed to create user' });
+                // If we reach here, duplicate but unable to resolve
+                return res.status(409).json({ error: 'User creation failed due to duplication.' });
             }
-            
-            // Fetch the newly created user to return
-            db.query('SELECT * FROM UserAccounts WHERE id = ?', [result.insertId], (err2, results2) => {
-                if (err2) {
-                    console.error('Error fetching created user:', err2);
-                    return res.status(201).json({ id: result.insertId, message: 'User created successfully' });
-                }
-                
-                res.status(201).json(results2[0]);
-            });
-        });
+
+            console.error('Error creating user:', err);
+            return res.status(500).json({ error: 'Failed to create user' });
+        }
     });
 
     // Update user
-    app.put('/api/users/:id', (req, res) => {
+    app.put('/api/users/:id', async (req, res) => {
         const userId = req.params.id;
         
         // Validate user ID
@@ -273,17 +252,13 @@ const setupUserRoutes = (app) => {
             return res.status(400).json({ error: 'Invalid user ID' });
         }
         
-        // First check if user exists
-        db.query('SELECT * FROM UserAccounts WHERE id = ?', [userId], (err, results) => {
-            if (err) {
-                console.error('Error checking user:', err);
-                return res.status(500).json({ error: 'Failed to update user' });
-            }
-            
+        try {
+            // First check if user exists
+            const results = await runQuery('SELECT * FROM UserAccounts WHERE id = ?', [userId]);
             if (results.length === 0) {
                 return res.status(404).json({ error: 'User not found' });
             }
-            
+
             // User exists, proceed with update
             const {
                 sid, 
@@ -413,30 +388,22 @@ const setupUserRoutes = (app) => {
                 return res.status(400).json({ error: 'No fields to update' });
             }
             
-            const query = `UPDATE UserAccounts SET ${updates.join(', ')} WHERE id = ?`;
+            const updateSql = `UPDATE UserAccounts SET ${updates.join(', ')} WHERE id = ?`;
             values.push(userId);
-            
-            db.query(query, values, (err, result) => {
-                if (err) {
-                    console.error('Error updating user:', err);
-                    return res.status(500).json({ error: 'Failed to update user' });
-                }
-                
-                // Fetch the updated user to return
-                db.query('SELECT * FROM UserAccounts WHERE id = ?', [userId], (err, results) => {
-                    if (err) {
-                        console.error('Error fetching updated user:', err);
-                        return res.status(200).json({ message: 'User updated successfully' });
-                    }
-                    
-                    res.json(results[0]);
-                });
-            });
-        });
+
+            await runQuery(updateSql, values);
+
+            // Fetch and return updated user
+            const updatedRows = await runQuery('SELECT * FROM UserAccounts WHERE id = ?', [userId]);
+            return res.json(updatedRows[0]);
+        } catch (err) {
+            console.error('Error updating user:', err);
+            res.status(500).json({ error: 'Failed to update user' });
+        }
     });
 
     // Delete user
-    app.delete('/api/users/:id', (req, res) => {
+    app.delete('/api/users/:id', async (req, res) => {
         const userId = req.params.id;
         
         // Validate user ID
@@ -444,31 +411,22 @@ const setupUserRoutes = (app) => {
             return res.status(400).json({ error: 'Invalid user ID' });
         }
         
-        // Check if user exists
-        db.query('SELECT * FROM UserAccounts WHERE id = ?', [userId], (err, results) => {
-            if (err) {
-                console.error('Error checking user:', err);
-                return res.status(500).json({ error: 'Failed to delete user' });
-            }
-            
-            if (results.length === 0) {
+        try {
+            const rows = await runQuery('SELECT * FROM UserAccounts WHERE id = ?', [userId]);
+            if (rows.length === 0) {
                 return res.status(404).json({ error: 'User not found' });
             }
-            
-            // User exists, proceed with deletion
-            db.query('DELETE FROM UserAccounts WHERE id = ?', [userId], (err, result) => {
-                if (err) {
-                    console.error('Error deleting user:', err);
-                    return res.status(500).json({ error: 'Failed to delete user' });
-                }
-                
-                res.json({ message: 'User deleted successfully' });
-            });
-        });
+
+            await runQuery('DELETE FROM UserAccounts WHERE id = ?', [userId]);
+            res.json({ message: 'User deleted successfully' });
+        } catch (err) {
+            console.error('Error deleting user:', err);
+            res.status(500).json({ error: 'Failed to delete user' });
+        }
     });
 
     // Search users by name, email, or display_name
-    app.get('/api/users/search/:query', (req, res) => {
+    app.get('/api/users/search/:query', async (req, res) => {
         const searchQuery = req.params.query;
         
         const query = `
@@ -486,18 +444,17 @@ const setupUserRoutes = (app) => {
         
         const searchPattern = `%${sanitizeValue(searchQuery)}%`;
         
-        db.query(query, [searchPattern, searchPattern, searchPattern, searchPattern], (err, results) => {
-            if (err) {
-                console.error('Error searching users:', err);
-                return res.status(500).json({ error: 'Failed to search users' });
-            }
-            
+        try {
+            const results = await runQuery(query, [searchPattern, searchPattern, searchPattern, searchPattern]);
             res.json(results);
-        });
+        } catch (err) {
+            console.error('Error searching users:', err);
+            res.status(500).json({ error: 'Failed to search users' });
+        }
     });
 
     // Search for public profiles (only returns users with public visibility)
-    app.get('/api/public-profiles/search/:query', (req, res) => {
+    app.get('/api/public-profiles/search/:query', async (req, res) => {
         const searchQuery = req.params.query;
         
         const query = `
@@ -513,18 +470,17 @@ const setupUserRoutes = (app) => {
         
         const searchPattern = `%${sanitizeValue(searchQuery)}%`;
         
-        db.query(query, [searchPattern, searchPattern], (err, results) => {
-            if (err) {
-                console.error('Error searching public profiles:', err);
-                return res.status(500).json({ error: 'Failed to search profiles' });
-            }
-            
+        try {
+            const results = await runQuery(query, [searchPattern, searchPattern]);
             res.json(results);
-        });
+        } catch (err) {
+            console.error('Error searching public profiles:', err);
+            res.status(500).json({ error: 'Failed to search profiles' });
+        }
     });
 
     // Get all public profiles (for browsing, limited results)
-    app.get('/api/public-profiles', (req, res) => {
+    app.get('/api/public-profiles', async (req, res) => {
         const limit = parseInt(req.query.limit) || 20;
         const offset = parseInt(req.query.offset) || 0;
         
@@ -538,18 +494,17 @@ const setupUserRoutes = (app) => {
             LIMIT ? OFFSET ?
         `;
         
-        db.query(query, [limit, offset], (err, results) => {
-            if (err) {
-                console.error('Error fetching public profiles:', err);
-                return res.status(500).json({ error: 'Failed to fetch profiles' });
-            }
-            
+        try {
+            const results = await runQuery(query, [limit, offset]);
             res.json(results);
-        });
+        } catch (err) {
+            console.error('Error fetching public profiles:', err);
+            res.status(500).json({ error: 'Failed to fetch profiles' });
+        }
     });
 
     // Filter users by admin status
-    app.get('/api/users/filter/admin/:status', (req, res) => {
+    app.get('/api/users/filter/admin/:status', async (req, res) => {
         const adminStatus = req.params.status === 'true' ? 1 : 0;
         
         const query = `
@@ -561,18 +516,17 @@ const setupUserRoutes = (app) => {
             ORDER BY id DESC
         `;
         
-        db.query(query, [adminStatus], (err, results) => {
-            if (err) {
-                console.error('Error filtering users by admin status:', err);
-                return res.status(500).json({ error: 'Failed to filter users' });
-            }
-            
+        try {
+            const results = await runQuery(query, [adminStatus]);
             res.json(results);
-        });
+        } catch (err) {
+            console.error('Error filtering users by admin status:', err);
+            res.status(500).json({ error: 'Failed to filter users' });
+        }
     });
 
     // Get full user details for currently authenticated user
-    app.get('/api/user/me', (req, res) => {
+    app.get('/api/user/me', async (req, res) => {
         console.log('>>> ENTERED /api/user/me handler');
         const auth0SubFromOIDC = (req.oidc && req.oidc.user && req.oidc.user.sub) ? req.oidc.user.sub : null;
         const auth0SubFromHeader = req.headers['x-user-sub'] || null;
@@ -595,90 +549,81 @@ const setupUserRoutes = (app) => {
             LIMIT 1
         `;
 
-        db.query(query, [auth0Sub], (err, results) => {
-            if (err) {
-                console.error('Error fetching user details:', err);
-                return res.status(500).json({ error: 'Failed to fetch user details' });
-            }
-
+        try {
+            const results = await runQuery(query, [auth0Sub]);
             if (results.length === 0) {
-                // No DB user – DO NOT create one on-the-fly here.
-                // Let the client-initiated POST /api/users handle explicit creation with its fresh authUser.sub.
-                // Return a 404 to signal to the client (e.g., UserProfile.js) that it needs to initiate creation.
                 console.log(`[user/me] No DB row for ${auth0Sub}. Returning 404.`);
                 return res.status(404).json({ error: 'User profile not found in DB.' });
-            } else {
-                const user = results[0];
-
-                // --- Begin streak + last_seen handling ---------------------------------
-                const now = new Date();
-
-                // Helper: normalise a Date to midnight for *date*-only comparisons
-                const toMidnight = (d) => {
-                    const dt = new Date(d);
-                    dt.setHours(0, 0, 0, 0);
-                    return dt;
-                };
-
-                const lastSeenDate = user.last_seen ? new Date(user.last_seen) : null;
-                const diffDays = lastSeenDate ? Math.floor((toMidnight(now) - toMidnight(lastSeenDate)) / (1000 * 60 * 60 * 24)) : null;
-
-                let newStreak = user.streak_days || 0;
-                let shouldIncrementLogin = false;
-
-                if (lastSeenDate === null) {
-                    // First ever login recorded
-                    newStreak = 1;
-                    shouldIncrementLogin = true;
-                } else if (diffDays === 0) {
-                    // Same calendar day – no streak change, no login increment
-                    newStreak = user.streak_days || 1;
-                } else if (diffDays === 1) {
-                    // Consecutive day – increase streak
-                    newStreak = (user.streak_days || 0) + 1;
-                    shouldIncrementLogin = true;
-                } else if (diffDays > 1) {
-                    // Gap detected – reset streak
-                    newStreak = 1;
-                    shouldIncrementLogin = true;
-                }
-
-                // Build dynamic UPDATE query parts
-                const updateFields = [ 'last_seen = NOW()', 'streak_days = ?' ];
-                const updateValues = [ newStreak ];
-
-                if (shouldIncrementLogin) {
-                    updateFields.push('total_logins = total_logins + 1');
-                }
-
-                updateValues.push(user.id); // WHERE id = ?
-
-                const updateSql = `UPDATE UserAccounts SET ${updateFields.join(', ')} WHERE id = ?`;
-
-                db.query(updateSql, updateValues, (updateErr) => {
-                    if (updateErr) {
-                        console.error('Error updating streak / last_seen:', updateErr);
-                        // Even if the update fails, return the original user data to avoid blocking the client.
-                        return res.json(user);
-                    }
-
-                    // Reflect changes in the response object
-                    user.streak_days = newStreak;
-                    user.last_seen = now;
-                    if (shouldIncrementLogin) {
-                        user.total_logins = (user.total_logins || 0) + 1;
-                    }
-
-                    res.json(user);
-                });
-                // --- End streak + last_seen handling -----------------------------------
             }
-        });
+            const user = results[0];
+
+            // --- Begin streak + last_seen handling ---------------------------------
+            const now = new Date();
+
+            // Helper: normalise a Date to midnight for *date*-only comparisons
+            const toMidnight = (d) => {
+                const dt = new Date(d);
+                dt.setHours(0, 0, 0, 0);
+                return dt;
+            };
+
+            const lastSeenDate = user.last_seen ? new Date(user.last_seen) : null;
+            const diffDays = lastSeenDate ? Math.floor((toMidnight(now) - toMidnight(lastSeenDate)) / (1000 * 60 * 60 * 24)) : null;
+
+            let newStreak = user.streak_days || 0;
+            let shouldIncrementLogin = false;
+
+            if (lastSeenDate === null) {
+                // First ever login recorded
+                newStreak = 1;
+                shouldIncrementLogin = true;
+            } else if (diffDays === 0) {
+                // Same calendar day – no streak change, no login increment
+                newStreak = user.streak_days || 1;
+            } else if (diffDays === 1) {
+                // Consecutive day – increase streak
+                newStreak = (user.streak_days || 0) + 1;
+                shouldIncrementLogin = true;
+            } else if (diffDays > 1) {
+                // Gap detected – reset streak
+                newStreak = 1;
+                shouldIncrementLogin = true;
+            }
+
+            // Build dynamic UPDATE query parts
+            const updateFields = [ 'last_seen = NOW()', 'streak_days = ?' ];
+            const updateValues = [ newStreak ];
+
+            if (shouldIncrementLogin) {
+                updateFields.push('total_logins = total_logins + 1');
+            }
+
+            updateValues.push(user.id); // WHERE id = ?
+
+            const updateSql = `UPDATE UserAccounts SET ${updateFields.join(', ')} WHERE id = ?`;
+
+            try {
+                await runQuery(updateSql, updateValues);
+                user.streak_days = newStreak;
+                user.last_seen = now;
+                if (shouldIncrementLogin) {
+                    user.total_logins = (user.total_logins || 0) + 1;
+                }
+            } catch (updateErr) {
+                console.error('Error updating streak / last_seen:', updateErr);
+                // Return without blocking
+            }
+
+            res.json(user);
+        } catch (err) {
+            console.error('Error fetching user details:', err);
+            res.status(500).json({ error: 'Failed to fetch user details' });
+        }
     });
 
     // Fetch user display_name by Auth0 sub without requiring auth token
     // NOTE: This endpoint only returns display_name and id to minimise data exposure.
-    app.get('/api/user/by-sub/:sub', (req, res) => {
+    app.get('/api/user/by-sub/:sub', async (req, res) => {
         const auth0Sub = req.params.sub;
 
         if (!auth0Sub) {
@@ -689,18 +634,16 @@ const setupUserRoutes = (app) => {
         // Also include picture_url
         const query = `SELECT id, COALESCE(display_name, nickname, name, email) AS display_name, picture_url FROM UserAccounts WHERE auth0_sub = ? LIMIT 1`;
 
-        db.query(query, [auth0Sub], (err, results) => {
-            if (err) {
-                console.error('Error fetching display_name by sub:', err);
-                return res.status(500).json({ error: 'Failed to fetch user' });
-            }
-
+        try {
+            const results = await runQuery(query, [auth0Sub]);
             if (results.length === 0) {
                 return res.status(404).json({ error: 'User not found' });
             }
-
             res.json(results[0]);
-        });
+        } catch (err) {
+            console.error('Error fetching display_name by sub:', err);
+            res.status(500).json({ error: 'Failed to fetch user' });
+        }
     });
 
     // Test endpoint to verify API is working
@@ -710,7 +653,7 @@ const setupUserRoutes = (app) => {
 
     // User profile update endpoint – accepts either Auth0 session (req.oidc.user) OR x-user-sub header.
     // This makes the endpoint usable from the SPA when the backend session cookie is missing.
-    app.put('/api/users/:id/profile', (req, res) => {
+    app.put('/api/users/:id/profile', async (req, res) => {
         const userId = req.params.id;
 
         // Determine caller identity
@@ -721,12 +664,9 @@ const setupUserRoutes = (app) => {
         }
 
         // First, verify that the user is updating their own profile
-        db.query('SELECT id, auth0_sub FROM UserAccounts WHERE id = ?', [userId], (err, results) => {
-            if (err) {
-                console.error('Error checking user:', err);
-                return res.status(500).json({ error: 'Failed to update profile' });
-            }
-            
+        try {
+            const results = await runQuery('SELECT id, auth0_sub FROM UserAccounts WHERE id = ?', [userId]);
+
             if (results.length === 0) {
                 return res.status(404).json({ error: 'User not found' });
             }
@@ -760,22 +700,15 @@ const setupUserRoutes = (app) => {
             }
 
             // Helper: if the DB row is missing auth0_sub, attach the caller's sub first, then continue.
-            const attachSubAndContinue = (next) => {
+            const attachSubAndContinue = async (next) => {
                 if (!dbAuthSub) {
-                    db.query('UPDATE UserAccounts SET auth0_sub = ? WHERE id = ?', [auth0Sub, userId], (patchErr) => {
-                        if (patchErr) {
-                            console.error('Error attaching auth0_sub to user row:', patchErr);
-                            return res.status(500).json({ error: 'Failed to link Auth0 account' });
-                        }
-                        next();
-                    });
-                } else {
-                    next();
+                    await runQuery('UPDATE UserAccounts SET auth0_sub = ? WHERE id = ?', [auth0Sub, userId]);
                 }
+                next();
             };
 
             // Encapsulate the remainder of the profile-update logic so we can call it after we possibly patched the row above.
-            const performProfileUpdate = () => {
+            const performProfileUpdate = async () => {
                 // Filter allowed fields that a regular user can update
                 const {
                     display_name,
@@ -836,38 +769,36 @@ const setupUserRoutes = (app) => {
                 const query = `UPDATE UserAccounts SET ${updates.join(', ')} WHERE id = ?`;
                 values.push(userId);
 
-                db.query(query, values, (err, result) => {
-                    if (err) {
-                        console.error('Error updating user profile:', err);
-                        return res.status(500).json({ error: 'Failed to update profile' });
-                    }
+                await runQuery(query, values);
 
-                    // Fetch the updated user to return all fields including profile_complete
-                    db.query('SELECT * FROM UserAccounts WHERE id = ?', [userId], (fetchErr, fetchResults) => {
-                        if (fetchErr || !fetchResults || fetchResults.length === 0) {
-                            console.error('Error fetching updated user profile or user not found after update:', fetchErr);
-                            return res.json({ 
-                                message: 'Profile updated successfully, but could not retrieve updated data.',
-                                // Provide the list of keys that were intended to be updated for client-side fallback if needed
-                                updatedFields: Object.keys(req.body).filter(key => ['display_name', 'bio', 'location', 'profile_visibility', 'email_notifications', 'theme', 'profile_complete'].includes(key))
-                            });
-                        }
+                // Fetch the updated user to return all fields including profile_complete
+                const fetchResults = await runQuery('SELECT * FROM UserAccounts WHERE id = ?', [userId]);
 
-                        res.json({ 
-                            message: 'Profile updated successfully',
-                            current: fetchResults[0] // Return the full updated user object
-                        });
+                if (fetchResults.length === 0) {
+                    console.error('Error fetching updated user profile or user not found after update');
+                    return res.json({ 
+                        message: 'Profile updated successfully, but could not retrieve updated data.',
+                        // Provide the list of keys that were intended to be updated for client-side fallback if needed
+                        updatedFields: Object.keys(req.body).filter(key => ['display_name', 'bio', 'location', 'profile_visibility', 'email_notifications', 'theme', 'profile_complete'].includes(key))
                     });
+                }
+
+                res.json({ 
+                    message: 'Profile updated successfully',
+                    current: fetchResults[0] // Return the full updated user object
                 });
             };
 
             // Ensure sub is attached/patched only when safe, then run update logic.
-            attachSubAndContinue(performProfileUpdate);
-        });
+            await attachSubAndContinue(performProfileUpdate);
+        } catch (err) {
+            console.error('Error updating user profile:', err);
+            res.status(500).json({ error: 'Failed to update profile' });
+        }
     });
 
     // Alternative preferences endpoint that doesn't use requiresAuth
-    app.put('/api/user-preferences/:id', (req, res) => {
+    app.put('/api/user-preferences/:id', async (req, res) => {
         const userId = req.params.id;
         
         // Validate user ID
@@ -908,11 +839,8 @@ const setupUserRoutes = (app) => {
         console.log(`[Preferences] SQL Query: ${query}`);
         console.log(`[Preferences] Values:`, values);
         
-        db.query(query, values, (err, result) => {
-            if (err) {
-                console.error('Error updating preferences:', err);
-                return res.status(500).json({ error: 'Failed to update preferences' });
-            }
+        try {
+            const result = await runQuery(query, values);
             
             console.log(`[Preferences] Update result:`, result);
             
@@ -921,34 +849,29 @@ const setupUserRoutes = (app) => {
             }
             
             // Fetch the updated user to verify changes
-            db.query('SELECT id, theme, email_notifications FROM UserAccounts WHERE id = ?', [userId], (err, results) => {
-                if (err) {
-                    console.error('Error fetching updated preferences:', err);
-                    return res.status(200).json({ 
-                        message: 'Preferences may have been updated, but verification failed',
-                        updated: result.affectedRows > 0
-                    });
+            const results = await runQuery('SELECT id, theme, email_notifications FROM UserAccounts WHERE id = ?', [userId]);
+            
+            if (results.length === 0) {
+                return res.status(404).json({ error: 'User not found after update' });
+            }
+            
+            // Return the current preference values for verification
+            res.json({ 
+                message: 'Preferences updated successfully',
+                updatedFields: Object.keys(req.body),
+                current: {
+                    theme: results[0].theme,
+                    email_notifications: results[0].email_notifications
                 }
-                
-                if (results.length === 0) {
-                    return res.status(404).json({ error: 'User not found after update' });
-                }
-                
-                // Return the current preference values for verification
-                res.json({ 
-                    message: 'Preferences updated successfully',
-                    updatedFields: Object.keys(req.body),
-                    current: {
-                        theme: results[0].theme,
-                        email_notifications: results[0].email_notifications
-                    }
-                });
             });
-        });
+        } catch (err) {
+            console.error('Error updating preferences:', err);
+            res.status(500).json({ error: 'Failed to update preferences' });
+        }
     });
     
     // Get badges for a user
-    app.get('/api/users/:id/badges', (req, res) => {
+    app.get('/api/users/:id/badges', async (req, res) => {
         const userId = req.params.id;
         
         // Validate user ID
@@ -965,18 +888,17 @@ const setupUserRoutes = (app) => {
             ORDER BY ub.date_earned DESC
         `;
         
-        db.query(query, [userId], (err, results) => {
-            if (err) {
-                console.error('Error fetching user badges:', err);
-                return res.status(500).json({ error: 'Failed to fetch user badges' });
-            }
-            
+        try {
+            const results = await runQuery(query, [userId]);
             res.json(results);
-        });
+        } catch (err) {
+            console.error('Error fetching user badges:', err);
+            res.status(500).json({ error: 'Failed to fetch user badges' });
+        }
     });
     
     // Award a badge to a user
-    app.post('/api/users/:id/badges', (req, res) => {
+    app.post('/api/users/:id/badges', async (req, res) => {
         const userId = parseInt(req.params.id);
         const badge_id = parseInt(req.body.badge_id);
         
@@ -999,11 +921,8 @@ const setupUserRoutes = (app) => {
         // Check if user already has this badge
         const checkQuery = 'SELECT * FROM UserBadges WHERE user_id = ? AND badge_id = ?';
         
-        db.query(checkQuery, [userId, badge_id], (checkErr, checkResults) => {
-            if (checkErr) {
-                console.error('Error checking user badge:', checkErr);
-                return res.status(500).json({ error: 'Failed to check if user has badge' });
-            }
+        try {
+            const checkResults = await runQuery(checkQuery, [userId, badge_id]);
             
             if (checkResults.length > 0) {
                 return res.status(409).json({ error: 'User already has this badge' });
@@ -1012,39 +931,30 @@ const setupUserRoutes = (app) => {
             // Award the badge
             const query = 'INSERT INTO UserBadges (user_id, badge_id, date_earned) VALUES (?, ?, NOW())';
             
-            db.query(query, [userId, badge_id], (err, result) => {
-                if (err) {
-                    console.error('Error awarding badge to user:', err);
-                    return res.status(500).json({ error: 'Failed to award badge to user' });
-                }
-                
-                // Fetch the badge details to return
-                const badgeQuery = `
-                    SELECT b.*, (SELECT FileNameServer FROM Images WHERE ID = b.Image) as BadgeFileName 
-                    FROM Badges b 
-                    WHERE b.ID = ?
-                `;
-                
-                db.query(badgeQuery, [badge_id], (badgeErr, badgeResults) => {
-                    if (badgeErr || badgeResults.length === 0) {
-                        return res.status(201).json({ 
-                            message: 'Badge awarded to user successfully',
-                            id: result.insertId
-                        });
-                    }
-                    
-                    res.status(201).json({
-                        message: 'Badge awarded to user successfully',
-                        id: result.insertId,
-                        badge: badgeResults[0]
-                    });
-                });
+            const result = await runQuery(query, [userId, badge_id]);
+            
+            // Fetch the badge details to return
+            const badgeQuery = `
+                SELECT b.*, (SELECT FileNameServer FROM Images WHERE ID = b.Image) as BadgeFileName 
+                FROM Badges b 
+                WHERE b.ID = ?
+            `;
+            
+            const badgeResults = await runQuery(badgeQuery, [badge_id]);
+            
+            res.status(201).json({
+                message: 'Badge awarded to user successfully',
+                id: result.insertId,
+                badge: badgeResults[0]
             });
-        });
+        } catch (err) {
+            console.error('Error awarding badge to user:', err);
+            res.status(500).json({ error: 'Failed to award badge to user' });
+        }
     });
     
     // Remove a badge from a user
-    app.delete('/api/users/:userId/badges/:badgeId', (req, res) => {
+    app.delete('/api/users/:userId/badges/:badgeId', async (req, res) => {
         const userId = req.params.userId;
         const badgeId = req.params.badgeId;
         
@@ -1059,22 +969,22 @@ const setupUserRoutes = (app) => {
         
         const query = 'DELETE FROM UserBadges WHERE user_id = ? AND badge_id = ?';
         
-        db.query(query, [userId, badgeId], (err, result) => {
-            if (err) {
-                console.error('Error removing badge from user:', err);
-                return res.status(500).json({ error: 'Failed to remove badge from user' });
-            }
+        try {
+            const result = await runQuery(query, [userId, badgeId]);
             
             if (result.affectedRows === 0) {
                 return res.status(404).json({ error: 'Badge not found for this user' });
             }
             
             res.json({ message: 'Badge removed from user successfully' });
-        });
+        } catch (err) {
+            console.error('Error removing badge from user:', err);
+            res.status(500).json({ error: 'Failed to remove badge from user' });
+        }
     });
 
     // Alternative profile update endpoint that doesn't use requiresAuth
-    app.put('/api/user-profile/:id', (req, res) => {
+    app.put('/api/user-profile/:id', async (req, res) => {
         const userId = req.params.id;
         
         // Validate user ID
@@ -1132,11 +1042,8 @@ const setupUserRoutes = (app) => {
         console.log(`[Profile] SQL Query: ${query}`);
         console.log(`[Profile] Values:`, values);
         
-        db.query(query, values, (err, result) => {
-            if (err) {
-                console.error('Error updating profile:', err);
-                return res.status(500).json({ error: 'Failed to update profile' });
-            }
+        try {
+            const result = await runQuery(query, values);
             
             console.log(`[Profile] Update result:`, result);
             
@@ -1145,38 +1052,32 @@ const setupUserRoutes = (app) => {
             }
             
             // Fetch the updated user to verify changes
-            db.query(
+            const results = await runQuery(
                 `SELECT id, display_name, bio, location, profile_visibility 
                  FROM UserAccounts WHERE id = ?`, 
-                [userId], 
-                (err, results) => {
-                    if (err) {
-                        console.error('Error fetching updated profile:', err);
-                        return res.status(200).json({ 
-                            message: 'Profile may have been updated, but verification failed',
-                            updated: result.affectedRows > 0
-                        });
-                    }
-                    
-                    if (results.length === 0) {
-                        return res.status(404).json({ error: 'User not found after update' });
-                    }
-                    
-                    // Return the current profile values for verification
-                    res.json({ 
-                        message: 'Profile updated successfully',
-                        updatedFields: Object.keys(req.body).filter(key => 
-                            ['display_name', 'bio', 'location', 'profile_visibility'].includes(key)
-                        ),
-                        current: results[0]
-                    });
-                }
+                [userId]
             );
-        });
+            
+            if (results.length === 0) {
+                return res.status(404).json({ error: 'User not found after update' });
+            }
+            
+            // Return the current profile values for verification
+            res.json({ 
+                message: 'Profile updated successfully',
+                updatedFields: Object.keys(req.body).filter(key => 
+                    ['display_name', 'bio', 'location', 'profile_visibility'].includes(key)
+                ),
+                current: results[0]
+            });
+        } catch (err) {
+            console.error('Error updating profile:', err);
+            res.status(500).json({ error: 'Failed to update profile' });
+        }
     });
 
     // Non-authenticated endpoint to get user preferences
-    app.get('/api/user-preferences/:id', (req, res) => {
+    app.get('/api/user-preferences/:id', async (req, res) => {
         const userId = req.params.id;
         
         // Validate user ID
@@ -1193,11 +1094,8 @@ const setupUserRoutes = (app) => {
             WHERE id = ?
         `;
         
-        db.query(query, [userId], (err, results) => {
-            if (err) {
-                console.error('Error fetching preferences:', err);
-                return res.status(500).json({ error: 'Failed to fetch preferences' });
-            }
+        try {
+            const results = await runQuery(query, [userId]);
             
             if (results.length === 0) {
                 return res.status(404).json({ error: 'User not found' });
@@ -1208,11 +1106,14 @@ const setupUserRoutes = (app) => {
             
             // Return user preference data
             res.json(preferences);
-        });
+        } catch (err) {
+            console.error('Error fetching preferences:', err);
+            res.status(500).json({ error: 'Failed to fetch preferences' });
+        }
     });
 
     // Award XP to a user
-    app.post('/api/users/:id/award-xp', (req, res) => {
+    app.post('/api/users/:id/award-xp', async (req, res) => {
         const userId = req.params.id;
         const { amount } = req.body; // amount of XP to add
 
@@ -1229,12 +1130,10 @@ const setupUserRoutes = (app) => {
             return res.status(400).json({ error: 'XP amount must be non-zero' });
         }
 
-        // Fetch current XP to calculate new totals
-        db.query('SELECT xp_points FROM UserAccounts WHERE id = ?', [userId], (err, results) => {
-            if (err) {
-                console.error('Error fetching user XP:', err);
-                return res.status(500).json({ error: 'Database error while fetching XP' });
-            }
+        try {
+            // Fetch current XP to calculate new totals
+            const results = await runQuery('SELECT xp_points FROM UserAccounts WHERE id = ?', [userId]);
+            
             if (results.length === 0) {
                 return res.status(404).json({ error: 'User not found' });
             }
@@ -1244,19 +1143,17 @@ const setupUserRoutes = (app) => {
             const newLevel = Math.floor(newXP / 100) + 1; // Simple level progression
 
             const updateQuery = 'UPDATE UserAccounts SET xp_points = ?, level = ? WHERE id = ?';
-            db.query(updateQuery, [newXP, newLevel, userId], (updateErr) => {
-                if (updateErr) {
-                    console.error('Error updating XP:', updateErr);
-                    return res.status(500).json({ error: 'Database error while updating XP' });
-                }
+            await runQuery(updateQuery, [newXP, newLevel, userId]);
 
-                // Return the updated values
-                res.json({ userId: parseInt(userId), xp_points: newXP, level: newLevel });
-            });
-        });
+            // Return the updated values
+            res.json({ userId: parseInt(userId), xp_points: newXP, level: newLevel });
+        } catch (err) {
+            console.error('Error updating XP:', err);
+            res.status(500).json({ error: 'Database error while updating XP' });
+        }
     });
 
-    app.get('/api/user/profile/:sub', (req, res) => {
+    app.get('/api/user/profile/:sub', async (req, res) => {
         const auth0Sub = req.params.sub;
 
         if (!auth0Sub) {
@@ -1279,12 +1176,9 @@ const setupUserRoutes = (app) => {
             LIMIT 1
         `;
 
-        db.query(query, [auth0Sub], (err, results) => {
-            if (err) {
-                console.error('Error fetching profile by sub:', err);
-                return res.status(500).json({ error: 'Failed to fetch profile' });
-            }
-
+        try {
+            const results = await runQuery(query, [auth0Sub]);
+            
             if (results.length === 0) {
                 return res.status(404).json({ error: 'User not found' });
             }
@@ -1309,7 +1203,10 @@ const setupUserRoutes = (app) => {
             };
 
             res.json(profile);
-        });
+        } catch (err) {
+            console.error('Error fetching profile by sub:', err);
+            res.status(500).json({ error: 'Failed to fetch profile' });
+        }
     });
 };
 

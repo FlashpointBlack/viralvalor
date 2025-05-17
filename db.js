@@ -25,6 +25,12 @@ pool.getConnection((err, connection) => {
     }
 });
 
-// Export the pool under the same property name so existing code (`const { db } = require('./db')`) keeps working
-module.exports = { db: pool };
+// Add Promise-based pool so callers can use async/await style queries without callbacks
+const promisePool = pool.promise();
+
+// Export both callback and promise interfaces to enable gradual migration
+module.exports = {
+    db: pool,
+    dbPromise: promisePool
+};
 

@@ -1,33 +1,24 @@
-const { db } = require('./db');
+const { dbPromise } = require('./db');
 const { connectedUsers } = require('./globals');
 const { executeQuery } = require('./utils');
 
 function checkUserProfileCompletion(userSub) {
-    return new Promise((resolve, reject) => {
-        // Replace this query with one appropriate for your database schema and setup.
-        const query = 'SELECT profile_complete FROM UserAccounts WHERE auth0_sub = ?';
-
-        // Execute the query
-        db.query(query, [userSub], (error, results) => {
-            if (error) {
-                console.error('Error checking profile completion:', error);
-                return reject(error);
-            }
-
-            // Assume 'profile_complete' is a boolean column in your 'UserAccounts' table.
-            if (results.length > 0 && results[0].profile_complete) {
-                resolve(true);
-            } else {
-                resolve(false);
-            }
-        });
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = 'SELECT profile_complete FROM UserAccounts WHERE auth0_sub = ?';
+            const [results] = await dbPromise.query(query, [userSub]);
+            resolve(results.length > 0 && results[0].profile_complete === 1);
+        } catch (error) {
+            console.error('Error checking profile completion:', error);
+            reject(error);
+        }
     });
 }
 
 function storeUserDetails(userDetails) {
-    return new Promise((resolve, reject) => {
-        // Prepare your SQL query to insert or update user details
-        const query = `
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = `
       INSERT INTO UserAccounts (auth0_sub, nickname, name, email, email_verified, display_name, profile_complete, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, 1, NOW())
       ON DUPLICATE KEY UPDATE
@@ -36,67 +27,57 @@ function storeUserDetails(userDetails) {
         email = VALUES(email),
         email_verified = VALUES(email_verified),
         display_name = VALUES(display_name),
-        profile_complete = VALUES(profile_complete);`; // Don't update 'updated_at' here, and no picture_url
+        profile_complete = VALUES(profile_complete);`;
 
-        // Extract the details from userDetails object
-        const {
-            nickname,
-            name,
-            email,
-            email_verified,
-            auth0_sub,
-            display_name
-        } = userDetails;
+            // Extract the details from userDetails object
+            const {
+                nickname,
+                name,
+                email,
+                email_verified,
+                auth0_sub,
+                display_name
+            } = userDetails;
 
-        // Ensure auth0_sub is defined, as it's crucial for identifying the user
-        if (!auth0_sub) {
-            console.error('auth0_sub is undefined. It is required to uniquely identify the user.');
-            reject('auth0_sub is undefined');
-            return; // Exit the function early
-        }
-
-        const values = [
-            auth0_sub,
-            nickname || null,
-            name || null,
-            email || null,
-            email_verified || null,
-            display_name || null
-        ];
-
-        // Execute the query
-        db.execute(query, values, (err, results) => {
-            if (err) {
-                console.error('Failed to insert/update user details:', err);
-                reject(err); // Reject the Promise if there's an error
-                return;
+            if (!auth0_sub) {
+                console.error('auth0_sub is undefined. It is required to uniquely identify the user.');
+                return reject('auth0_sub is undefined');
             }
-            console.log('User details inserted/updated:', results);
-            resolve(); // Resolve the Promise when done
-        });
+
+            const values = [
+                auth0_sub,
+                nickname || null,
+                name || null,
+                email || null,
+                email_verified || null,
+                display_name || null
+            ];
+
+            await dbPromise.execute(query, values);
+            resolve();
+        } catch (err) {
+            console.error('Failed to insert/update user details:', err);
+            reject(err);
+        }
     });
 }
 
 const fetchUserData = (auth0_sub, socketId) => {
-    return new Promise((resolve, reject) => {
-        const query = 'SELECT display_name FROM UserAccounts WHERE auth0_sub = ?';
-
-		db.execute(query, [auth0_sub], (err, results, fields) => {
-			if (err) {
-				console.error('Failed to retrieve user data:', err);
-				return reject(err);
-			}
-
-			if (results.length > 0) {
-				const user = results[0];
-				connectedUsers[socketId] = user.display_name;
-				resolve(user.display_name);
-			} else {
-				console.log('No user found with the provided auth0_sub');
-				resolve(null);
-			}
-		});
-
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = 'SELECT display_name FROM UserAccounts WHERE auth0_sub = ?';
+            const [results] = await dbPromise.execute(query, [auth0_sub]);
+            if (results.length > 0) {
+                const user = results[0];
+                connectedUsers[socketId] = user.display_name;
+                resolve(user.display_name);
+            } else {
+                resolve(null);
+            }
+        } catch (err) {
+            console.error('Failed to retrieve user data:', err);
+            reject(err);
+        }
     });
 };
 

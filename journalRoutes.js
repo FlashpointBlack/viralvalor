@@ -13,7 +13,7 @@ const {
 } = require('./journalOperations');
 
 const { handleErrorResponse } = require('./utils');
-const { db } = require('./db');
+const { dbPromise } = require('./db');
 const { sendSystemDirectMessage } = require('./messageOperations');
 
 /**
@@ -22,13 +22,15 @@ const { sendSystemDirectMessage } = require('./messageOperations');
 async function isUserAdminBySub(userSub) {
   if (!userSub) return false;
   return new Promise((resolve) => {
-    db.query('SELECT isadmin FROM UserAccounts WHERE auth0_sub = ? LIMIT 1', [userSub], (err, rows) => {
-      if (err) {
+    (async () => {
+      try {
+        const [rows] = await dbPromise.query('SELECT isadmin FROM UserAccounts WHERE auth0_sub = ? LIMIT 1', [userSub]);
+        resolve(rows.length > 0 && rows[0].isadmin === 1);
+      } catch (err) {
         console.error('isUserAdminBySub DB error', err);
-        return resolve(false);
+        resolve(false);
       }
-      resolve(rows.length > 0 && rows[0].isadmin === 1);
-    });
+    })();
   });
 }
 
@@ -141,12 +143,7 @@ const setupJournalRoutes = (app) => {
         const body = `A new reflection journal prompt "${prompt.title}" is now available. You can respond to it <a href=\"${journalLink}\">here</a>.`;
 
         // Get list of all student recipients (non-educator accounts)
-        const rows = await new Promise((resolve, reject) => {
-          db.query('SELECT auth0_sub FROM UserAccounts WHERE (iseducator IS NULL OR iseducator = 0)', (err, results) => {
-            if (err) return reject(err);
-            resolve(results || []);
-          });
-        });
+        const [rows] = await dbPromise.query('SELECT auth0_sub FROM UserAccounts WHERE (iseducator IS NULL OR iseducator = 0)');
 
         if (rows && rows.length) {
           const io = req.app.get('io');
