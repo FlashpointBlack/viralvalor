@@ -22,7 +22,7 @@ const CompleteProfile = () => {
     setError('');
     
     try {
-      await axios.post('/submit-profile', { displayName });
+      await axios.post('/user/submit-profile', { displayName });
       // After profile creation, take user to full profile editor page
       navigate('/?tab=profile', { replace: true });
     } catch (err) {

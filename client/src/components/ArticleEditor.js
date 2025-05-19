@@ -35,20 +35,20 @@ const ArticleEditor = ({ onBack }) => {
     try {
       let articleId;
       if (mode === 'link') {
-        const { data } = await axios.post('/create-article-link', { title, url, description }, { headers: { 'x-user-sub': userSub } });
+        const { data } = await axios.post('articles/create-article-link', { title, url, description }, { headers: { 'x-user-sub': userSub } });
         articleId = data?.articleId;
       } else {
         const formData = new FormData();
         formData.append('title', title);
         formData.append('description', description);
         formData.append('file', file);
-        const { data } = await axios.post('/upload-article-file', formData, { headers: { 'x-user-sub': userSub, 'Content-Type': 'multipart/form-data' } });
+        const { data } = await axios.post('articles/upload-article-file', formData, { headers: { 'x-user-sub': userSub, 'Content-Type': 'multipart/form-data' } });
         articleId = data?.articleId;
       }
 
       // Immediately submit for approval if we got an id
       if (articleId) {
-        await axios.post('/submit-article-for-approval', { articleId }, { headers: { 'x-user-sub': userSub } }).catch(()=>{});
+        await axios.post('articles/submit-article-for-approval', { articleId }, { headers: { 'x-user-sub': userSub } }).catch(()=>{});
       }
 
       onBack();

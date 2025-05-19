@@ -1,0 +1,6 @@
+2025-05-17 14:00 UTC – Created initial SOW and marked M1 DONE. Next step: prepare plan for M2 (lectureRoutes extraction). 
+2025-05-17 14:15 UTC – Drafted plan_M2_lectureRoutes.md and linked it in SOW. Next: start step-01 inventory. 
+2025-05-17 14:35 UTC – Completed step-01 inventory; updated plan with 15 lecture endpoints. 
+2025-05-17 15:20 UTC – Completed step-02 scaffold lectureRoutes.js and copied handlers.
+2025-05-17 15:30 UTC – Completed step-03 wired router into server.js.
+2025-05-17 15:40 UTC – Completed step-04 helper imports; updated selfTestRoutes with lecture tests; updated SOW and plan. 

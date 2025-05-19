@@ -1,3 +1,5 @@
+console.log('[MESSAGE_ROUTES ENTRY] File loaded.');
+
 const express = require('express');
 const router = express.Router();
 const {
@@ -13,16 +15,27 @@ const { dbPromise } = require('./db');
 
 // Middleware to ensure userSub is present (expects it on req.body or req.query)
 function requireUserSub(req, res, next) {
-  const userSub = req.query.userSub || req.body.userSub;
+  let userSub =
+    req.query.userSub ||
+    req.body.userSub ||
+    req.headers['x-user-sub'] ||
+    (req.oidc && req.oidc.user && req.oidc.user.sub);
+
+  // Sanitize: if userSub is the literal string "undefined" or "null", treat as missing
+  if (userSub === 'undefined' || userSub === 'null') {
+    userSub = null; 
+  }
+
   if (!userSub) {
-    return res.status(400).json({ error: 'userSub is required' });
+    return res.status(400).json({ error: 'userSub is required or was invalid (e.g., "undefined")' });
   }
   req.userSub = userSub;
   next();
 }
 
-// List conversations for a user
+console.log('[MESSAGE_ROUTES]: Defining GET /conversations route...');
 router.get('/conversations', requireUserSub, async (req, res) => {
+  console.log(`[MESSAGE_ROUTES HANDLER]: GET /conversations reached. userSub: ${req.userSub}`);
   try {
     const conversations = await getUserConversations(req.userSub);
     // enrich with other participant for direct chats
@@ -38,10 +51,11 @@ router.get('/conversations', requireUserSub, async (req, res) => {
     }));
     res.json(enriched);
   } catch (err) {
-    console.error('Error fetching conversations:', err);
+    console.error('[MESSAGE_ROUTES HANDLER ERROR] Error fetching conversations:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
+console.log('[MESSAGE_ROUTES]: GET /conversations route defined.');
 
 // Get or create direct conversation between two users
 router.post('/conversations/direct', async (req, res) => {
@@ -178,4 +192,9 @@ router.post('/admin/system-messages', async (req, res) => {
   }
 });
 
-module.exports = { setupMessageRoutes: (app) => app.use('/api', router) }; 
+function setupMessageRoutesLocal(appOrParentRouter) {
+  console.log('[MESSAGE_ROUTES]: setupMessageRoutesLocal called. Mounting messageRouter on passed app/router at path \'/\'.');
+  appOrParentRouter.use('/', router);
+}
+
+module.exports = { setupMessageRoutes: setupMessageRoutesLocal }; 

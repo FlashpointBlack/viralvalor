@@ -18,7 +18,7 @@ const StudentArticleList = () => {
       setLoading(true);
       setError(null);
       try {
-        const { data } = await axios.get('/approved-articles', {
+        const { data } = await axios.get('articles/get-approved-articles', {
           headers: { 'x-user-sub': userSub },
         });
         setArticles(Array.isArray(data) ? data : []);
@@ -46,7 +46,7 @@ const StudentArticleList = () => {
       )}
       {article.fileNameServer && (
         <a
-          href={`/download-article-file/${article.id}`}
+          href={`/api/articles/download-article-file/${article.id}`}
           className="lecture-link-btn btn"
         >
           Download PDF

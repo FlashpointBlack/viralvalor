@@ -54,7 +54,15 @@ window.addEventListener('message', (event) => {
   console.log(`GLOBAL: Window received message:`, event.data);
 });
 
-const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = null }) => {
+let fetchCounter = 0; // Global counter for fetchEncounterData calls
+
+const EncounterDisplay = ({
+  encounterIdForDisplay = null, // Used by PresentationDisplayHost to indicate target ID
+  gameId: gameIdProp = null,
+  encounter: hostProvidedEncounter = null, // Direct encounter object from host
+  routes: hostProvidedRoutes = null, // Direct routes array from host
+  controlledByHost = false, // If true, this component is dumber and relies on host for data
+}) => {
   const { id: urlId, gameId: urlGameId } = useParams(); // Get encounter ID and game ID from URL
   // Determine the initial IDs based on props or URL parameters
   const initialEncounterId = encounterIdForDisplay || urlId;
@@ -63,15 +71,15 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
   const [currentId, setCurrentId] = useState(initialEncounterId); // Track current encounter ID
   const [currentGameId, setCurrentGameId] = useState(initialGameId); // Track game ID
   const location = useLocation();
-  const [encounter, setEncounter] = useState(null);
+  const [encounter, setEncounter] = useState(hostProvidedEncounter || null);
   const [previousEncounter, setPreviousEncounter] = useState(null);
-  const [routes, setRoutes] = useState([]);
+  const [routes, setRoutes] = useState(hostProvidedRoutes || []);
   const [pollActive, setPollActive] = useState(false);
   const [isEducatorDisplay, setIsEducatorDisplay] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const displayRef = useRef(null);
   const transitionTimeoutRef = useRef(null);
-  const [newEncounterData, setNewEncounterData] = useState(null);
+  const [newEncounterDataForPreload, setNewEncounterDataForPreload] = useState(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [transitionError, setTransitionError] = useState(null);
   const [debugInfo, setDebugInfo] = useState({
@@ -102,11 +110,14 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
   // Sync with prop changes
   // ------------------------
   useEffect(() => {
-    if (encounterIdForDisplay && encounterIdForDisplay !== currentId) {
+    if (controlledByHost && encounterIdForDisplay && encounterIdForDisplay !== currentId) {
       debugLog(`[EncounterDisplay] Prop encounterIdForDisplay changed to ${encounterIdForDisplay}. Updating currentId.`);
       setCurrentId(encounterIdForDisplay);
+    } else if (!controlledByHost && encounterIdForDisplay && encounterIdForDisplay !== currentId) {
+      // If not controlled, standard behavior
+      setCurrentId(encounterIdForDisplay);
     }
-  }, [encounterIdForDisplay]);
+  }, [encounterIdForDisplay, currentId, controlledByHost]);
 
   useEffect(() => {
     if (gameIdProp && gameIdProp !== currentGameId) {
@@ -155,10 +166,34 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
     }
   }, [location.search, currentGameId, currentId]);
 
+  // When host provides new encounter/routes data directly, update our state
+  useEffect(() => {
+    if (controlledByHost) {
+      if (hostProvidedEncounter && hostProvidedEncounter.ID === currentId) {
+        setEncounter(hostProvidedEncounter);
+      }
+      if (hostProvidedRoutes) {
+        // Assuming routes are tied to the hostProvidedEncounter
+        setRoutes(hostProvidedRoutes);
+      }
+      // If host provides data, this could be the new source for preloading images
+      if (hostProvidedEncounter) {
+        setNewEncounterDataForPreload({ Encounter: hostProvidedEncounter, EncounterRoutes: hostProvidedRoutes || [] });
+      }
+    }
+  }, [controlledByHost, hostProvidedEncounter, hostProvidedRoutes, currentId]);
+
   // Define fetchEncounterData FIRST before any functions that use it
   const fetchEncounterData = useCallback(async (encounterId, isTransition = false) => {
+    if (controlledByHost) {
+      debugLog(`FETCH_TRACE (${fetchCounter}): fetchEncounterData call SKIPPED - controlled by host. Encounter ID: ${encounterId}`);
+      return null; // Do not fetch if controlled by host
+    }
+
     // Guard: Do not fetch if encounterId is missing
     if (!encounterId) {
+      fetchCounter++;
+      debugLog(`FETCH_TRACE (${fetchCounter}): fetchEncounterData call SKIPPED - encounterId missing. Caller:`, new Error().stack.split('\n')[2].trim());
       debugLog('[EncounterDisplay] fetchEncounterData aborted: encounterId is missing.');
       setEncounter(null);
       setRoutes([]);
@@ -168,6 +203,8 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
     
     // Guard: Ensure userSub is available
     if (!userSub) {
+      fetchCounter++;
+      debugLog(`FETCH_TRACE (${fetchCounter}): fetchEncounterData call SKIPPED - userSub missing. Caller:`, new Error().stack.split('\n')[2].trim());
       debugLog('[EncounterDisplay] fetchEncounterData aborted: userSub is missing.');
       setEncounter(null);
       setRoutes([]);
@@ -175,6 +212,8 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
       return null; // Return null to indicate failure
     }
 
+    fetchCounter++;
+    debugLog(`FETCH_TRACE (${fetchCounter}): fetchEncounterData call START for ID ${encounterId}. isTransition: ${isTransition}. Caller:`, new Error().stack.split('\n')[2].trim());
     debugLog(`Fetching data for encounter ${encounterId}, isTransition: ${isTransition}`);
     setDebugInfo(prev => ({ ...prev, status: `Fetching data for encounter ${encounterId}` }));
     setLoading(true); // Set loading true here
@@ -191,7 +230,7 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
 
       const response = await axios({
         method: 'get',
-        url: `/GetEncounterData/${encounterId}`,
+        url: `/encounters/GetEncounterData/${encounterId}`,
         withCredentials: true, 
         headers: { 'x-user-sub': userSub },
         params: { _t: new Date().getTime() },
@@ -215,7 +254,7 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
       
       if (isTransition) {
         // For transitions, store data for preloading/later application
-        setNewEncounterData({ Encounter: encounterData, EncounterRoutes: routesData });
+        setNewEncounterDataForPreload({ Encounter: encounterData, EncounterRoutes: routesData });
       } else {
         // For direct loads, update state immediately
         setEncounter(encounterData);
@@ -253,13 +292,13 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
       // Clear encounter state on error
       setEncounter(null);
       setRoutes([]);
-      setNewEncounterData(null); 
+      setNewEncounterDataForPreload(null); 
       setDebugInfo(prev => ({ ...prev, status: `ERROR: ${errorMsg}` }));
       return null; // Indicate failure
     } finally {
       setLoading(false);
     }
-  }, [userSub, currentId]);
+  }, [userSub, currentId, controlledByHost]);
 
   // Function to extract image URLs from any HTML (src or background url())
   const extractImageUrls = useCallback((htmlString) => {
@@ -364,11 +403,11 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
     setIsTransitioning(false);
     
     // If we have new encounter data, apply it
-    if (newEncounterData) {
+    if (newEncounterDataForPreload) {
       debugLog('Applying pending encounter data during force reset');
-      setEncounter(newEncounterData.Encounter);
-      setRoutes(newEncounterData.EncounterRoutes || []);
-      setNewEncounterData(null);
+      setEncounter(newEncounterDataForPreload.Encounter);
+      setRoutes(newEncounterDataForPreload.EncounterRoutes || []);
+      setNewEncounterDataForPreload(null);
     } else {
       debugLog('WARNING: No new encounter data available during force reset');
     }
@@ -398,7 +437,7 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
     setTimeout(() => {
       setTransitionError(null);
     }, 3000);
-  }, [newEncounterData]);
+  }, [newEncounterDataForPreload]);
 
   // Function to handle failed transitions by retrying
   const handleTransitionFailure = useCallback((encounterId, error) => {
@@ -440,7 +479,7 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
             if (!data) {
               throw new Error('Failed to fetch encounter data during retry');
             }
-            setNewEncounterData(data);
+            setNewEncounterDataForPreload(data);
             // Skip image loading and immediately apply the data
             setImagesLoaded(true);
           })
@@ -449,10 +488,10 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
             if (newRetryCount >= MAX_TRANSITION_RETRIES) {
               setTransitionError(`All transition attempts failed. Trying to continue anyway...`);
               // Force transition completion even if we failed
-              if (newEncounterData) {
-                setEncounter(newEncounterData.Encounter);
-                setRoutes(newEncounterData.EncounterRoutes || []);
-                setNewEncounterData(null);
+              if (newEncounterDataForPreload) {
+                setEncounter(newEncounterDataForPreload.Encounter);
+                setRoutes(newEncounterDataForPreload.EncounterRoutes || []);
+                setNewEncounterDataForPreload(null);
               }
               setIsTransitioning(false);
             } else {
@@ -470,22 +509,24 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
       }));
       
       // If we have any data from previous attempts, use it
-      if (newEncounterData) {
+      if (newEncounterDataForPreload) {
         debugLog('Using available encounter data despite failure');
-        setEncounter(newEncounterData.Encounter);
-        setRoutes(newEncounterData.EncounterRoutes || []);
-        setNewEncounterData(null);
+        setEncounter(newEncounterDataForPreload.Encounter);
+        setRoutes(newEncounterDataForPreload.EncounterRoutes || []);
+        setNewEncounterDataForPreload(null);
       }
       
       // Make sure we're not stuck in transitioning state
       setIsTransitioning(false);
       setImagesLoaded(false);
     }
-  }, [transitionRetryCount, forceResetTransition, fetchEncounterData, newEncounterData]);
+  }, [transitionRetryCount, forceResetTransition, fetchEncounterData, newEncounterDataForPreload]);
 
   // Modify handleEncounterTransition to improve transition flow
   const handleEncounterTransition = useCallback(async (newEncounterId) => { // Make async
     try {
+      fetchCounter++;
+      debugLog(`FETCH_TRACE (${fetchCounter}): handleEncounterTransition call START for ID ${newEncounterId}. Caller:`, new Error().stack.split('\n')[2].trim());
       // Prevent transitions to the current ID
       if (newEncounterId === currentId) {
         debugLog(`Already at requested encounter ${newEncounterId}, ignoring transition request`);
@@ -536,17 +577,17 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
       }
 
       // Apply the new data using `fetchedData` directly.
-      // This avoids potential stale closures if relying on `newEncounterData` state here.
-      // `fetchEncounterData` already set the `newEncounterData` state variable,
+      // This avoids potential stale closures if relying on `newEncounterDataForPreload` state here.
+      // `fetchEncounterData` already set the `newEncounterDataForPreload` state variable,
       // which the image preloading useEffect can use.
       setEncounter(fetchedData.Encounter);
       setRoutes(fetchedData.EncounterRoutes || []);
       
-      // Clear newEncounterData state. This signals that this specific batch of data
+      // Clear newEncounterDataForPreload state. This signals that this specific batch of data
       // has been processed for the main encounter display. The image preloading useEffect
-      // (which depends on newEncounterData state) would have used the value of newEncounterData 
+      // (which depends on newEncounterDataForPreload state) would have used the value of newEncounterDataForPreload 
       // that was set by fetchEncounterData.
-      setNewEncounterData(null); 
+      setNewEncounterDataForPreload(null); 
       
       // Now start the transition - put the previous encounter on top with fade-out effect
       setIsTransitioning(true);
@@ -567,7 +608,7 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
       setIsTransitioning(false);
       setLoading(false); // Ensure loading is off
     }
-  }, [currentId, encounter, fetchEncounterData, newEncounterData, gatherImageUrlsFromEncounter, preloadImages]); // Dependencies
+  }, [currentId, encounter, fetchEncounterData, newEncounterDataForPreload, gatherImageUrlsFromEncounter, preloadImages]); // Dependencies
 
   // Handle message events - simplified approach
   const handleMessage = useCallback((data) => {
@@ -713,26 +754,31 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
       return; 
     }
     
-    // If we have an encounter ID (from URL or props) and haven't loaded the encounter yet, fetch it.
-    const initialId = urlId || encounterIdForDisplay;
-    if (initialId && !encounter && !loading) { 
-      debugLog(`Initial fetch for encounter ID: ${initialId}`);
+    // Only fetch if not controlled by host and data is missing
+    if (!controlledByHost && initialEncounterId && !encounter && !loading) {
+      debugLog(`Initial fetch for encounter ID: ${initialEncounterId}`);
       // Use currentId state for consistency, even on initial load
-      if (currentId !== initialId) {
-         setCurrentId(initialId);
+      if (currentId !== initialEncounterId) {
+         setCurrentId(initialEncounterId);
       }
-      fetchEncounterData(initialId, false) // Fetch directly, not as transition
+      fetchEncounterData(initialEncounterId, false) // Fetch directly, not as transition
         .catch(error => {
           // fetchEncounterData already handles setting error state
-          logError(`Error during initial data fetch for ${initialId}: ${error.message}`, error);
+          logError(`Error during initial data fetch for ${initialEncounterId} (not host controlled): ${error.message}`, error);
         });
-    } else if (!urlId) {
+    } else if (controlledByHost && initialEncounterId && hostProvidedEncounter && hostProvidedEncounter.ID === initialEncounterId) {
+      // If controlled by host and data already provided for initialId, set it
+      debugLog(`[EncounterDisplay] Controlled by host. Initial data already provided for ${initialEncounterId}. Setting encounter state.`);
+      setEncounter(hostProvidedEncounter);
+      setRoutes(hostProvidedRoutes || []);
+      setNewEncounterDataForPreload({ Encounter: hostProvidedEncounter, EncounterRoutes: hostProvidedRoutes || [] });
+    } else if (!controlledByHost && !urlId) {
       // If no ID in URL, we might not load anything by default or load a specific root
       // For now, we do nothing, waiting for a message or socket event.
       debugLog(`No ID in URL. Waiting for external trigger (message/socket) to load encounter.`);
       // To load a default, you would call fetchRootEncounters first, then fetchEncounterData(defaultId)
     }
-  }, [urlId, userSub, currentId, encounter, loading, isTransitioning, currentGameId, fetchEncounterData]); 
+  }, [controlledByHost, hostProvidedEncounter, hostProvidedRoutes, urlId, userSub, currentId, encounter, loading, isTransitioning, currentGameId, fetchEncounterData, encounterIdForDisplay]); 
 
   // Handle toggling fullscreen mode
   const toggleFullscreen = () => {
@@ -783,8 +829,8 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
 
   // Preload images when new encounter data arrives
   useEffect(() => {
-    if (newEncounterData && !imagesLoaded) {
-      const { Encounter } = newEncounterData;
+    if (newEncounterDataForPreload && !imagesLoaded) {
+      const { Encounter } = newEncounterDataForPreload;
 
       debugLog(`Preloading images for new encounter ID ${Encounter.ID}`);
 
@@ -834,10 +880,10 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
 
       return () => clearTimeout(timeoutId);
     }
-  }, [newEncounterData, imagesLoaded, gatherImageUrlsFromEncounter]);
+  }, [newEncounterDataForPreload, imagesLoaded, gatherImageUrlsFromEncounter]);
 
   // Render loading state
-  if (!encounter && !isTransitioning) {
+  if (!controlledByHost && loading && !encounter && !isTransitioning) {
     return (
       <div className="loading-display">
         <p>Loading encounter...</p>
@@ -860,6 +906,27 @@ const EncounterDisplay = ({ encounterIdForDisplay = null, gameId: gameIdProp = n
             }}
           />
         )}
+      </div>
+    );
+  } else if (controlledByHost && !encounter && !isTransitioning) {
+    // If controlled by host and no encounter data yet, it might be fetching or waiting.
+    // Display a simple placeholder; PresentationDisplayHost handles the actual loading indicator for its fetch.
+    return (
+      <div className="loading-display">
+        <p>Waiting for presentation data...</p>
+        {/* Optionally show transitionError if passed from host or managed here for host errors */}
+        {transitionError && <p className="error-message">Error: {transitionError}</p>}
+      </div>
+    );
+  }
+
+  // If encounter is null (e.g. host hasn't provided it yet, or an error occurred), don't try to render its details.
+  if (!encounter) {
+    // This case should ideally be handled by the loading states above or an error display
+    // but as a fallback, if encounter is null post-loading, show minimal UI.
+    return (
+      <div className="encounter-display placeholder">
+        <p>{error || "Encounter data not available."}</p>
       </div>
     );
   }

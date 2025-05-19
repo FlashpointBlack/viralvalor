@@ -31,7 +31,7 @@ const LectureDetail = ({ lecture, onClose }) => {
       if (isNew) {
         // Creation path: link OR file
         if (url) {
-          await axios.post('/create-lecture-link', { title, url, description }, {
+          await axios.post('lectures/create-lecture-link', { title, url, description }, {
             headers: { 'x-user-sub': userSub }
           });
         } else if (file) {
@@ -39,7 +39,7 @@ const LectureDetail = ({ lecture, onClose }) => {
           formData.append('title', title);
           formData.append('description', description);
           formData.append('file', file);
-          await axios.post('/upload-lecture-file', formData, {
+          await axios.post('lectures/upload-lecture-file', formData, {
             headers: { 'Content-Type': 'multipart/form-data', 'x-user-sub': userSub }
           });
         } else {
@@ -49,7 +49,7 @@ const LectureDetail = ({ lecture, onClose }) => {
         }
       } else {
         // Update existing lecture details (no file uploads here)
-        await axios.post('/update-lecture', { id: lecture.id, title, description, url }, {
+        await axios.post('lectures/update-lecture', { id: lecture.id, title, description, url }, {
           headers: { 'x-user-sub': userSub }
         });
       }

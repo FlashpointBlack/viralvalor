@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './PresentationLanding.css'; // Reuse same vibrant background & styles
 import axios from 'axios';
 
-const PresentationEnd = ({ hostSubForDisplay, gameId }) => {
+const PresentationEnd = ({ hostSubForDisplay, hostSub, gameId }) => {
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const [presenter, setPresenter] = useState(null);
@@ -13,20 +13,20 @@ const PresentationEnd = ({ hostSubForDisplay, gameId }) => {
   // Load presenter info from hostSubForDisplay prop or query params as fallback
   useEffect(() => {
     // Use prop if provided, otherwise try URL param as fallback
-    let hostSub = hostSubForDisplay;
+    let hostSubLocal = hostSubForDisplay || hostSub;
     
     // Fallback to URL param if no prop
     const urlParams = new URLSearchParams(window.location.search);
-    if (!hostSub) {
-      hostSub = urlParams.get('hostSub');
+    if (!hostSubLocal) {
+      hostSubLocal = urlParams.get('hostSub');
     }
 
-    console.log(`[PresentationEnd] Loading presenter info for hostSub: ${hostSub}`);
+    console.log(`[PresentationEnd] Loading presenter info for hostSub: ${hostSubLocal}`);
 
     const fetchPresenter = async (sub) => {
       try {
         // Convert sub -> numeric ID
-        const { data } = await axios.get(`/api/user/by-sub/${encodeURIComponent(sub)}`);
+        const { data } = await axios.get(`/user/by-sub/${encodeURIComponent(sub)}`);
         const userId = data?.id;
         if (!userId) {
           setError('Presenter not found');
@@ -34,7 +34,7 @@ const PresentationEnd = ({ hostSubForDisplay, gameId }) => {
           return;
         }
 
-        const userResp = await axios.get(`/api/users/${userId}`);
+        const userResp = await axios.get(`/users/${userId}`);
         setPresenter(userResp.data);
         console.log('[PresentationEnd] Loaded presenter data:', userResp.data);
       } catch (err) {
@@ -45,13 +45,13 @@ const PresentationEnd = ({ hostSubForDisplay, gameId }) => {
       }
     };
 
-    if (hostSub) {
-      fetchPresenter(hostSub);
+    if (hostSubLocal) {
+      fetchPresenter(hostSubLocal);
     } else {
       console.warn('[PresentationEnd] No hostSub provided via prop or URL');
       setLoading(false);
     }
-  }, [hostSubForDisplay]);
+  }, [hostSubForDisplay, hostSub]);
 
   // Allow listener for incoming LOAD_ENCOUNTER to support transitions if needed
   useEffect(() => {

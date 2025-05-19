@@ -416,7 +416,7 @@ const MobilePoll = () => {
 
     (async () => {
       try {
-        const { data } = await axios.post('/api/conversations/direct', {
+        const { data } = await axios.post('/conversations/direct', {
           userSubA: authUser.sub,
           userSubB: presenterSub
         });
@@ -449,7 +449,7 @@ const MobilePoll = () => {
     try {
       let convId = presenterConversationId;
       if (!convId && isAuthenticated && authUser?.sub) {
-        const { data } = await axios.post('/api/conversations/direct', {
+        const { data } = await axios.post('/conversations/direct', {
           userSubA: authUser.sub,
           userSubB: presenterSub
         });
@@ -627,7 +627,7 @@ const MobilePoll = () => {
 
     try {
       // Ensure direct conversation exists
-      const convRes = await fetch('/api/conversations/direct', {
+      const convRes = await fetch('/conversations/direct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userSubA: authUser.sub, userSubB: presenterSub })

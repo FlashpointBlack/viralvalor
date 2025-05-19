@@ -15,24 +15,7 @@ const {
 const { handleErrorResponse } = require('./utils');
 const { dbPromise } = require('./db');
 const { sendSystemDirectMessage } = require('./messageOperations');
-
-/**
- * Quick helper – duplicated from routes.js so this file can stand alone.
- */
-async function isUserAdminBySub(userSub) {
-  if (!userSub) return false;
-  return new Promise((resolve) => {
-    (async () => {
-      try {
-        const [rows] = await dbPromise.query('SELECT isadmin FROM UserAccounts WHERE auth0_sub = ? LIMIT 1', [userSub]);
-        resolve(rows.length > 0 && rows[0].isadmin === 1);
-      } catch (err) {
-        console.error('isUserAdminBySub DB error', err);
-        resolve(false);
-      }
-    })();
-  });
-}
+const { isUserAdminBySub } = require('./utils/auth');
 
 const setupJournalRoutes = (app) => {
   // ---------------- Admin: Manage prompts -----------------

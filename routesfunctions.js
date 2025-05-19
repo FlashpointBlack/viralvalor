@@ -118,20 +118,10 @@ function GetEncounterData(encounterId) {
             );
             
             // Function to handle image fetching for character models
-            const fetchCharacterImage = async (characterModelId) => {
-                const characterModels = await executeQuery(
-                    'SELECT * FROM CharacterModels WHERE ID = ?', 
-                    [characterModelId]
-                );
-                
-                if (characterModels.length === 0) {
-                    return null;
-                }
-                
-                const characterModel = characterModels[0];
+            const fetchCharacterImage = async (imageId) => {
                 const images = await executeQuery(
-                    'SELECT * FROM Images WHERE ID = ?', 
-                    [characterModel.Image]
+                    'SELECT FileNameServer FROM Images WHERE ID = ?', 
+                    [imageId]
                 );
                 
                 if (images.length === 0) {
@@ -142,20 +132,10 @@ function GetEncounterData(encounterId) {
             };
             
             // Function to handle image fetching for backdrops
-            const fetchBackdropImage = async (backdropId) => {
-                const backdrops = await executeQuery(
-                    'SELECT * FROM Backdrops WHERE ID = ?', 
-                    [backdropId]
-                );
-                
-                if (backdrops.length === 0) {
-                    return null;
-                }
-                
-                const backdrop = backdrops[0];
+            const fetchBackdropImage = async (imageId) => {
                 const images = await executeQuery(
-                    'SELECT * FROM Images WHERE ID = ?', 
-                    [backdrop.Image]
+                    'SELECT FileNameServer FROM Images WHERE ID = ?', 
+                    [imageId]
                 );
                 
                 if (images.length === 0) {
@@ -169,7 +149,7 @@ function GetEncounterData(encounterId) {
             if (encounter.ImageBackdrop) {
                 const fileNameServer = await fetchBackdropImage(encounter.ImageBackdrop);
                 if (fileNameServer) {
-                    encounter.BackdropImage = `<img src="images/uploads/backdrops/${fileNameServer}" class="EncounterImagePreview"/>`;
+                    encounter.BackdropImage = `<img src="/images/uploads/backdrops/${fileNameServer}" alt="Backdrop">`;
                 } else {
                     encounter.BackdropImage = '';
                 }
@@ -181,7 +161,7 @@ function GetEncounterData(encounterId) {
             if (encounter.ImageCharacter1) {
                 const fileNameServer = await fetchCharacterImage(encounter.ImageCharacter1);
                 if (fileNameServer) {
-                    encounter.Character1Image = `<img src="images/uploads/characters/${fileNameServer}" class="EncounterImagePreview"/>`;
+                    encounter.Character1Image = `<img src="/images/uploads/characters/${fileNameServer}" alt="Character 1">`;
                 } else {
                     encounter.Character1Image = '';
                 }
@@ -193,7 +173,7 @@ function GetEncounterData(encounterId) {
             if (encounter.ImageCharacter2) {
                 const fileNameServer = await fetchCharacterImage(encounter.ImageCharacter2);
                 if (fileNameServer) {
-                    encounter.Character2Image = `<img src="images/uploads/characters/${fileNameServer}" class="EncounterImagePreview"/>`;
+                    encounter.Character2Image = `<img src="/images/uploads/characters/${fileNameServer}" alt="Character 2">`;
                 } else {
                     encounter.Character2Image = '';
                 }
@@ -296,27 +276,35 @@ function GetCharacterData(characterId) {
             );
             
             if (characterData.length === 0) {
-                return reject(new Error(`No character found with ID ${characterId}`));
+                // No CharacterModels row – fallback to orphan image record
+                const orphan = await executeQuery(
+                    'SELECT FileNameServer FROM Images WHERE ID = ? AND FileType = "ImageCharacter" LIMIT 1',
+                    [characterId]
+                );
+
+                if (orphan.length) {
+                    return resolve({
+                        Title: '',
+                        Description: '',
+                        FileName: orphan[0].FileNameServer
+                    });
+                }
+
+                return resolve({});
             }
-            
+
             const character = characterData[0];
             const images = await executeQuery(
-                'SELECT * FROM Images WHERE ID = ? LIMIT 1', 
+                'SELECT FileNameServer FROM Images WHERE ID = ? LIMIT 1', 
                 [character.Image]
             );
             
-            if (images.length === 0) {
-                return resolve({
-                    Title: character.Title,
-                    Description: character.Description,
-                    FileName: null
-                });
-            }
+            const fileName = images.length ? images[0].FileNameServer : null;
             
             resolve({
                 Title: character.Title,
                 Description: character.Description,
-                FileName: images[0].FileNameServer
+                FileName: fileName
             });
         } catch (error) {
             reject(error);
@@ -331,9 +319,9 @@ function GetCharacterData(characterId) {
 function GetAllCharacterData() {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = 'SELECT b.ID, b.Title, b.Description, i.FileNameServer, i.FileType, i._REC_Creation_Timestamp AS CreationTimestamp ' +
-                'FROM CharacterModels b ' +
-                'LEFT JOIN Images i ON b.Image = i.ID';
+            const query =
+                // 1) CharacterModels with metadata
+                'SELECT cm.ID                             AS ID,\n                        cm.Title                          AS Title,\n                        cm.Description                    AS Description,\n                        i.FileNameServer                  AS FileNameServer,\n                        i.FileType                        AS FileType,\n                        i._REC_Creation_Timestamp         AS CreationTimestamp\n                 FROM CharacterModels cm\n                 LEFT JOIN Images i ON i.ID = cm.Image\n                 UNION ALL\n                 -- 2) Orphan character images (no matching CharacterModels row)\n                 SELECT i.ID                              AS ID,\n                        ""                               AS Title,\n                        ""                               AS Description,\n                        i.FileNameServer                  AS FileNameServer,\n                        i.FileType                        AS FileType,\n                        i._REC_Creation_Timestamp         AS CreationTimestamp\n                 FROM Images i\n                 WHERE i.FileType = "ImageCharacter"\n                   AND NOT EXISTS (SELECT 1 FROM CharacterModels WHERE Image = i.ID)';
             
             const results = await executeQuery(query);
             
@@ -367,31 +355,42 @@ function GetBackdropData(backdropId) {
             );
             
             if (results.length === 0) {
-                return resolve({}); // Return empty object if no backdrop found
+                // Fallback: treat the supplied ID as an Images.ID – this happens
+                // when the image was uploaded but no Backdrops metadata row was
+                // created.  We still want to return a usable filename so the
+                // client can display the backdrop.
+
+                const orphanImages = await executeQuery(
+                    'SELECT FileNameServer FROM Images WHERE ID = ? AND FileType = "ImageBackdrop" LIMIT 1',
+                    [backdropId]
+                );
+
+                if (orphanImages.length) {
+                    return resolve({
+                        Title: '',
+                        Description: '',
+                        FileName: orphanImages[0].FileNameServer
+                    });
+                }
+
+                // Truly unknown – return empty object so caller can handle.
+                return resolve({});
             }
-            
+
             const backdrop = results[0];
-            
-            // Get the associated image
+
+            // Get the associated image from Images table
             const imageResults = await executeQuery(
-                'SELECT * FROM Images WHERE ID = ? LIMIT 1', 
+                'SELECT FileNameServer FROM Images WHERE ID = ? LIMIT 1',
                 [backdrop.Image]
             );
-            
-            if (imageResults.length === 0) {
-                return resolve({
-                    Title: backdrop.Title,
-                    Description: backdrop.Description,
-                    FileName: null
-                });
-            }
-            
-            const image = imageResults[0];
-            
+
+            const fileName = imageResults.length ? imageResults[0].FileNameServer : null;
+
             resolve({
                 Title: backdrop.Title,
                 Description: backdrop.Description,
-                FileName: image.FileNameServer
+                FileName: fileName
             });
         } catch (error) {
             reject(error);
@@ -406,9 +405,9 @@ function GetBackdropData(backdropId) {
 function GetAllBackdropData() {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = 'SELECT b.ID, b.Title, b.Description, i.FileNameServer, i.FileType, i._REC_Creation_Timestamp AS CreationTimestamp ' +
-                'FROM Backdrops b ' +
-                'LEFT JOIN Images i ON b.Image = i.ID';
+            const query =
+                // 1) Backdrops with metadata
+                'SELECT b.ID                              AS ID,\n                        b.Title                           AS Title,\n                        b.Description                     AS Description,\n                        i.FileNameServer                  AS FileNameServer,\n                        i.FileType                        AS FileType,\n                        i._REC_Creation_Timestamp         AS CreationTimestamp\n                 FROM Backdrops b\n                 LEFT JOIN Images i ON i.ID = b.Image\n                 UNION ALL\n                 -- 2) Orphan backdrop images (no Backdrops row)\n                 SELECT i.ID                              AS ID,\n                        ""                               AS Title,\n                        ""                               AS Description,\n                        i.FileNameServer                  AS FileNameServer,\n                        i.FileType                        AS FileType,\n                        i._REC_Creation_Timestamp         AS CreationTimestamp\n                 FROM Images i\n                 WHERE i.FileType = "ImageBackdrop"\n                   AND NOT EXISTS (SELECT 1 FROM Backdrops WHERE Image = i.ID)';
             
             const results = await executeQuery(query);
             
@@ -522,12 +521,12 @@ function GetInstructionData(instructionId) {
 function GetAllInstructionData() {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = 'SELECT s.ID, s.Title, s.Description, i.FileNameServer, i.FileType, i._REC_Creation_Timestamp AS CreationTimestamp ' +
-                'FROM StudentInstructions s ' +
-                'LEFT JOIN Images i ON s.Image = i.ID';
-
+            const query =
+                // 1) StudentInstructions with metadata
+                'SELECT s.ID                              AS ID,\n                        s.Title                           AS Title,\n                        s.Description                     AS Description,\n                        i.FileNameServer                  AS FileNameServer,\n                        i.FileType                        AS FileType,\n                        i._REC_Creation_Timestamp         AS CreationTimestamp\n                 FROM StudentInstructions s\n                 LEFT JOIN Images i ON i.ID = s.Image\n                 UNION ALL\n                 -- 2) Orphan instruction images (no StudentInstructions row)\n                 SELECT i.ID                              AS ID,\n                        ""                               AS Title,\n                        ""                               AS Description,\n                        i.FileNameServer                  AS FileNameServer,\n                        i.FileType                        AS FileType,\n                        i._REC_Creation_Timestamp         AS CreationTimestamp\n                 FROM Images i\n                 WHERE i.FileType = "ImageInstruction"\n                   AND NOT EXISTS (SELECT 1 FROM StudentInstructions WHERE Image = i.ID)';
+            
             const results = await executeQuery(query);
-
+            
             const instructions = results.map(row => ({
                 ID: row.ID,
                 Title: row.Title,
@@ -536,7 +535,7 @@ function GetAllInstructionData() {
                 FileType: row.FileType,
                 _REC_Creation_Timestamp: row.CreationTimestamp
             }));
-
+            
             resolve(instructions);
         } catch (error) {
             reject(error);

@@ -31,7 +31,7 @@ const QuestionPractice = () => {
     try {
       const params = new URLSearchParams(location.search);
       const lectureId = params.get('lecture');
-      const endpoint = lectureId ? `/lecture/${lectureId}/questions` : '/student-questions';
+      const endpoint = lectureId ? `lecture/${lectureId}/questions` : 'student-questions';
       const { data } = await axios.get(endpoint);
       let list = Array.isArray(data) ? [...data] : [];
       // Shuffle questions so every practice session has a different order
@@ -58,7 +58,7 @@ const QuestionPractice = () => {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await axios.get(`/student-question/${qid}`);
+      const { data } = await axios.get(`questions/student-question/${qid}`);
       // Shuffle the answer options so their placement changes each time
       const shuffle = (arr) => arr
         .map((value) => ({ value, sort: Math.random() }))
@@ -86,7 +86,7 @@ const QuestionPractice = () => {
       return;
     }
     try {
-      const { data } = await axios.get(`/my-question-attempts?questionId=${qid}`, {
+      const { data } = await axios.get(`questions/my-question-attempts?questionId=${qid}`, {
         headers: { 'x-user-sub': userSub }
       });
       setAttempts(Array.isArray(data) ? data : []);
@@ -114,7 +114,7 @@ const QuestionPractice = () => {
     setError(null);
     try {
       const timeTakenMs = questionStartRef.current ? Date.now() - questionStartRef.current : null;
-      const { data } = await axios.post('/record-question-attempt', {
+      const { data } = await axios.post('questions/record-question-attempt', {
         questionId: selectedQuestionId,
         selectedOptionId,
         timeTakenMs,

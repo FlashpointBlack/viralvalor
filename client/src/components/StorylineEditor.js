@@ -89,20 +89,20 @@ const StorylineEditor = () => {
   const runDiagnostics = async () => {
     console.log('Running diagnostics...');
     try {
-      await axios.get('/api/user/profile-status');
+      await axios.get('user/profile-status');
     } catch {}
     try {
-      await axios.get('/root-encounters');
+      await axios.get('encounters/root-encounters');
     } catch {}
     try {
-      await axios.get('/unlinked-encounters');
+      await axios.get('encounters/unlinked-encounters');
     } catch {}
     console.log('Diagnostics complete.');
   };
 
   const fetchRootEncounters = async () => {
     try {
-      const response = await axios.get('/root-encounters', { 
+      const response = await axios.get('encounters/root-encounters', { 
         withCredentials: true,
         headers: { 'x-user-sub': userSub },
         params: { _t: new Date().getTime() }
@@ -173,7 +173,7 @@ const StorylineEditor = () => {
     try {
       const response = await axios({
         method: 'post',
-        url: '/create-blank-encounter', 
+        url: 'encounters/create-blank-encounter', 
         data: { userSub },
         withCredentials: true,
         headers: {
@@ -221,7 +221,7 @@ const StorylineEditor = () => {
       try {
         await axios({
           method: 'post',
-          url: '/delete-root-encounter',
+          url: 'encounters/delete-root-encounter',
           data: { rootEncounterId: parseInt(selectedRootEncounterId, 10) },
           withCredentials: true,
           headers: { 'x-user-sub': userSub, 'Content-Type': 'application/json' }
@@ -260,9 +260,32 @@ const StorylineEditor = () => {
       [field]: value
     }));
 
+    // NEW: keep the local cache in sync so future loads reflect the change
+    setEncounterCache(prev => {
+      if (!prev[activeEncounterId]) {
+        return {
+          ...prev,
+          [activeEncounterId]: {
+            encounter: { [field]: value },
+            routes: encounterRoutes
+          }
+        };
+      }
+      return {
+        ...prev,
+        [activeEncounterId]: {
+          ...prev[activeEncounterId],
+          encounter: {
+            ...prev[activeEncounterId].encounter,
+            [field]: value
+          }
+        }
+      };
+    });
+
     // Persist the change in the background
     axios
-      .post('/update-encounter-field', {
+      .post('encounters/update-encounter-field', {
         id: activeEncounterId,
         field,
         value
@@ -277,7 +300,7 @@ const StorylineEditor = () => {
     if (!activeEncounterId || !userSub) return;
     
     try {
-      const response = await axios.post('/create-encounter-choice', {
+      const response = await axios.post('encounters/create-encounter-choice', {
         EncounterID: activeEncounterId,
         UserSub: userSub
       });
@@ -300,7 +323,7 @@ const StorylineEditor = () => {
   const updateEncounterChoice = async (choiceId, title) => {
     if (!userSub) return;
     try {
-      await axios.post('/update-encounter-choice', {
+      await axios.post('encounters/update-encounter-choice', {
         ID: choiceId,
         Title: title
       });
@@ -320,7 +343,7 @@ const StorylineEditor = () => {
   const deleteEncounterChoice = async (choiceId) => {
     if (!userSub) return;
     try {
-      await axios.post('/delete-encounter-choice', { ID: choiceId });
+      await axios.post('encounters/delete-encounter-choice', { ID: choiceId });
       
       // Remove the choice from local state
       setEncounterRoutes(prev => 
@@ -350,7 +373,7 @@ const StorylineEditor = () => {
       // 1. Update the link on the server
       await axios({
         method: 'post',
-        url: '/set-receiving-encounter',
+        url: 'encounters/set-receiving-encounter',
         data: {
           RouteID: routeId,
           selectedEncounterID: receivingEncounterId
@@ -365,7 +388,7 @@ const StorylineEditor = () => {
       // 2. Refetch the parent encounter data to get the updated routes
       const response = await axios({
         method: 'get',
-        url: `/GetEncounterData/${parentEncounterId}`,
+        url: `encounters/GetEncounterData/${parentEncounterId}`,
         withCredentials: true,
         headers: { 'x-user-sub': userSub },
         params: { _t: new Date().getTime() } // Cache buster
@@ -415,7 +438,7 @@ const StorylineEditor = () => {
       // 1. Duplicate the current encounter
       const duplicateResponse = await axios({
         method: 'post',
-        url: '/duplicateEncounter',
+        url: 'encounters/duplicateEncounter',
         data: { encounterId: activeEncounterId, userSub },
         withCredentials: true,
         headers: { 'Content-Type': 'application/json', 'x-user-sub': userSub }
@@ -446,7 +469,7 @@ const StorylineEditor = () => {
 
   const fetchUnlinkedEncounters = async () => {
     try {
-      const response = await axios.get('/unlinked-encounters');
+      const response = await axios.get('encounters/unlinked-encounters');
       return response.data;
     } catch (err) {
       console.error('Error fetching unlinked encounters:', err);
@@ -532,7 +555,7 @@ const StorylineEditor = () => {
       axiosDefaults: { withCredentials: axios.defaults.withCredentials, hasUserSubHeader: !!axios.defaults.headers.common['x-user-sub'] }
     });
     try {
-      const profileResponse = await axios.get('/api/user/profile-status');
+      const profileResponse = await axios.get('user/profile-status');
       console.log('Profile status check succeeded', profileResponse.data);
     } catch (err) {
       console.error('Profile status check failed', { status: err.response?.status, data: err.response?.data, error: err.message });
@@ -552,7 +575,7 @@ const StorylineEditor = () => {
     try {
       const testResponse = await axios({
         method: 'post',
-        url: '/create-blank-encounter',
+        url: 'encounters/create-blank-encounter',
         data: { userSub },
         withCredentials: true,
         headers: { 'Content-Type': 'application/json', 'x-user-sub': userSub }
@@ -621,7 +644,7 @@ const StorylineEditor = () => {
         // Fetch from server
         const response = await axios({
           method: 'get',
-          url: `/GetEncounterData/${id}`,
+          url: `encounters/GetEncounterData/${id}`,
           withCredentials: true,
           headers: { 'x-user-sub': userSub },
           params: { _t: new Date().getTime() }

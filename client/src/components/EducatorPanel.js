@@ -197,9 +197,16 @@ const EducatorPanel = ({ embedded = false }) => {
   // Add a useRef for storing cached breadcrumb elements
   const breadcrumbNodesRef = useRef({});
 
-  // Get user sub from AuthContext - corrected to prefer authUser from Auth0
+  // Prefer Auth0 user sub when available, otherwise fall back to any value previously persisted
+  // in localStorage (set by AuthContext) so that we always have the presenter identifier
+  // when sending the SHOW_END_SCREEN message to the display window.
   const { user: auth0User } = useAuth0(); // Renamed to avoid conflict with user from useAuth()
-  const userSub = auth0User?.sub;
+  const { user: fallbackAuthUser } = useAuth(); // Might contain data sooner than Auth0 in some flows
+
+  const userSub = auth0User?.sub 
+                || fallbackAuthUser?.sub 
+                || localStorage.getItem('userSub') 
+                || null; // Explicit null if all sources fail
 
   const isPollRunningRef = useRef(isPollRunning);
   const totalVotesRef = useRef(totalVotes);
@@ -673,7 +680,7 @@ const EducatorPanel = ({ embedded = false }) => {
       setDisplayCommunicationStatus('loading');
     }
     
-    return axios.get(`/GetEncounterData/${encounterId}`)
+    return axios.get(`/encounters/GetEncounterData/${encounterId}`)
       .then(({ data }) => {
         setDisplayCommunicationStatus('connected');
         if (data && data.Encounter) {
@@ -804,7 +811,7 @@ const EducatorPanel = ({ embedded = false }) => {
   const fetchEncounterDataSilently = async (encounterId) => {
     try {
       debugLog(`Silently fetching data for encounter ${encounterId}`);
-      const response = await axios.get(`/GetEncounterData/${encounterId}`);
+      const response = await axios.get(`/encounters/GetEncounterData/${encounterId}`);
       const data = response.data;
       
       if (data && data.Encounter) {
@@ -981,7 +988,7 @@ const EducatorPanel = ({ embedded = false }) => {
       setDisplayCommunicationStatus('loading');
     }
     
-    axios.get('/root-encounters', {
+    axios.get('encounters/root-encounters', {
       withCredentials: true, // Ensure cookies are sent
       headers: {
         'x-user-sub': userSub // Add the user sub header
@@ -1593,7 +1600,7 @@ const EducatorPanel = ({ embedded = false }) => {
           pureSub = `${parts[0]}|${parts[1]}`;
         }
 
-        const { data } = await axios.get(`/api/user/by-sub/${encodeURIComponent(pureSub)}`);
+        const { data } = await axios.get(`/user/by-sub/${encodeURIComponent(pureSub)}`);
         const userId = data?.id;
         if (!userId) {
           addToast('Unable to find user.', 'error');
@@ -1637,7 +1644,7 @@ const EducatorPanel = ({ embedded = false }) => {
         const parts = userSub.split('|');
         pureSub = `${parts[0]}|${parts[1]}`;
       }
-      const { data } = await axios.get(`/api/user/by-sub/${encodeURIComponent(pureSub)}`);
+      const { data } = await axios.get(`/user/by-sub/${encodeURIComponent(pureSub)}`);
       const userId = data?.id;
       if (!userId) {
         addToast('Unable to find user.', 'error');
@@ -1810,7 +1817,7 @@ const EducatorPanel = ({ embedded = false }) => {
         return;
       }
 
-      const { data } = await axios.post('/api/conversations/direct', {
+      const { data } = await axios.post('/conversations/direct', {
         userSubA: authUser.sub,
         userSubB: otherSub
       });
@@ -1837,7 +1844,7 @@ const EducatorPanel = ({ embedded = false }) => {
   const fetchBadges = async () => {
     try {
       setLoadingBadges(true);
-      const response = await axios.get('/GetAllBadgesData');
+      const response = await axios.get('badges/GetAllBadgesData');
       setBadges(response.data || []);
     } catch (error) {
       console.error('Error fetching badges:', error);
@@ -1878,7 +1885,7 @@ const EducatorPanel = ({ embedded = false }) => {
               const parts = pureSub.split('|');
               pureSub = `${parts[0]}|${parts[1]}`;
             }
-            const { data } = await axios.get(`/api/user/by-sub/${encodeURIComponent(pureSub)}`);
+            const { data } = await axios.get(`/user/by-sub/${encodeURIComponent(pureSub)}`);
             const userId = data?.id;
             if (!userId) continue;
             const xpRes = await awardXP(userId, amount);
@@ -1926,7 +1933,7 @@ const EducatorPanel = ({ embedded = false }) => {
             const parts = pureSub.split('|');
             pureSub = `${parts[0]}|${parts[1]}`;
           }
-          const { data } = await axios.get(`/api/user/by-sub/${encodeURIComponent(pureSub)}`);
+          const { data } = await axios.get(`/user/by-sub/${encodeURIComponent(pureSub)}`);
           const userId = data?.id;
           if (!userId) continue;
           await awardBadge(userId, badgeId);
@@ -1970,7 +1977,7 @@ const EducatorPanel = ({ embedded = false }) => {
   const fetchInstructions = async () => {
     try {
       setLoadingInstructions(true);
-      const response = await axios.get('/GetAllInstructionData');
+      const response = await axios.get('instructions/GetAllInstructionData');
       setInstructions(response.data || []);
     } catch (err) {
       console.error('Error fetching instructions:', err);

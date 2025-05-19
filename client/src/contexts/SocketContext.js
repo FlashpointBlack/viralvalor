@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import { useAuth0 } from '@auth0/auth0-react';
+import axios from 'axios';
 
 const SocketContext = createContext();
 
@@ -35,8 +36,13 @@ export const SocketProvider = ({ children }) => {
 
       // Register authenticated user (joins their private room)
       const { user: authUser, isAuthenticated: authReady } = authRef.current;
+      console.log('Socket connection - auth status:', { authReady, userSub: authUser?.sub });
       if (authReady && authUser?.sub) {
+        console.log('Registering authenticated user with socket:', authUser.sub);
         newSocket.emit('register user', authUser.sub);
+        
+        // Load existing messages for this user
+        fetchExistingMessages(authUser.sub);
       }
     });
 
@@ -54,7 +60,12 @@ export const SocketProvider = ({ children }) => {
     });
 
     newSocket.on('receive message', (message) => {
-      setChatMessages(prev => [...prev, message]);
+      console.log('Socket received new message:', message);
+      setChatMessages(prev => {
+        const newMessages = [...prev, message];
+        console.log(`ChatMessages updated: now has ${newMessages.length} messages`);
+        return newMessages;
+      });
     });
 
     newSocket.on('message reaction', (reaction) => {
@@ -129,6 +140,87 @@ export const SocketProvider = ({ children }) => {
       newSocket.disconnect();
     };
   }, [user, isAuthenticated]);
+
+  // Fetch all messages for a user's conversations 
+  const fetchExistingMessages = async (userSub) => {
+    if (!userSub) return;
+
+    try {
+      // First get all conversations for the user
+      const { data: conversations } = await axios.get(`/conversations?userSub=${encodeURIComponent(userSub)}`);
+      
+      if (!Array.isArray(conversations)) {
+        console.error('Failed to fetch conversations: API did not return an array');
+        return;
+      }
+
+      // For each conversation, fetch messages
+      let allMessages = [];
+      const readStatusMap = {}; // Track last read timestamps per conversation
+      
+      for (const conv of conversations) {
+        try {
+          // Skip if conversation has no ID
+          if (!conv.conversationId) continue;
+          
+          const { data: messages } = await axios.get(`/conversations/${conv.conversationId}/messages`, {
+            params: { userSub, limit: 100 }
+          });
+          
+          if (Array.isArray(messages)) {
+            allMessages = [...allMessages, ...messages];
+          }
+          
+          // Get last read timestamp for this conversation based on last message read
+          try {
+            // If the conversation has a lastReadMessageId parameter provided by the API
+            if (conv.lastReadMessageId) {
+              // Find the timestamp of the message with this ID
+              const lastReadMessage = messages.find(m => (m.id || m.ID) === conv.lastReadMessageId);
+              if (lastReadMessage) {
+                const timestamp = new Date(lastReadMessage.sentAt || lastReadMessage.Sent_At || lastReadMessage.timestamp || 0).getTime();
+                readStatusMap[conv.conversationId] = timestamp;
+              }
+            } else if (conv.lastReadTime) {
+              // If the API provides a lastReadTime directly
+              readStatusMap[conv.conversationId] = new Date(conv.lastReadTime).getTime();
+            } else if (messages.length === 0 || conv.unreadCount === 0) {
+              // For conversations with no messages or explicitly zero unread count, 
+              // mark as read by setting timestamp to current time
+              readStatusMap[conv.conversationId] = Date.now();
+            } else {
+              // If unreadCount > 0 but no specifics, use a timestamp of 0 to mark all as unread
+              readStatusMap[conv.conversationId] = 0;
+            }
+          } catch (readErr) {
+            console.error(`Error processing read status for conversation ${conv.conversationId}:`, readErr);
+            // If there's an error, assume the conversation is read
+            readStatusMap[conv.conversationId] = Date.now();
+          }
+        } catch (err) {
+          console.error(`Error fetching messages for conversation ${conv.conversationId}:`, err);
+          // If there's an error, assume the conversation is read
+          readStatusMap[conv.conversationId] = Date.now();
+        }
+      }
+
+      console.log(`Loaded ${allMessages.length} existing messages from ${conversations.length} conversations`);
+      console.log('Read status map:', readStatusMap);
+      
+      // Update the chatMessages state with existing messages
+      setChatMessages(prev => {
+        // Filter out duplicates
+        const messageIds = new Set(prev.map(m => m.id || m.ID));
+        const newMessages = allMessages.filter(m => !messageIds.has(m.id || m.ID));
+        return [...prev, ...newMessages];
+      });
+      
+      // Update the lastViewedByConv state with read timestamps
+      setLastViewedConvos(readStatusMap);
+    } catch (err) {
+      console.error('Error fetching existing messages:', err);
+    }
+  };
 
   const emitNewUser = (user) => {
     if (socket && isConnected) {

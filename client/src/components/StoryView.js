@@ -81,7 +81,7 @@ const StoryView = () => {
     const fetchScenarios = async () => {
       console.log('[StoryView] Fetching public list of all root encounters...');
       try {
-        const { data } = await axios.get('/root-encounters', {
+        const { data } = await axios.get('encounters/root-encounters', {
           // No auth headers needed
           params: { 
             _t: new Date().getTime(), // Cache buster

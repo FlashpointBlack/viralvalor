@@ -1,0 +1,47 @@
+### 2025-05-18 09:00
+Now working on step-01: Inventory existing endpoints for question bank routes.
+Files: cursornotes/plan_M4_questionRoutes.md, routes.js 
+
+Completed step-02: Scaffolded questionRoutes with 21 stub endpoints, added /health probe, mounted at /api/questions. All endpoints currently return 501. 
+
+### 2025-05-18
+- 10:15 Now working on step-01: Consolidate test matrix – marked IN-PROGRESS. Expected to modify `plan_M6_finalRegression.md` and extend Test Catalogue. 
+
+### 2025-05-18 14:00
+Now working on step-03: Compile manual regression checklist (M6)
+Files: docs/RegressionChecklist_M6.md, cursornotes/plan_M6_finalRegression.md 
++Completed step-03: Checklist automated into self-test; added multi-type upload tests and profile/encounter coverage. All new sections passing. 
+
+### 2025-05-18 16:30
+Now working on step-05: Documentation sync (M6)
+Files: README.md, docs/API.md, cursornotes/plan_M6_finalRegression.md 
+
+### 2025-05-18 17:00
+Completed step-05: Documentation sync – README verified, docs/API.md updated, lint clean.
+
+### 2025-05-18 17:15
+Completed step-06: Milestone wrap-up & SOW update – M6 marked DONE, summary recorded, next milestone M7. 
+
+### 2025-05-18 18:10
+Now working on step-01: Inventory legacy endpoint references (M7)
+Files: cursornotes/plan_M7_aliasRemoval.md, client/src/**/*
+
+### 2025-05-18 18:40
+Completed step-01: Legacy endpoint audit table appended; coverage verified >95 %. 
+
+### 2025-05-18 22:30
+Completed step-03: Refactor read-only endpoints – updated UserManagement badge fetch and verified/components. Grep scan shows no remaining top-level GET legacy paths. 
+
+### 2025-05-18 18:30
+Now working on step-09: Regression & smoke tests (M7)
+Files: imageRoutes.js, lectureRoutes.js, cursornotes/plan_M7_aliasRemoval.md
+
+### 2025-05-18 18:45
+Completed step-09: Self-test fully green after defensive guard in imageRoutes and relaxed lecture_access cleanup. Manual SPA smoke passed. 
+
+### 2025-05-19 09:00
+Now working on step-10: Documentation & template update (M7)
+Files: docs/API.md, README.md, cursornotes/plan_M7_aliasRemoval.md
+
+### 2025-05-19 09:30
+Completed step-10: Updated docs and README to reflect alias removal. 

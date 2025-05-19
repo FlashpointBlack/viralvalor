@@ -9,8 +9,8 @@ const ImageSelector = ({ label, type, encounterId, currentImageId, onImageSelect
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const endpoint = type === 'backdrop' 
-    ? '/GetAllBackdropData' 
-    : '/GetAllCharacterData';
+    ? 'backdrops/GetAllBackdropData' 
+    : 'characters/GetAllCharacterData';
   
   const imagePath = type === 'backdrop'
     ? 'images/uploads/backdrops/'
@@ -18,7 +18,12 @@ const ImageSelector = ({ label, type, encounterId, currentImageId, onImageSelect
 
   useEffect(() => {
     if (currentImageId) {
+      // Clear previous preview to avoid showing stale image while new one loads
+      setSelectedImage(null);
       fetchCurrentImage();
+    } else {
+      // Encounter has no image assigned – reset to placeholder
+      setSelectedImage(null);
     }
   }, [currentImageId]);
 
@@ -40,14 +45,22 @@ const ImageSelector = ({ label, type, encounterId, currentImageId, onImageSelect
     if (!currentImageId) return;
     
     const fetchEndpoint = type === 'backdrop'
-      ? `/GetBackdropData/${currentImageId}`
-      : `/GetCharacterData/${currentImageId}`;
+      ? `backdrops/GetBackdropData/${currentImageId}`
+      : `characters/GetCharacterData/${currentImageId}`;
       
     try {
       const response = await axios.get(fetchEndpoint);
-      setSelectedImage(response.data);
+      // Only update if we got a usable file reference; otherwise keep existing selection
+      if (response.data && response.data.FileName) {
+        setSelectedImage(response.data);
+      } else {
+        // The backdrop/character record might not exist yet (orphan image).
+        // In that case do nothing so that the previously-selected preview stays visible.
+        console.warn(`[ImageSelector] No dedicated ${type} metadata row for image ${currentImageId}. Keeping existing preview.`);
+      }
     } catch (err) {
       console.error(`Error fetching current ${type}:`, err);
+      // Keep existing preview on error so it doesn't disappear instantly
     }
   };
 

@@ -82,9 +82,9 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
     setLoading(true);
     setError(null);
     try {
-      let endpoint = '/my-questions';
+      let endpoint = 'questions/my-questions';
       if (lectureId) {
-        endpoint = `/lecture/${lectureId}/questions`;
+        endpoint = `questions/lecture/${lectureId}/questions`;
       }
 
       const { data } = await axios.get(endpoint, {
@@ -100,7 +100,7 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
         const enriched = await Promise.all(
           baseList.map(async (q) => {
             try {
-              const { data: full } = await axios.get(`/get-question/${q.ID}`, {
+              const { data: full } = await axios.get(`questions/get-question/${q.ID}`, {
                 withCredentials: true,
                 headers: { 'x-user-sub': userSub },
               });
@@ -130,7 +130,7 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await axios.get(`/get-question/${qid}`, {
+      const { data } = await axios.get(`questions/get-question/${qid}`, {
         withCredentials: true,
         headers: { 'x-user-sub': userSub },
       });
@@ -149,7 +149,7 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
     setError(null);
     try {
       const payload = lectureId ? { userSub, lectureId } : { userSub };
-      const { data } = await axios.post('/create-blank-question', payload, {
+      const { data } = await axios.post('questions/create-blank-question', payload, {
         withCredentials: true,
         headers: { 'Content-Type': 'application/json', 'x-user-sub': userSub },
       });
@@ -167,7 +167,7 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
 
   const fetchAllTags = useCallback(async () => {
     try {
-      const { data } = await axios.get('/tags', { withCredentials: true });
+      const { data } = await axios.get('tags', { withCredentials: true });
       setAllTags(data.map(t => ({ value: t.id, label: t.name })));
     } catch (err) {
       console.error('Failed to load tags', err);
@@ -184,7 +184,7 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
     const { ID } = question;
     try {
       setQuestion((prev) => ({ ...prev, [field]: value })); // optimistic
-      await axios.post('/update-question-field', { id: ID, field, value }, {
+      await axios.post('questions/update-question-field', { id: ID, field, value }, {
         withCredentials: true,
         headers: { 'Content-Type': 'application/json', 'x-user-sub': userSub },
       });
@@ -200,7 +200,7 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
   const addOption = async () => {
     if (!question) return;
     try {
-      const { data } = await axios.post('/create-question-option', {
+      const { data } = await axios.post('questions/create-question-option', {
         questionId: question.ID,
         userSub,
       }, {
@@ -223,7 +223,7 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
       options: prev.options.map((op) => (op.ID === optionId ? { ...op, OptionText: text } : op)),
     }));
     try {
-      await axios.post('/update-question-option', { questionId: question.ID, optionId, text }, {
+      await axios.post('questions/update-question-option', { questionId: question.ID, optionId, text }, {
         withCredentials: true,
         headers: { 'Content-Type': 'application/json', 'x-user-sub': userSub },
       });
@@ -241,7 +241,7 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
       options: prev.options.map((op) => (op.ID === optionId ? { ...op, Rationale: rationale } : op)),
     }));
     try {
-      await axios.post('/update-question-option', { questionId: question.ID, optionId, rationale }, {
+      await axios.post('questions/update-question-option', { questionId: question.ID, optionId, rationale }, {
         withCredentials: true,
         headers: { 'Content-Type': 'application/json', 'x-user-sub': userSub },
       });
@@ -254,7 +254,7 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
   const deleteOption = async (optionId) => {
     if (!question) return;
     try {
-      await axios.post('/delete-question-option', { questionId: question.ID, optionId }, {
+      await axios.post('questions/delete-question-option', { questionId: question.ID, optionId }, {
         withCredentials: true,
         headers: { 'Content-Type': 'application/json', 'x-user-sub': userSub },
       });
@@ -271,7 +271,7 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
   const setCorrectOption = async (optionId) => {
     if (!question) return;
     try {
-      await axios.post('/set-correct-option', { questionId: question.ID, optionId }, {
+      await axios.post('questions/set-correct-option', { questionId: question.ID, optionId }, {
         withCredentials: true,
         headers: { 'Content-Type': 'application/json', 'x-user-sub': userSub },
       });
@@ -293,11 +293,11 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
       fetchAllTags();
 
       // Determine admin status / educator flag once so we can restrict tag UI
-      axios.get('/am-admin', { headers: { 'x-user-sub': userSub } })
+      axios.get('am-admin', { headers: { 'x-user-sub': userSub } })
         .then(res => setIsAdmin(!!res.data.isAdmin))
         .catch(() => setIsAdmin(false));
 
-      axios.get('/am-educator', { headers: { 'x-user-sub': userSub } })
+      axios.get('am-educator', { headers: { 'x-user-sub': userSub } })
         .then(res => setIsEducator(!!res.data.isEducator))
         .catch(() => setIsEducator(false));
     }
@@ -383,7 +383,7 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
     if (!allowTagging || !question) return; // restrict if not allowed
     const tagIds = selectedOptions.map(opt => opt.value);
     try {
-      await axios.post('/set-question-tags', { questionId: question.ID, tagIds }, {
+      await axios.post('questions/set-question-tags', { questionId: question.ID, tagIds }, {
         withCredentials: true,
         headers: { 'Content-Type': 'application/json', 'x-user-sub': userSub },
       });
@@ -397,7 +397,7 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
   const handleCreateTag = async (inputValue) => {
     if (!allowTagging) return null;
     try {
-      const { data } = await axios.post('/create-tag', { name: inputValue }, {
+      const { data } = await axios.post('tags/create-tag', { name: inputValue }, {
         withCredentials: true,
         headers: { 'Content-Type': 'application/json', 'x-user-sub': userSub },
       });

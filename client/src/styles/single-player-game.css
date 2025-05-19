@@ -1,0 +1,53 @@
+/* Styles scoped to single-player game mode */
+body.single-player-game-active {
+  /* Hide global chat/message bubble */
+}
+
+body.single-player-game-active .message-dropdown {
+  display: none !important;
+}
+
+.singleplayer-controls {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 9999; /* above everything */
+}
+
+.singleplayer-controls .scenario-selector select {
+  max-width: 220px;
+  padding: 6px 8px;
+}
+
+/* Ensure back button aligns nicely next to dropdown */
+.singleplayer-controls .back-btn {
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  height: 36px;
+}
+
+/* Choice buttons now render inside encounter content, so default layout applies */
+
+/* Back button top-left */
+.singleplayer-back-btn {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 9999;
+}
+
+/* Fullscreen intro placeholder to ensure clean fade */
+.single-player-intro {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  color: #fff;
+  font-size: 2rem;
+  text-align: center;
+} 

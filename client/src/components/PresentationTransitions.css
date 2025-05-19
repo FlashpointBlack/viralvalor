@@ -7,7 +7,81 @@
   --transition-duration: 1.5s; /* Match with TRANSITION_DURATION in PresentationDisplayHost.js */
 }
 
-/* Main presentation view container styling */
+.presentation-display-container {
+  position: relative; /* Needed for absolute positioning of children */
+  width: 100%;
+  height: 100vh;
+  overflow: hidden; /* Prevent scrollbars if content overflows during transition */
+  background-color: #000; /* Add black background to match encounter-display */
+}
+
+.slide-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  will-change: opacity; /* Optimize for opacity changes */
+  /* Ensure children can define background, e.g. if they have their own */
+  /* background-color: transparent; */ 
+}
+
+/* Stable, visible slide when not transitioning */
+.slide-active {
+  opacity: 1;
+  z-index: 1;
+}
+
+/* The new slide that is entering. It is underneath the exiting slide and should be fully opaque. */
+.slide-entering {
+  opacity: 1; /* Fully visible under exiting slide */
+  z-index: 1;
+  /* No animation for entering slide: it's revealed when exiting slide fades */
+}
+
+/* The old slide that is on top and fades out */
+.slide-exiting {
+  opacity: 1;
+  z-index: 2;
+  animation: fadeOutAnimation var(--transition-duration) forwards ease-in-out;
+  pointer-events: none;
+}
+
+/* @keyframes fadeInAnimation - NO LONGER NEEDED
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+} */
+
+@keyframes fadeOutAnimation {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* Add styles to help stabilize rendering on the exiting slide */
+/* JavaScript handles the actual text scaling; these are for render stability. */
+.slide-exiting .encounter-title,
+.slide-exiting .encounter-description {
+  transform: translateZ(0); /* May help promote to own layer / prevent jitter */
+  -webkit-font-smoothing: subpixel-antialiased; /* Attempt to stabilize font rendering */
+}
+
+/* Ensure the components rendered by renderView fill their container and are visible */
+.slide-container > * { /* Target direct children of slide-container */
+  width: 100%;
+  height: 100%;
+  opacity: 1; /* Make sure the content within the slide container is visible */
+  /* display: flex; flex-direction: column; if needed for layout within */
+}
+
+/* End of active transition styles */
+
+/*
+  The following styles are from the old implementation or are view-specific.
+  They might need to be reviewed or adapted if specific animations beyond the standard fade are required.
+*/
+
+/* Old .presentation-view rules - REMOVED as they are replaced by .slide-container and its variants */
+/*
 .presentation-view {
   position: absolute;
   top: 0;
@@ -19,22 +93,19 @@
   overflow: hidden;
 }
 
-/* Ensure current view is visible and positioned properly */
 .presentation-view.current {
-  z-index: 100; /* Top layer when it's the current view */
+  z-index: 100; 
   opacity: 1;
 }
 
-/* When transitioning, previous view is on top and fades out */
 .presentation-view.previous {
-  z-index: 200; /* Put above current during transition */
+  z-index: 200; 
   opacity: 1;
 }
 
-/* Fade out animation for the previous view */
 .presentation-view.previous.fade-out {
   animation: viewFadeOut var(--transition-duration) forwards ease-in-out;
-  pointer-events: none; /* Prevent interaction during fade */
+  pointer-events: none; 
 }
 
 @keyframes viewFadeOut {
@@ -42,7 +113,6 @@
   100% { opacity: 0; }
 }
 
-/* Apply a fade-in effect for new views */
 .presentation-view.current {
   animation: viewFadeIn 0.3s ease-in-out;
 }
@@ -51,32 +121,28 @@
   0% { opacity: 0.3; }
   100% { opacity: 1; }
 }
+*/
 
-/* View-specific adjustments */
+/* View-specific adjustments - these might need review */
+/*
 .welcome-view {
-  /* Welcome-specific styling could go here if needed */
 }
 
 .encounter-view {
-  /* Any specific styling for encounter view */
 }
 
 .end-view {
-  /* Special handling for the end view */
 }
 
-/* Ensure entering the end view is smooth */
 .end-view.current {
   animation: endViewEnter 0.2s ease-in;
 }
 
-/* Special animation for encounter->end transition */
 @keyframes endViewEnter {
   0% { opacity: 0.2; transform: scale(0.98); }
   100% { opacity: 1; transform: scale(1); }
 }
 
-/* And make sure the encounter->end transition is super smooth */
 .encounter-view.previous.fade-out + .end-view.current {
   animation: endViewReveal var(--transition-duration) ease-in-out;
 }
@@ -87,13 +153,11 @@
   100% { opacity: 1; }
 }
 
-/* Ensure nested transitions in EncounterDisplay work well with parent transitions */
 .encounter-view .encounter-container.previous.fade-out {
-  /* When an encounter transition happens inside the encounter view, coordinate z-indexes */
-  z-index: 150; /* Below the presentation-view.previous but above current view */
+  z-index: 150; 
 }
 
-/* Force all presentation views to have higher z-index than other page elements */
 .presentation-view {
-  z-index: 10;
-} 
+  z-index: 10; 
+}
+*/ 

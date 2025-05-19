@@ -5,19 +5,27 @@ import { useEffect, useCallback } from 'react';
  * overflows its container. Re-implements the earlier adjustTextFit logic but
  * hides the resize listener internals from the component.
  */
-export default function useTextAutosize(encounter) {
-  // Core algorithm lifted from the previous inline implementation
+export default function useTextAutosize(contentRef, titleRef, descRef, encounter, enabled = true) {
   const adjustTextFit = useCallback(() => {
-    const contentEl = document.querySelector('.encounter-content');
-    if (!contentEl) return;
+    const contentEl = contentRef.current;
+    const titleEl = titleRef.current;
+    const descEl = descRef.current;
 
-    const titleEl = contentEl.querySelector('.encounter-title');
-    const descEl = contentEl.querySelector('.encounter-description');
-    if (!descEl || !titleEl) return;
+    if (!contentEl || !titleEl || !descEl) return;
+
+    // If the content element is part of an exiting slide, do not make further adjustments.
+    // Its size should have been set before it started exiting.
+    if (contentEl.closest('.slide-exiting')) {
+      return;
+    }
 
     // Reset any inline sizing first
     titleEl.style.fontSize = '';
     descEl.style.fontSize = '';
+    const btnElsForReset = contentEl.querySelectorAll('.choice-buttons .btn, .choice-buttons .btn-primary');
+    btnElsForReset.forEach(btn => {
+      btn.style.fontSize = '';
+    });
 
     // Get computed starting sizes (px)
     let titleSize = parseFloat(window.getComputedStyle(titleEl).fontSize);
@@ -31,24 +39,69 @@ export default function useTextAutosize(encounter) {
 
     while (guard < MAX_ITER && contentEl.scrollHeight > contentEl.clientHeight) {
       guard++;
-      if (descSize <= MIN_DESC) break;
+      // Ensure both title and description are above their minimums before breaking if one is too small.
+      if (descSize <= MIN_DESC && titleSize <= MIN_TITLE) break;
+      
+      // Only shrink if above minimum
+      if (descSize > MIN_DESC) {
+        descSize = Math.max(descSize - STEP, MIN_DESC);
+      }
+      if (titleSize > MIN_TITLE) {
+        titleSize = Math.max(titleSize - STEP, MIN_TITLE);
+      }
 
-      descSize = Math.max(descSize - STEP, MIN_DESC);
-      titleSize = Math.max(titleSize - STEP, MIN_TITLE);
+      // If one dimension is already at min, but container still overflows,
+      // allow the other to continue shrinking if it's not at its min.
+      // This condition can be complex if text lengths vary wildly.
+      // For simplicity, current logic shrinks both if container overflows
+      // and at least one is above min.
 
       titleEl.style.fontSize = `${titleSize}px`;
       descEl.style.fontSize = `${descSize}px`;
+      
+      // Sync choice-button font sizes (if present) with description size
+      const btnElsInLoop = contentEl.querySelectorAll('.choice-buttons .btn, .choice-buttons .btn-primary');
+      btnElsInLoop.forEach(btn => {
+        btn.style.setProperty('font-size', `${descSize}px`, 'important');
+      });
+
+      // If both hit min and still overflowing, we can't do more.
+      if (descSize <= MIN_DESC && titleSize <= MIN_TITLE) break;
     }
-  }, []);
+
+    // After the loop, get the final computed sizes and set them again to "lock them in".
+    const finalComputedTitleSize = window.getComputedStyle(titleEl).fontSize;
+    const finalComputedDescSize = window.getComputedStyle(descEl).fontSize;
+
+    titleEl.style.fontSize = finalComputedTitleSize;
+    descEl.style.fontSize = finalComputedDescSize;
+
+    // Lock in final button sizes
+    const finalDescSize = window.getComputedStyle(descEl).fontSize;
+    const btnElsAfterLoop = contentEl.querySelectorAll('.choice-buttons .btn, .choice-buttons .btn-primary');
+    btnElsAfterLoop.forEach(btn => {
+      btn.style.setProperty('font-size', finalDescSize, 'important');
+    });
+  }, [contentRef, titleRef, descRef]);
 
   useEffect(() => {
-    // Delay slightly to allow images/fonts to load then measure
+    if (!enabled || !contentRef.current || !titleRef.current || !descRef.current) {
+      return; 
+    }
+    
     const t = setTimeout(adjustTextFit, 100);
 
-    window.addEventListener('resize', adjustTextFit);
+    // Define handleResize within useEffect to capture current refs and adjustTextFit
+    const handleResize = () => {
+      if (enabled && contentRef.current && titleRef.current && descRef.current) {
+        adjustTextFit();
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
     return () => {
       clearTimeout(t);
-      window.removeEventListener('resize', adjustTextFit);
+      window.removeEventListener('resize', handleResize);
     };
-  }, [encounter, adjustTextFit]);
+  }, [encounter, adjustTextFit, enabled, contentRef, titleRef, descRef]);
 } 

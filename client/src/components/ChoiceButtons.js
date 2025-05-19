@@ -1,12 +1,14 @@
 import React from 'react';
 import { useSocket } from '../contexts/SocketContext';
 
-const ChoiceButtons = ({ routes, onSelectRoute }) => {
+const ChoiceButtons = ({ routes, onSelectRoute, broadcast = true, fontSize = null }) => {
   const { selectEncounter } = useSocket();
 
   const handleSelectRoute = (routeId) => {
     onSelectRoute(routeId);
-    selectEncounter(routeId);
+    if (broadcast) {
+      selectEncounter(routeId);
+    }
   };
 
   if (!routes || routes.length === 0) {
@@ -14,12 +16,13 @@ const ChoiceButtons = ({ routes, onSelectRoute }) => {
   }
 
   return (
-    <div className="choice-buttons">
+    <div className="choice-buttons" style={fontSize ? { fontSize } : undefined}>
       {routes.map((route) => (
         <button
           key={route.ID}
           className="btn btn-primary btn-block"
           onClick={() => handleSelectRoute(route.RelID_Encounter_Receiving)}
+          style={fontSize ? { fontSize } : undefined}
         >
           {route.Title}
         </button>

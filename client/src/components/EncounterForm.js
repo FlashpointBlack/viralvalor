@@ -60,7 +60,7 @@ const EncounterForm = ({ scenario, onUpdateField }) => {
 
     import('axios').then(({ default: axios }) => {
       axios
-        .get(`/api/user/by-sub/${encodeURIComponent(pureSub)}`)
+        .get(`/user/by-sub/${encodeURIComponent(pureSub)}`)
         .then(({ data }) => {
           if (data && data.display_name) {
             setCreatorDisplayName(data.display_name);

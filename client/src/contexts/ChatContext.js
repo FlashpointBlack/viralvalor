@@ -24,7 +24,7 @@ export const ChatProvider = ({ children }) => {
 
     // If the conversation's other.name still looks like a raw Auth0 sub, attempt to resolve it once.
     if (!conversation.isGroup && conversation.other?.sub && (!conversation.other.name || conversation.other.name.includes('|') || conversation.other.name === 'Unknown User')) {
-      axios.get(`/api/user/by-sub/${encodeURIComponent(conversation.other.sub)}`)
+      axios.get(`/user/by-sub/${encodeURIComponent(conversation.other.sub)}`)
         .then(({ data }) => {
           if (data?.display_name) {
             setOpenChats(prev => prev.map(c => {
@@ -44,7 +44,7 @@ export const ChatProvider = ({ children }) => {
 
     // If we don't yet know the other participant's name, attempt to fetch full conversation list
     if (!conversation.other && user?.sub) {
-      axios.get(`/api/conversations?userSub=${encodeURIComponent(user.sub)}`)
+      axios.get(`/conversations?userSub=${encodeURIComponent(user.sub)}`)
         .then(({ data: list }) => list)
         .then(list => {
           const full = list.find(l => l.conversationId === conversation.conversationId);

@@ -25,7 +25,7 @@ const useIsAdmin = (userSub) => {
 
     const check = async () => {
       try {
-        const { data } = await axios.get('/am-admin', {
+        const { data } = await axios.get('am-admin', {
           headers: { 'x-user-sub': userSub }
         });
         setIsAdmin(!!data.isAdmin);
@@ -94,7 +94,7 @@ const LectureManager = ({ onEditLecture }) => {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await axios.get('/my-lectures', { headers: { 'x-user-sub': userSub } });
+      const { data } = await axios.get('lectures/my-lectures', { headers: { 'x-user-sub': userSub } });
       setLectures(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
@@ -109,7 +109,7 @@ const LectureManager = ({ onEditLecture }) => {
       setLoading(true);
       setError(null);
       try {
-        const { data } = await axios.post('/release-lecture', { lectureId }, { headers: { 'x-user-sub': userSub } });
+        const { data } = await axios.post('lectures/release-lecture', { lectureId }, { headers: { 'x-user-sub': userSub } });
         addToast(`Lecture released to ${data.releasedCount || 0} students`, 'success');
         await loadLectures();
       } catch (err) {
@@ -127,7 +127,7 @@ const LectureManager = ({ onEditLecture }) => {
       setLoading(true);
       setError(null);
       try {
-        await axios.post('/delete-lecture', 
+        await axios.post('lectures/delete-lecture', 
           { id: lectureId }, 
           { headers: { 'x-user-sub': userSub } }
         );
@@ -148,7 +148,7 @@ const LectureManager = ({ onEditLecture }) => {
       setLoading(true);
       setError(null);
       try {
-        await axios.post('/submit-lecture-for-approval', { lectureId }, { headers: { 'x-user-sub': userSub } });
+        await axios.post('lectures/submit-lecture-for-approval', { lectureId }, { headers: { 'x-user-sub': userSub } });
         await loadLectures();
         addToast('Lecture submitted for approval', 'success');
       } catch (err) {
@@ -172,7 +172,7 @@ const LectureManager = ({ onEditLecture }) => {
       setLoading(true);
       setError(null);
       try {
-        await axios.post('/approve-lecture', { lectureId: lecObj.id }, { headers: { 'x-user-sub': userSub } });
+        await axios.post('lectures/approve-lecture', { lectureId: lecObj.id }, { headers: { 'x-user-sub': userSub } });
         await loadLectures();
         addToast('Lecture approved', 'success');
       } catch (err) {
@@ -190,7 +190,7 @@ const LectureManager = ({ onEditLecture }) => {
       setLoading(true);
       setError(null);
       try {
-        await axios.post('/deny-lecture', { lectureId: lecObj.id }, { headers: { 'x-user-sub': userSub } });
+        await axios.post('lectures/deny-lecture', { lectureId: lecObj.id }, { headers: { 'x-user-sub': userSub } });
         await loadLectures();
         addToast('Lecture rejected', 'info');
       } catch (err) {

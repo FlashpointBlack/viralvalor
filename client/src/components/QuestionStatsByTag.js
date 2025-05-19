@@ -41,7 +41,7 @@ const QuestionStatsByTag = () => {
     if (endDate) params.endDate = endDate;
 
     axios
-      .get('/admin/question-stats-by-tag', { headers: { 'x-user-sub': userSub }, params })
+      .get('questions/admin/question-stats-by-tag', { headers: { 'x-user-sub': userSub }, params })
       .then(({ data }) => setRows(Array.isArray(data) ? data : []))
       .catch(() => setError('Failed to load tag stats'))
       .finally(() => setLoading(false));

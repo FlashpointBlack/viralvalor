@@ -43,7 +43,7 @@ export const EncounterProvider = ({ children }) => {
     try {
       const response = await axios({
         method: 'get',
-        url: `/GetEncounterData/${encounterId}`,
+        url: `/encounters/GetEncounterData/${encounterId}`,
         withCredentials: true,
         headers: { 'x-user-sub': userSub },
         params: { 

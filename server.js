@@ -1,6 +1,6 @@
 // My includes
 const { db, dbPromise } = require('./db');
-const { setupRoutes } = require('./routes');
+const apiRoutes = require('./src/routes');
 const { connectedUsers } = require('./globals');
 var { quizResponses, currentQuiz } = require('./globals');
 const { calculateQuizResults, formatResultsMessage } = require('./quizfunctions');
@@ -16,9 +16,20 @@ const socketIO = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
+
+// ===== BEGIN ADDED LOGGING =====
+app.use((req, res, next) => {
+  console.log(`[SERVER INCOMING]: ${req.method} ${req.originalUrl}`);
+  next();
+});
+// ===== END ADDED LOGGING =====
+
 app.set('io', io);
 const path = require('path');
 const errorHandler = require('./utils/errorHandler');
+const { isUserAdminBySub, isUserEducatorBySub } = require('./utils/auth');
+// Legacy alias: expose encounter endpoints at root-level /encounters in addition to /api/encounters
+// Legacy alias: expose question-bank endpoints at root-level (no /api prefix) in addition to /api/questions
 
 // Pending quiz waiting to be sent
 let pendingQuiz = null;
@@ -26,18 +37,76 @@ let pendingQuiz = null;
 // Track last broadcasted student instruction (null when none active)
 let currentInstruction = null;
 
-setupRoutes(app);
+// Global body parsing – required before mounting routers so req.body is populated
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+console.log('[SERVER SETUP]: Mounting /api routes...');
+app.use('/api', apiRoutes);
+console.log('[SERVER SETUP]: /api routes mounted.');
+
+// ------------------------------------------------------------
+// User management API (legacy) – mount directly on the root so
+// absolute paths like "/api/users" resolve correctly.  When the
+// modular router is hit at /api/* these would otherwise become
+// "/api/api/users".  By attaching here we ensure backward-compat
+// without touching the massive userRoutes file.
+// ------------------------------------------------------------
+const { setupUserRoutes } = require('./userRoutes');
+const { setupMessageRoutes } = require('./messageRoutes');
+const userRouter = express.Router();
+setupUserRoutes(userRouter);
+app.use('/', userRouter);
+
+console.log('[SERVER SETUP]: Mounting root message routes...');
+setupMessageRoutes(app);
+console.log('[SERVER SETUP]: Root message routes mounted.');
+
+// Preserve historical public image URLs (e.g. /images/uploads/badges/xyz.png)
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
 // Add centralized error handler AFTER routes
 app.use(errorHandler);
+
+// Legacy compatibility: expose /am-admin and /am-educator at root (no /api prefix)
+app.get('/am-admin', async (req, res) => {
+  const requestSub = (req.oidc && req.oidc.user && req.oidc.user.sub) || req.headers['x-user-sub'];
+  if (!requestSub) return res.status(401).json({ error: 'Unauthorized' });
+  const isAdminFlag = await isUserAdminBySub(requestSub);
+  res.json({ isAdmin: isAdminFlag });
+});
+
+app.get('/am-educator', async (req, res) => {
+  const requestSub = (req.oidc && req.oidc.user && req.oidc.user.sub) || req.headers['x-user-sub'];
+  if (!requestSub) return res.status(401).json({ error: 'Unauthorized' });
+  const isEducatorFlag = await isUserEducatorBySub(requestSub);
+  res.json({ isEducator: isEducatorFlag });
+});
+
+// ---------------------------------------------------------------------------
+// NEW: API-prefixed aliases so axios (default baseURL = '/api') resolves the
+//      role-lookup endpoints correctly without front-end changes.
+// ---------------------------------------------------------------------------
+app.get('/api/am-admin', async (req, res) => {
+  const requestSub = (req.oidc && req.oidc.user && req.oidc.user.sub) || req.headers['x-user-sub'];
+  if (!requestSub) return res.status(401).json({ error: 'Unauthorized' });
+  const isAdminFlag = await isUserAdminBySub(requestSub);
+  res.json({ isAdmin: isAdminFlag });
+});
+
+app.get('/api/am-educator', async (req, res) => {
+  const requestSub = (req.oidc && req.oidc.user && req.oidc.user.sub) || req.headers['x-user-sub'];
+  if (!requestSub) return res.status(401).json({ error: 'Unauthorized' });
+  const isEducatorFlag = await isUserEducatorBySub(requestSub);
+  res.json({ isEducator: isEducatorFlag });
+});
 
 // Serve static files from the React app in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'client/build')));
   
-  // The "catchall" handler: for any request that doesn't
-  // match one above, send back React's index.html file.
   app.get('*', (req, res) => {
+    console.log(`[SERVER SPA FALLBACK]: Serving index.html for ${req.method} ${req.originalUrl}`);
     res.sendFile(path.join(__dirname, 'client/build/index.html'));
   });
 }

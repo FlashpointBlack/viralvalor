@@ -41,7 +41,7 @@ const StudentPracticeReports = () => {
     if (startDate) params.startDate = startDate;
     if (endDate) params.endDate = endDate;
 
-    axios.get('/admin/question-stats', { headers: { 'x-user-sub': userSub }, params })
+    axios.get('questions/admin/question-stats', { headers: { 'x-user-sub': userSub }, params })
       .then(({ data }) => setRows(Array.isArray(data) ? data : []))
       .catch(() => setError('Failed to load student stats'))
       .finally(() => setLoading(false));
@@ -54,7 +54,7 @@ const StudentPracticeReports = () => {
     if (endDate) params.endDate = endDate;
     if (selectedStudent !== 'all') params.studentSub = selectedStudent; // backend will handle optional
 
-    axios.get('/admin/question-stats-by-tag', { headers: { 'x-user-sub': userSub }, params })
+    axios.get('questions/admin/question-stats-by-tag', { headers: { 'x-user-sub': userSub }, params })
       .then(({ data }) => setTagRows(Array.isArray(data) ? data : []))
       .catch(() => setError('Failed to load tag stats'));
   };

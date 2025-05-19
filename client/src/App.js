@@ -25,6 +25,7 @@ import axios from 'axios';
 import PresentationLanding from './components/PresentationLanding';
 import PresentationEnd from './components/PresentationEnd';
 import PresentationDisplayHost from './components/PresentationDisplayHost';
+import RoutesWithEncounter from './RoutesWithEncounter';
 
 // Create a context for our custom navigation to be accessible throughout the app
 export const NavigationContext = createContext(null);
@@ -199,88 +200,41 @@ const App = () => {
       <ToastProvider>
         <SocketProvider>
           <ChatProvider>
-            <EncounterProvider>
-              <AppWrapper>
-                {/* ScrollToTop component to handle scroll position on navigation */}
-                <ScrollToTop />
-                <div className="app">
-                  {/* Render global header on pages without their own header */}
-                  {!hideGlobalHeader && (
-                    <header className="app-header">
-                      {!isAuthenticated ? (
-                        <LoginButton />
-                      ) : (
-                        <>
-                          <span className="user-welcome">Welcome, {user.name}</span>
-                          <LogoutButton />
-                        </>
-                      )}
-                    </header>
-                  )}
+            <AppWrapper>
+              <ScrollToTop />
+              <div className="app">
+                {!hideGlobalHeader && (
+                  <header className="app-header">
+                    {!isAuthenticated ? (
+                      <LoginButton />
+                    ) : (
+                      <>
+                        <span className="user-welcome">Welcome, {user.name}</span>
+                        <LogoutButton />
+                      </>
+                    )}
+                  </header>
+                )}
+                
+                <Routes>
+                  {/* Route for PresentationDisplayHost - NO EncounterProvider here */}
+                  <Route path="/presentation-display" element={<PresentationDisplayHost />} />
                   
-                  <Routes>
-                    {/* Public routes */}
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/poll" element={<MobilePoll />} />
-                    <Route path="/game/:gameId/poll" element={<MobilePoll />} />
-                    
-                    {/* Profile routes */}
-                    <Route 
-                      path="/complete-profile" 
-                      element={
-                        <ProtectedRoute>
-                          <CompleteProfile />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    
-                    {/* Single-player game route - no login required */}
-                    <Route path="/game" element={<StoryView />} />
-                    
-                    {/* Protected routes requiring authentication */}
-                    <Route path="/multiplayer" element={<EducatorPanel />} />
-                    <Route 
-                      path="/educator-panel" 
-                      element={
-                        <ProtectedRoute>
-                          <EducatorPanel />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route path="/encounter-display" 
-                      element={
-                        <ProtectedRoute>
-                          <EncounterDisplayPlaceholder />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route path="/encounters2" element={<PresentationLanding />} />
-                    <Route path="/encounters2/:id" element={<EncounterDisplay />} />
-                    
-                    {/* UUID-based game routes */}
-                    <Route 
-                      path="/game/:gameId/encounter/:id" 
-                      element={
-                        <ProtectedRoute>
-                          <EncounterDisplay />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/game/:gameId/educator-panel" 
-                      element={
-                        <ProtectedRoute>
-                          <EducatorPanel />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route path="/presentation-landing" element={<PresentationLanding />} />
-                    <Route path="/presentation-end" element={<PresentationEnd />} />
-                    <Route path="/presentation-display" element={<PresentationDisplayHost />} />
-                  </Routes>
-                </div>
-              </AppWrapper>
-            </EncounterProvider>
+                  {/* Other routes that explicitly DO NOT need EncounterProvider can go here */}
+                  {/* For example, a standalone login page if it existed outside other flows */}
+
+                  {/* All other application routes that DO need EncounterContext */}
+                  <Route 
+                    path="/*" 
+                    element={                       
+                      <EncounterProvider>
+                        <RoutesWithEncounter />
+                      </EncounterProvider>
+                    }
+                  />
+                </Routes>
+              </div>
+            </AppWrapper>
           </ChatProvider>
         </SocketProvider>
       </ToastProvider>

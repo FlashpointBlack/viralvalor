@@ -18,38 +18,7 @@ const { setupMulter } = require('../../routesfunctions');
 const path = require('path');
 const fs = require('fs');
 const express = require('express');
-
-/**
- * Helper – check admin rights by userSub
- * Keep a local copy to avoid circular deps and preserve feature independence.
- */
-async function isUserAdminBySub(userSub) {
-  if (!userSub) return false;
-  try {
-    const [rows] = await dbPromise.query(
-      'SELECT isadmin FROM UserAccounts WHERE auth0_sub = ? LIMIT 1',
-      [userSub]
-    );
-    return rows.length > 0 && rows[0].isadmin === 1;
-  } catch (err) {
-    console.error('[isUserAdminBySub] DB error', err);
-    return false;
-  }
-}
-
-async function isUserEducatorBySub(userSub) {
-  if (!userSub) return false;
-  try {
-    const [rows] = await dbPromise.query(
-      'SELECT iseducator FROM UserAccounts WHERE auth0_sub = ? LIMIT 1',
-      [userSub]
-    );
-    return rows.length > 0 && rows[0].iseducator === 1;
-  } catch (err) {
-    console.error('[isUserEducatorBySub] DB error', err);
-    return false;
-  }
-}
+const { isUserAdminBySub, isUserEducatorBySub } = require('../../utils/auth');
 
 /**
  * Attach all article-related endpoints to the Express `app`.
@@ -57,7 +26,14 @@ async function isUserEducatorBySub(userSub) {
  * @param {import('express').Express} app
  */
 const setupArticleRoutes = (app) => {
-  // Serve uploaded article files (PDFs)
+  // Create a dedicated sub-router so every endpoint gets the "/articles" prefix
+  const router = express.Router();
+
+  // ------------------------------------------------------------
+  // Static assets (PDF uploads) – keep these on the parent app so
+  // the public URL remains /articles/uploads/<file>
+  // ------------------------------------------------------------
+
   app.use(
     '/articles/uploads',
     express.static(path.resolve(process.cwd(), 'public/articles/uploads'))
@@ -66,7 +42,7 @@ const setupArticleRoutes = (app) => {
   const articleUpload = setupMulter('public/articles/uploads').single('file');
 
   /* ---------------- Educator/Admin: Manage own articles ----------------*/
-  app.get('/my-articles', async (req, res) => {
+  router.get('/my-articles', async (req, res) => {
     const requestSub =
       (req.oidc && req.oidc.user && req.oidc.user.sub) ||
       req.headers['x-user-sub'];
@@ -88,7 +64,7 @@ const setupArticleRoutes = (app) => {
   });
 
   // Create article – link URL
-  app.post('/create-article-link', async (req, res) => {
+  router.post('/create-article-link', async (req, res) => {
     const { title, url, description = '' } = req.body;
     const requestSub =
       (req.oidc && req.oidc.user && req.oidc.user.sub) ||
@@ -119,7 +95,7 @@ const setupArticleRoutes = (app) => {
   });
 
   // Create article – file upload (PDF)
-  app.post('/upload-article-file', articleUpload, async (req, res) => {
+  router.post('/upload-article-file', articleUpload, async (req, res) => {
     const { title, description = '' } = req.body;
     const requestSub =
       (req.oidc && req.oidc.user && req.oidc.user.sub) ||
@@ -152,7 +128,7 @@ const setupArticleRoutes = (app) => {
   });
 
   // Update title/description/link (owner or admin)
-  app.post('/update-article', async (req, res) => {
+  router.post('/update-article', async (req, res) => {
     const { id, title, description, url } = req.body;
     const requestSub =
       (req.oidc && req.oidc.user && req.oidc.user.sub) ||
@@ -182,7 +158,7 @@ const setupArticleRoutes = (app) => {
   });
 
   // Submit for approval (educator)
-  app.post('/submit-article-for-approval', async (req, res) => {
+  router.post('/submit-article-for-approval', async (req, res) => {
     const { articleId } = req.body;
     const requestSub =
       (req.oidc && req.oidc.user && req.oidc.user.sub) ||
@@ -200,7 +176,7 @@ const setupArticleRoutes = (app) => {
   });
 
   // Approve article (admins – may also approve their own drafts)
-  app.post('/approve-article', async (req, res) => {
+  router.post('/approve-article', async (req, res) => {
     const { articleId } = req.body;
     const requestSub =
       (req.oidc && req.oidc.user && req.oidc.user.sub) ||
@@ -247,7 +223,7 @@ const setupArticleRoutes = (app) => {
   });
 
   // Deny (admin only)
-  app.post('/deny-article', async (req, res) => {
+  router.post('/deny-article', async (req, res) => {
     const { articleId } = req.body;
     const requestSub =
       (req.oidc && req.oidc.user && req.oidc.user.sub) ||
@@ -268,7 +244,7 @@ const setupArticleRoutes = (app) => {
   });
 
   // Delete (owner or admin)
-  app.post('/delete-article', async (req, res) => {
+  router.post('/delete-article', async (req, res) => {
     const { articleId } = req.body;
     const requestSub =
       (req.oidc && req.oidc.user && req.oidc.user.sub) ||
@@ -305,7 +281,7 @@ const setupArticleRoutes = (app) => {
   });
 
   /* ---------------- Student-facing ----------------*/
-  app.get('/get-approved-articles', async (req, res) => {
+  router.get('/get-approved-articles', async (req, res) => {
     try {
       const rows = await getApprovedArticles();
       res.json(rows);
@@ -313,6 +289,9 @@ const setupArticleRoutes = (app) => {
       handleErrorResponse(err, res, 'Error fetching articles');
     }
   });
+
+  // Mount the router at '/articles'
+  app.use('/articles', router);
 };
 
 module.exports = setupArticleRoutes; 

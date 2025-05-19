@@ -44,7 +44,7 @@ const PublicUserProfile = ({ userId, onBack }) => {
         console.log(`Fetching public profile for user ID: ${userId}`);
         
         // Fetch the user data
-        const userResponse = await axios.get(`/api/users/${userId}`);
+        const userResponse = await axios.get(`/users/${userId}`);
         const userData = sanitizeObject(userResponse.data);
         
         // Check profile visibility
@@ -87,7 +87,7 @@ const PublicUserProfile = ({ userId, onBack }) => {
         // Fetch user badges
         if (userData.id) {
           try {
-            const badgesResponse = await axios.get(`/api/users/${userData.id}/badges`);
+            const badgesResponse = await axios.get(`/users/${userData.id}/badges`);
             setUserBadges(sanitizeObject(badgesResponse.data) || []);
           } catch (err) {
             console.error('Could not fetch badges:', err);
@@ -142,7 +142,7 @@ const PublicUserProfile = ({ userId, onBack }) => {
 
     try {
       // Step 1: Find or create a direct conversation
-      const { data: conversationData } = await axios.post('/api/conversations/direct', {
+      const { data: conversationData } = await axios.post('/conversations/direct', {
         userSubA: currentUser.sub, 
         userSubB: profileSub
       });

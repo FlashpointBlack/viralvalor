@@ -46,7 +46,7 @@ const SendSystemMessage = () => {
     try {
       setSending(true);
       const { data } = await axios.post(
-        '/api/admin/system-messages',
+        'admin/system-messages',
         { body: messageText.trim(), groups: selectedGroups },
         { headers: { 'x-user-sub': userSub } }
       );

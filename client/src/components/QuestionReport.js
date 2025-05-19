@@ -39,8 +39,8 @@ const QuestionReport = () => {
     const headers = { 'x-user-sub': userSub };
 
     Promise.all([
-      axios.get('/my-question-stats', { headers, params }),
-      axios.get('/my-question-stats-by-tag', { headers, params })
+      axios.get('questions/my-question-stats', { headers, params }),
+      axios.get('questions/my-question-stats-by-tag', { headers, params })
     ])
       .then(([statsRes, tagRes]) => {
         setStats(statsRes.data);

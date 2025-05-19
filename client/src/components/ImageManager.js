@@ -26,21 +26,23 @@ const ImageManager = () => {
       let endpoint;
       switch(type) {
         case 'backdrops':
-          endpoint = '/GetAllBackdropData';
+          endpoint = 'backdrops/GetAllBackdropData';
           break;
         case 'badges':
-          endpoint = '/GetAllBadgesData';
+          endpoint = 'badges/GetAllBadgesData';
           break;
         case 'instructions':
-          endpoint = '/GetAllInstructionData';
+          endpoint = 'instructions/GetAllInstructionData';
           break;
         default: // characters
-          endpoint = '/GetAllCharacterData';
+          endpoint = 'characters/GetAllCharacterData';
           break;
       }
       
       const response = await axios.get(endpoint);
-      setImages(response.data);
+      // Ensure we always work with an array to prevent runtime errors when mapping or checking length
+      const fetchedImages = Array.isArray(response.data) ? response.data : [];
+      setImages(fetchedImages);
     } catch (err) {
       console.error(`Error fetching ${type}:`, err);
       setError(`Failed to load ${type} images`);
@@ -76,16 +78,16 @@ const ImageManager = () => {
       let endpoint;
       switch(activeTab) {
         case 'backdrops':
-          endpoint = '/images/uploads/backdrops/';
+          endpoint = 'uploads/backdrops';
           break;
         case 'badges':
-          endpoint = '/images/uploads/badges/';
+          endpoint = 'uploads/badges';
           break;
         case 'instructions':
-          endpoint = '/images/uploads/instructions/';
+          endpoint = 'uploads/instructions';
           break;
         default: // characters
-          endpoint = '/images/uploads/characters/';
+          endpoint = 'uploads/characters';
           break;
       }
       
@@ -143,16 +145,16 @@ const ImageManager = () => {
       let endpoint;
       switch(activeTab) {
         case 'backdrops':
-          endpoint = '/delete-backdrop';
+          endpoint = 'backdrops/delete-backdrop';
           break;
         case 'badges':
-          endpoint = '/delete-badge';
+          endpoint = 'badges/delete-badge';
           break;
         case 'instructions':
-          endpoint = '/delete-instruction';
+          endpoint = 'instructions/delete-instruction';
           break;
         default: // characters
-          endpoint = '/delete-character';
+          endpoint = 'characters/delete-character';
           break;
       }
       
@@ -218,16 +220,16 @@ const ImageManager = () => {
       let endpoint;
       switch(activeTab) {
         case 'backdrops':
-          endpoint = `/update-backdrop-field`;
+          endpoint = `backdrops/update-backdrop-field`;
           break;
         case 'badges':
-          endpoint = `/update-badge-field`;
+          endpoint = `badges/update-badge-field`;
           break;
         case 'instructions':
-          endpoint = `/update-instruction-field`;
+          endpoint = `instructions/update-instruction-field`;
           break;
         default: // characters
-          endpoint = `/update-character-field`;
+          endpoint = `characters/update-character-field`;
           break;
       }
       

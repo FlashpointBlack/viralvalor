@@ -23,7 +23,7 @@ const ChatWindow = ({ conversation, onClose, onMinimize, offset = 20, isPresente
   useEffect(() => {
     const fetchMsgs = async () => {
       try {
-        const { data } = await axios.get(`/api/conversations/${conversation.conversationId}/messages`, {
+        const { data } = await axios.get(`/conversations/${conversation.conversationId}/messages`, {
           params: { userSub: user.sub, limit: 100 }
         });
         setMessages(data);
@@ -111,7 +111,7 @@ const ChatWindow = ({ conversation, onClose, onMinimize, offset = 20, isPresente
     const lastId = latest.id || latest.ID;
     if (!lastId) return;
     // Fire-and-forget
-    axios.post(`/api/conversations/${conversation.conversationId}/read`, { userSub: user.sub, lastMessageId: lastId })
+    axios.post(`/conversations/${conversation.conversationId}/read`, { userSub: user.sub, lastMessageId: lastId })
       .catch(err => console.warn('mark read failed', err));
 
     // Locally reset unread badge since user is viewing

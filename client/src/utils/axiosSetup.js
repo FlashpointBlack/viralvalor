@@ -13,4 +13,7 @@ axios.interceptors.response.use(
   (error) => Promise.reject(error)
 );
 
-// No exports needed – importing this file once sets up the interceptor. 
+// No exports needed – importing this file once sets up the interceptor.
+
+// ADD_BASE_URL
+axios.defaults.baseURL = '/api'; 

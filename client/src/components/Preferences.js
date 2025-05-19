@@ -53,11 +53,11 @@ const Preferences = () => {
           }
         }
         
-        // Try authenticated /api/user/me endpoint (may fail due to auth issues)
+        // Try authenticated /user/me endpoint (may fail due to auth issues)
         try {
-          console.log('Fallback: fetching from /api/user/me...');
-          const res = await axios.get('/api/user/me');
-          console.log('Received user data from /api/user/me:', res.data);
+          console.log('Fallback: fetching from /user/me...');
+          const res = await axios.get('user/me');
+          console.log('Received user data from /user/me:', res.data);
           
           if (res.data.id) {
             setUserId(res.data.id);
@@ -71,7 +71,7 @@ const Preferences = () => {
             return;
           }
         } catch (authErr) {
-          console.error('Error fetching /api/user/me:', authErr.response || authErr);
+          console.error('Error fetching /user/me:', authErr.response || authErr);
         }
         
         // Fallback to user sub approach
@@ -79,7 +79,7 @@ const Preferences = () => {
         if (userSub) {
           try {
             console.log('Attempting to fetch user by sub:', userSub);
-            const subResponse = await axios.get(`/api/user/by-sub/${userSub}`);
+            const subResponse = await axios.get(`user/by-sub/${userSub}`);
             
             if (subResponse.data && subResponse.data.id) {
               console.log('Found user by sub, fetching full profile:', subResponse.data.id);

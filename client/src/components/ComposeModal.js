@@ -26,7 +26,7 @@ const ComposeModal = ({ onClose, onSent }) => {
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const { data } = await axios.get(`/api/users/search/${encodeURIComponent(query)}`, { signal: controller.signal });
+        const { data } = await axios.get(`/users/search/${encodeURIComponent(query)}`, { signal: controller.signal });
         setSuggestions(data.map(u => ({ sub: u.auth0_sub, name: u.display_name || u.name || 'Unknown' })));
       } catch (err) {
         if (err.name !== 'AbortError') console.error('Autocomplete error', err);
@@ -43,7 +43,7 @@ const ComposeModal = ({ onClose, onSent }) => {
     setError(null);
     try {
       // Step 1: ensure/direct conversation exists
-      const { data } = await axios.post('/api/conversations/direct', { userSubA: user.sub, userSubB: recipientSub });
+      const { data } = await axios.post('/conversations/direct', { userSubA: user.sub, userSubB: recipientSub });
       if (!data || !data.conversationId) throw new Error(data.error || 'Failed to create conversation');
       const conversationId = data.conversationId;
 

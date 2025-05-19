@@ -87,13 +87,13 @@ const UserProfile = ({ userId = null }) => {
         // If userId is provided, use it, otherwise try to get the current user
         if (userId) {
           // Fetch specific user by ID (for admin view or public profiles)
-          userDataResponse = await axios.get(`/api/users/${userId}`);
+          userDataResponse = await axios.get(`users/${userId}`);
           setAuthStatus('authenticated');
         } else {
           try {
             // Try to get current user first (if authenticated)
             console.log('Attempting to fetch authenticated user data...');
-            userDataResponse = await axios.get('/api/user/me', { headers });
+            userDataResponse = await axios.get('user/me', { headers });
             
             if (userDataResponse.data && userDataResponse.data.id) {
               console.log('Successfully fetched authenticated user data:', userDataResponse.data.id);
@@ -109,7 +109,7 @@ const UserProfile = ({ userId = null }) => {
               try {
                 console.log('No DB account found – creating blank profile for sub', authUser.sub);
                 // Capture the response from the POST request
-                const creationResponse = await axios.post('/api/users', {
+                const creationResponse = await axios.post('users', {
                   email: authUser.email,
                   name: authUser.name || null,
                   auth0_sub: authUser.sub,
@@ -182,7 +182,7 @@ const UserProfile = ({ userId = null }) => {
         if (userData.id && userData.id > 0) {
           try {
             console.log(`Fetching badges for user ID ${userData.id}`);
-            const badgesResponse = await axios.get(`/api/users/${userData.id}/badges`);
+            const badgesResponse = await axios.get(`users/${userData.id}/badges`);
             console.log('Badge data:', badgesResponse.data);
             setUserBadges(sanitizeObject(badgesResponse.data) || []);
           } catch (err) {
@@ -230,7 +230,7 @@ const UserProfile = ({ userId = null }) => {
     formData.append('userSub', authUser?.sub || 'anonymous');
 
     try {
-      const response = await axios.post('/images/uploads/profiles/', formData, {
+      const response = await axios.post('uploads/profiles', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
@@ -290,7 +290,7 @@ const UserProfile = ({ userId = null }) => {
       };
       
       // Use the new non-authenticated endpoint
-      const response = await axios.put(`/api/users/${userData.id}/profile`, profileDataToSend, {
+      const response = await axios.put(`users/${userData.id}/profile`, profileDataToSend, {
         headers: authUser?.sub ? { 'x-user-sub': authUser.sub } : {}
       });
       console.log('Profile update response:', response.data);

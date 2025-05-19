@@ -11,7 +11,7 @@ const useIsAdmin = (userSub) => {
   const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
     if (!userSub) return setIsAdmin(false);
-    axios.get('/am-admin', { headers: { 'x-user-sub': userSub } })
+    axios.get('am-admin', { headers: { 'x-user-sub': userSub } })
       .then(({ data }) => setIsAdmin(!!data.isAdmin))
       .catch(() => setIsAdmin(false));
   }, [userSub]);
@@ -48,7 +48,7 @@ const ArticleManager = ({ onEditArticle }) => {
   const load = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const { data } = await axios.get('/my-articles', { headers: { 'x-user-sub': userSub } });
+      const { data } = await axios.get('articles/my-articles', { headers: { 'x-user-sub': userSub } });
       setArticles(Array.isArray(data) ? data : []);
     } catch (err) { console.error(err); setError('Failed to load'); }
     finally { setLoading(false); }
@@ -60,7 +60,7 @@ const ArticleManager = ({ onEditArticle }) => {
     askConfirm('Submit this article for admin approval?', async () => {
       setLoading(true);
       try {
-        await axios.post('/submit-article-for-approval', { articleId: id }, { headers: { 'x-user-sub': userSub } });
+        await axios.post('articles/submit-article-for-approval', { articleId: id }, { headers: { 'x-user-sub': userSub } });
         await load();
         addToast('Article submitted', 'success');
       } catch { addToast('Failed', 'error'); }
@@ -73,7 +73,7 @@ const ArticleManager = ({ onEditArticle }) => {
     askConfirm(needsWarn ? 'Approve this draft article?' : 'Approve this article?', async () => {
       setLoading(true);
       try {
-        await axios.post('/approve-article', { articleId: article.id }, { headers: { 'x-user-sub': userSub } });
+        await axios.post('articles/approve-article', { articleId: article.id }, { headers: { 'x-user-sub': userSub } });
         await load();
         addToast('Article approved', 'success');
       } catch { addToast('Failed to approve', 'error'); }
@@ -85,7 +85,7 @@ const ArticleManager = ({ onEditArticle }) => {
     askConfirm('Reject and return to draft?', async () => {
       setLoading(true);
       try {
-        await axios.post('/deny-article', { articleId: article.id }, { headers: { 'x-user-sub': userSub } });
+        await axios.post('articles/deny-article', { articleId: article.id }, { headers: { 'x-user-sub': userSub } });
         await load();
         addToast('Article denied', 'info');
       } catch { addToast('Failed', 'error'); }
@@ -98,7 +98,7 @@ const ArticleManager = ({ onEditArticle }) => {
     askConfirm('This will permanently delete the article. Continue?', async () => {
       setLoading(true);
       try {
-        await axios.post('/delete-article', { articleId: article.id }, { headers: { 'x-user-sub': userSub } });
+        await axios.post('articles/delete-article', { articleId: article.id }, { headers: { 'x-user-sub': userSub } });
         await load();
         addToast('Article deleted', 'success');
       } catch {
@@ -123,7 +123,7 @@ const ArticleManager = ({ onEditArticle }) => {
         )}
         {article.fileNameServer && (
           <a
-            href={`/download-article-file/${article.id}`}
+            href={`/api/articles/download-article-file/${article.id}`}
             className="lecture-link-btn btn"
           >PDF</a>
         )}

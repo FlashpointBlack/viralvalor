@@ -80,7 +80,7 @@ const LectureEditor = ({ lectureId, onBack }) => {
     setError(null);
     
     try {
-      const { data } = await axios.get('/my-lectures', { 
+      const { data } = await axios.get('lectures/my-lectures', { 
         headers: { 'x-user-sub': userSub }
       });
       
@@ -115,7 +115,7 @@ const LectureEditor = ({ lectureId, onBack }) => {
       setCreatingBlank(true);
       setError(null);
       try {
-        const { data } = await axios.post('/create-blank-lecture', {
+        const { data } = await axios.post('lectures/create-blank-lecture', {
           userSub,
           // Optionally pass initial title, empty for now
         }, {
@@ -144,7 +144,7 @@ const LectureEditor = ({ lectureId, onBack }) => {
     if (!idToUse) return; // We don't yet have an ID (shouldn't happen)
 
     try {
-      await axios.post('/update-lecture', {
+      await axios.post('lectures/update-lecture', {
         id: idToUse,
         // Map url↔linkUrl on backend via field name `url`
         ...(field === 'url' ? { url: value } : { [field]: value })
@@ -171,7 +171,7 @@ const LectureEditor = ({ lectureId, onBack }) => {
       const formData = new FormData();
       formData.append('id', idToUse);
       formData.append('file', fileObj);
-      await axios.post('/upload-lecture-file-existing', formData, {
+      await axios.post('lectures/upload-lecture-file-existing', formData, {
         headers: { 'Content-Type': 'multipart/form-data', 'x-user-sub': userSub }
       });
       setLecture(prev => prev ? { ...prev, fileNameServer: 'uploaded', linkUrl: prev.linkUrl } : prev);
@@ -209,7 +209,7 @@ const LectureEditor = ({ lectureId, onBack }) => {
     if (target === 'link') {
       // delete file server side
       if (lecture?.fileNameServer) {
-        axios.post('/delete-lecture-file', { id: idToUse }, { headers: { 'x-user-sub': userSub } }).catch(() => {});
+        axios.post('lectures/delete-lecture-file', { id: idToUse }, { headers: { 'x-user-sub': userSub } }).catch(() => {});
       }
       setLecture(prev => prev ? { ...prev, fileNameServer: null } : prev);
       setMode('link');
@@ -230,7 +230,7 @@ const LectureEditor = ({ lectureId, onBack }) => {
       setSaving(true);
       setError(null);
       try {
-        await axios.post('/submit-lecture-for-approval', { lectureId: idToUse }, { headers: { 'x-user-sub': userSub } });
+        await axios.post('lectures/submit-lecture-for-approval', { lectureId: idToUse }, { headers: { 'x-user-sub': userSub } });
         addToast('Lecture submitted for approval', 'success');
         // Update local lecture status so UI reflects change
         setLecture(prev => prev ? { ...prev, approvalStatus: 'PENDING' } : prev);
@@ -253,7 +253,7 @@ const LectureEditor = ({ lectureId, onBack }) => {
       setSaving(true);
       setError(null);
       try {
-        await axios.post('/approve-lecture', { lectureId: idToUse }, { headers: { 'x-user-sub': userSub } });
+        await axios.post('lectures/approve-lecture', { lectureId: idToUse }, { headers: { 'x-user-sub': userSub } });
         addToast('Lecture approved successfully', 'success');
         // Update local lecture status so UI reflects change
         setLecture(prev => prev ? { ...prev, approvalStatus: 'APPROVED' } : prev);
@@ -275,7 +275,7 @@ const LectureEditor = ({ lectureId, onBack }) => {
     if (!userSub) return;
     const fetchAdmin = async () => {
       try {
-        const { data } = await axios.get('/am-admin', {
+        const { data } = await axios.get('am-admin', {
           headers: { 'x-user-sub': userSub }
         });
         setIsAdmin(!!data.isAdmin);

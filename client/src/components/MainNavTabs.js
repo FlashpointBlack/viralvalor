@@ -87,11 +87,11 @@ const MainNavTabs = ({
 
   useEffect(() => {
     if (!userSub) return;
-    axios.get('/am-admin', { headers: { 'x-user-sub': userSub } })
+    axios.get('am-admin', { headers: { 'x-user-sub': userSub } })
       .then(({ data }) => setIsAdmin(!!data.isAdmin))
       .catch(() => setIsAdmin(false));
 
-    axios.get('/am-educator', { headers: { 'x-user-sub': userSub } })
+    axios.get('am-educator', { headers: { 'x-user-sub': userSub } })
       .then(({ data }) => setIsEducator(!!data.isEducator))
       .catch(() => setIsEducator(false));
       

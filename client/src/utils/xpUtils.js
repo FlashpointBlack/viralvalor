@@ -11,7 +11,7 @@ export const awardXP = async (userId, amount) => {
   if (!userId || isNaN(userId)) throw new Error('Invalid userId supplied to awardXP');
   if (amount === undefined || isNaN(amount)) throw new Error('Invalid amount supplied to awardXP');
 
-  const response = await axios.post(`/api/users/${userId}/award-xp`, { amount });
+  const response = await axios.post(`/users/${userId}/award-xp`, { amount });
   return response.data;
 };
 
@@ -26,7 +26,7 @@ export const awardBadge = async (userId, badgeId) => {
   if (!userId || isNaN(userId)) throw new Error('Invalid userId supplied to awardBadge');
   if (!badgeId || isNaN(badgeId)) throw new Error('Invalid badgeId supplied to awardBadge');
 
-  const response = await axios.post(`/api/users/${userId}/badges`, { badge_id: badgeId });
+  const response = await axios.post(`/users/${userId}/badges`, { badge_id: badgeId });
   return response.data;
 };
 

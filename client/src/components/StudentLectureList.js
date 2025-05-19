@@ -21,7 +21,7 @@ const StudentLectureList = () => {
       setLoading(true);
       setError(null);
       try {
-        const { data } = await axios.get('/my-released-lectures', {
+        const { data } = await axios.get('lectures/my-released-lectures', {
           headers: { 'x-user-sub': userSub },
         });
         setLectures(Array.isArray(data) ? data : []);
@@ -50,7 +50,7 @@ const StudentLectureList = () => {
         )}
         {lec.fileNameServer && (
           <a
-            href={`/download-lecture-file/${lec.id}`}
+            href={`/api/lectures/download-lecture-file/${lec.id}`}
             className="lecture-link-btn btn"
           >
             Download PPT
