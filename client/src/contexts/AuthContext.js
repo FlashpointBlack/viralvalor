@@ -35,11 +35,11 @@ export const AuthProvider = ({ children }) => {
       });
       try {
         const authHeader = { headers: { Authorization: `Bearer ${token}`, 'x-user-sub': user?.sub } };
-        const { data: profileData } = await axios.get('user/profile-status', authHeader);
+        const { data: profileData } = await axios.get('users/profile-status', authHeader);
         setProfileComplete(profileData.profileComplete);
         setIsAdmin(profileData.isAdmin);
 
-        const { data: meData } = await axios.get('user/me', authHeader);
+        const { data: meData } = await axios.get('users/me', authHeader);
         setUserData(meData);
         if (meData?.display_name) {
           localStorage.setItem('display_name', meData.display_name);
@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }) => {
     if (user?.sub && !userData) {
       // eslint-disable-next-line no-console
       console.log('[AuthContext] Fetching display_name via by-sub endpoint');
-      axios.get(`user/by-sub/${encodeURIComponent(user.sub)}`)
+      axios.get(`users/by-sub/${encodeURIComponent(user.sub)}`)
         .then(({ data }) => data)
         .then(data => {
           setUserData(data);

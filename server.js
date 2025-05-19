@@ -16,6 +16,10 @@ const socketIO = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
+const { auth } = require('express-openid-connect');
+const userRoutesApi = require('./src/routes/userRoutesApi');
+const messageRoutesApi = require('./src/routes/messageRoutesApi');
+const journalRoutesApi = require('./src/routes/journalRoutesApi');
 
 // ===== BEGIN ADDED LOGGING =====
 app.use((req, res, next) => {
@@ -41,6 +45,11 @@ let currentInstruction = null;
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// ===== START REDIRECT SHIM MIDDLEWARE (M6) =====
+const redirectShim = require('./src/middleware/redirectShim');
+app.use(redirectShim);
+// ===== END REDIRECT SHIM MIDDLEWARE (M6) =====
+
 console.log('[SERVER SETUP]: Mounting /api routes...');
 app.use('/api', apiRoutes);
 console.log('[SERVER SETUP]: /api routes mounted.');
@@ -52,15 +61,15 @@ console.log('[SERVER SETUP]: /api routes mounted.');
 // "/api/api/users".  By attaching here we ensure backward-compat
 // without touching the massive userRoutes file.
 // ------------------------------------------------------------
-const { setupUserRoutes } = require('./userRoutes');
-const { setupMessageRoutes } = require('./messageRoutes');
-const userRouter = express.Router();
-setupUserRoutes(userRouter);
-app.use('/', userRouter);
+// const { setupUserRoutes } = require('./userRoutes');
+// const userRouter = express.Router();
+// setupUserRoutes(userRouter);
+// app.use('/', userRouter);
 
-console.log('[SERVER SETUP]: Mounting root message routes...');
-setupMessageRoutes(app);
-console.log('[SERVER SETUP]: Root message routes mounted.');
+// console.log('[SERVER SETUP]: Mounting root message routes...');
+// const { setupMessageRoutes } = require('./messageRoutes');
+// setupMessageRoutes(app);
+// console.log('[SERVER SETUP]: Root message routes mounted.');
 
 // Preserve historical public image URLs (e.g. /images/uploads/badges/xyz.png)
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
@@ -69,19 +78,19 @@ app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use(errorHandler);
 
 // Legacy compatibility: expose /am-admin and /am-educator at root (no /api prefix)
-app.get('/am-admin', async (req, res) => {
-  const requestSub = (req.oidc && req.oidc.user && req.oidc.user.sub) || req.headers['x-user-sub'];
-  if (!requestSub) return res.status(401).json({ error: 'Unauthorized' });
-  const isAdminFlag = await isUserAdminBySub(requestSub);
-  res.json({ isAdmin: isAdminFlag });
-});
+// app.get('/am-admin', async (req, res) => {
+//   const requestSub = (req.oidc && req.oidc.user && req.oidc.user.sub) || req.headers['x-user-sub'];
+//   if (!requestSub) return res.status(401).json({ error: 'Unauthorized' });
+//   const isAdminFlag = await isUserAdminBySub(requestSub);
+//   res.json({ isAdmin: isAdminFlag });
+// });
 
-app.get('/am-educator', async (req, res) => {
-  const requestSub = (req.oidc && req.oidc.user && req.oidc.user.sub) || req.headers['x-user-sub'];
-  if (!requestSub) return res.status(401).json({ error: 'Unauthorized' });
-  const isEducatorFlag = await isUserEducatorBySub(requestSub);
-  res.json({ isEducator: isEducatorFlag });
-});
+// app.get('/am-educator', async (req, res) => {
+//   const requestSub = (req.oidc && req.oidc.user && req.oidc.user.sub) || req.headers['x-user-sub'];
+//   if (!requestSub) return res.status(401).json({ error: 'Unauthorized' });
+//   const isEducatorFlag = await isUserEducatorBySub(requestSub);
+//   res.json({ isEducator: isEducatorFlag });
+// });
 
 // ---------------------------------------------------------------------------
 // NEW: API-prefixed aliases so axios (default baseURL = '/api') resolves the
@@ -703,6 +712,10 @@ io.on('connection', (socket) => {
         }
     });
 });
+
+// Modular API routes
+app.use('/api/users', userRoutesApi);
+app.use('/api/messages', messageRoutesApi);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT} on all networks`));

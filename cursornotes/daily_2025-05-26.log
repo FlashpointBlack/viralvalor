@@ -1,0 +1,20 @@
+2025-05-26 10:00:00
+Now working on step-01 (plan_M5_self_test_endpoints.md): Create `selfTestRoutesApi.js`
+Files to create/modify: `src/routes/selfTestRoutesApi.js` (create) 
+
+2025-05-26 10:05:00
+Finished step-01 (plan_M5_self_test_endpoints.md): Create `selfTestRoutesApi.js`
+Now working on step-02 (plan_M5_self_test_endpoints.md): Identify Existing Self-Test Routes
+Files to read: `selfTestRoutes.js`, `server.js`
+
+2025-05-26 10:15:00
+Finished step-02 (plan_M5_self_test_endpoints.md): Identify Existing Self-Test Routes
+Now working on step-03 (plan_M5_self_test_endpoints.md): Migrate Self-Test Routes
+Files to create/modify: `src/routes/selfTestRoutesApi.js` (modify)
+Files to read: `selfTestRoutes.js`
+
+2025-05-26 10:30:00
+Finished step-03 (plan_M5_self_test_endpoints.md): Migrate Self-Test Routes
+  (Created `src/routes/selfTestUtils.js`, modified `src/routes/selfTestRoutesApi.js`)
+Now working on step-04 (plan_M5_self_test_endpoints.md): Mount the New Self-Test Router
+Files to create/modify: `server.js` (or `src/routes/index.js`) 

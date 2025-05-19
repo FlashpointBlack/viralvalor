@@ -1,0 +1,4 @@
+2025-05-27 10:00:00 - Now working on step-00 of M6 (plan_M6_redirect_shim.md): Define Legacy to New Route Mappings. Files expected to modify: `cursornotes/plan_M6_redirect_shim.md` (for documentation), potentially `server.js` (for discovery).
+2025-05-27 10:05:00 - Completed step-00 of M6: Defined legacy to new route mappings. Now starting step-01: Create Redirect Shim Middleware. Files expected to modify: `src/middleware/redirectShim.js` (new file).
+2025-05-27 10:10:00 - Completed step-01 of M6: Created `src/middleware/redirectShim.js`. Now starting step-02: Integrate Redirect Shim into `server.js`. Files expected to modify: `server.js`.
+2025-05-27 10:15:00 - Completed step-02 of M6: Integrated redirect shim into `server.js`. Now starting step-03: Manual Testing of Redirects. Files expected to modify: None (testing procedure). 

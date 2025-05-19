@@ -1,6 +1,5 @@
 # REST API Documentation
 
-> Version: 2025-05-18 (M6 Final Regression) – All domain routers migrated to modular architecture; legacy aliases remain intact until M7.
 > Version: 2025-05-19 (M7 Alias Removal Complete) – All domain routes reside under `/api/*`; root-level legacy aliases have been removed.
 
 ## Health Checks
@@ -19,7 +18,6 @@ Each domain router exposes a lightweight JSON health endpoint. These are intende
 | Backdrops | `/api/backdrops/health` |
 | Student Instructions | `/api/instructions/health` |
 | Tags | `/api/tags/health` |
-| Legacy monolith catch-all | `/api/legacy-health` |
 
 A successful request returns:
 ```json
@@ -66,4 +64,4 @@ These still resolve to the React SPA and are not handled by the API layer:
 
 ---
 
-_Domain-specific docs for Lectures, Questions, Images, Badges, Characters, Backdrops, Instructions, and Tags now reside alongside their respective routers (`/docs/<domain>.md`)._ 
+_Domain-specific docs for Lectures, Questions, Images, Badges, Characters, Backdrops, Instructions, and Tags now reside alongside their respective routers (`/docs/<domain>.md`)._

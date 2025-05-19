@@ -16,10 +16,10 @@ const UserManagement = ({ onViewProfile = () => {} }) => {
 
   // Fetch users on component mount
   useEffect(() => {
-    const fetchUsers = async () => {
+    (async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/users');
+        const response = await axios.get('users');
         setUsers(response.data);
         setLoading(false);
       } catch (err) {
@@ -27,9 +27,7 @@ const UserManagement = ({ onViewProfile = () => {} }) => {
         setError(`Failed to fetch users: ${err.message}`);
         setLoading(false);
       }
-    };
-
-    fetchUsers();
+    })();
   }, []);
 
   // Handle sorting
@@ -105,7 +103,7 @@ const UserManagement = ({ onViewProfile = () => {} }) => {
   const handleDeleteUser = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
-        await axios.delete(`/users/${userId}`);
+        await axios.delete(`users/${userId}`);
         setUsers(users.filter(user => user.id !== userId));
       } catch (err) {
         setError('Failed to delete user. Please try again.');
@@ -117,7 +115,7 @@ const UserManagement = ({ onViewProfile = () => {} }) => {
   // Handle user selection for editing
   const handleEditUser = (user) => {
     // Fetch the full user data with badges
-    axios.get(`/users/${user.id}`)
+    axios.get(`users/${user.id}`)
       .then(response => {
         console.log('[handleEditUser] User data fetched:', response.data);
         setSelectedUser(response.data);
@@ -139,7 +137,7 @@ const UserManagement = ({ onViewProfile = () => {} }) => {
   const handleSaveUser = async (userData) => {
     try {
       // Update existing user only - removed new user creation
-      const response = await axios.put(`/users/${selectedUser.id}`, userData);
+      const response = await axios.put(`users/${selectedUser.id}`, userData);
       setUsers(users.map(user => user.id === selectedUser.id ? response.data : user));
       
       setShowUserModal(false);
@@ -180,8 +178,8 @@ const UserManagement = ({ onViewProfile = () => {} }) => {
       setBadges([]); // Reset badges state initially
 
       // Fetch user badges
-      console.log(`[UserModal useEffect] Fetching badges from /users/${user.id}/badges`);
-      axios.get(`/users/${user.id}/badges`)
+      console.log(`[UserModal useEffect] Fetching badges from users/${user.id}/badges`);
+      axios.get(`users/${user.id}/badges`)
         .then(response => {
           console.log('[UserModal useEffect] Badge API response:', response.data);
           console.log('Badge data fetched in modal:', response.data);
@@ -246,12 +244,12 @@ const UserManagement = ({ onViewProfile = () => {} }) => {
     const handleAddBadge = () => {
       if (!selectedBadge) return;
       
-      axios.post(`/users/${user.id}/badges`, { badge_id: selectedBadge })
+      axios.post(`users/${user.id}/badges`, { badge_id: selectedBadge })
         .then(response => {
           console.log('Badge added:', response.data);
           
           // Refresh the badges list from the server
-          axios.get(`/users/${user.id}/badges`)
+          axios.get(`users/${user.id}/badges`)
             .then(response => {
               console.log('Updated badges:', response.data);
               setBadges(response.data);
@@ -269,7 +267,7 @@ const UserManagement = ({ onViewProfile = () => {} }) => {
 
     const handleRemoveBadge = (badgeId) => {
       if (window.confirm('Are you sure you want to remove this badge from the user?')) {
-        axios.delete(`/users/${user.id}/badges/${badgeId}`)
+        axios.delete(`users/${user.id}/badges/${badgeId}`)
           .then(response => {
             // Remove the badge from the list
             setBadges(badges.filter(badge => badge.ID !== badgeId));

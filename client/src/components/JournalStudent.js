@@ -36,7 +36,7 @@ const JournalStudent = ({ initialPromptId = null }) => {
   const fetchPrompts = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get('my-journal-prompts', { headers: { 'x-user-sub': user?.sub } });
+      const { data } = await axios.get('journal/my-prompts', { headers: { 'x-user-sub': user?.sub } });
       let list = Array.isArray(data) ? data : [];
       // Filter out any placeholder/unreleased prompts that should not be shown to students
       list = list.filter(p => {
@@ -57,8 +57,8 @@ const JournalStudent = ({ initialPromptId = null }) => {
     setSelectedId(id);
     try {
       const [pRes, rRes] = await Promise.all([
-        axios.get(`journal-prompts/${id}`, { headers: { 'x-user-sub': user?.sub } }),
-        axios.get(`journal-prompts/${id}/my-response`, { headers: { 'x-user-sub': user?.sub } }).catch(() => ({ data: null }))
+        axios.get(`journal/prompts/${id}`, { headers: { 'x-user-sub': user?.sub } }),
+        axios.get(`journal/prompts/${id}/my-response`, { headers: { 'x-user-sub': user?.sub } }).catch(() => ({ data: null }))
       ]);
       setPrompt(pRes.data);
       if (rRes.data) {
@@ -78,7 +78,7 @@ const JournalStudent = ({ initialPromptId = null }) => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.post(`journal-prompts/${selectedId}/response`, { responseText: response }, { headers: { 'x-user-sub': user?.sub } });
+      const { data } = await axios.post(`journal/prompts/${selectedId}/response`, { responseText: response }, { headers: { 'x-user-sub': user?.sub } });
       setCharCount(data.charCount);
       // Refresh list so charCount reflects immediately
       await fetchPrompts();

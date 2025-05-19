@@ -1,0 +1,46 @@
+2025-05-25 00:00:00
+Now working on step-M1: Inventory & gap analysis of remaining *non-modular* endpoints.
+Files to review: server.js, userRoutes.js, messageRoutes.js, journalRoutes.js, selfTestRoutes.js
+
+2025-05-25 01:00:00
+Finished M1: Inventory & gap analysis complete. Plan documented in cursornotes/plan_M1_inventory_gap_analysis.md.
+Now working on M2: Extract User endpoints into `src/routes/userRoutesApi.js`.
+Files to modify: userRoutes.js, src/routes/userRoutesApi.js, server.js, src/routes/index.js, routes.js (eventually), src/routes/legacyRoutes.js (eventually).
+
+2025-05-25 01:15:00
+M2 step-01 DONE: Created src/routes/userRoutesApi.js with basic scaffold and health check.
+Now working on M2 step-02: Migrate Endpoints from `userRoutes.js` to `userRoutesApi.js`.
+Files to modify: userRoutes.js, src/routes/userRoutesApi.js.
+
+2025-05-25 02:15:00
+M2 step-02 DONE: Migrated endpoints from userRoutes.js to src/routes/userRoutesApi.js.
+Now working on M2 step-03: Migrate Inline User Routes from `routes.js`.
+Files to modify: routes.js, src/routes/userRoutesApi.js.
+
+2025-05-25 02:45:00
+M2 step-03 DONE: Migrated inline user routes (/submit-profile, /profile) from routes.js to src/routes/userRoutesApi.js.
+Now working on M2 step-04: Mount `userRoutesApi.js` in `src/routes/index.js`.
+Files to modify: src/routes/index.js, src/routes/userRoutesApi.js.
+
+2025-05-25 03:00:00
+M2 step-04 DONE: Mounted src/routes/userRoutesApi.js in src/routes/index.js.
+Now working on M2 step-05: Remove Old User Route Mounts and Definitions.
+Files to modify: server.js, routes.js.
+
+2025-05-25 03:15:00
+M2 step-05 DONE: Removed old user route mounts from server.js and routes.js.
+Now working on M2 step-06: Testing and Verification.
+Files to test: src/routes/userRoutesApi.js. Admin self-tests may need updating.
+
+2025-05-25 03:45:00
+M2 step-06 DONE: Added HTTP self-tests for User API routes to selfTestRoutes.js. M2 complete.
+Now working on M3: Extract Message endpoints into `src/routes/messageRoutesApi.js`.
+Files to modify: messageRoutes.js, src/routes/messageRoutesApi.js, server.js, src/routes/index.js, routes.js (eventually), src/routes/legacyRoutes.js (eventually).
+
+2025-05-25 10:00:00
+Now working on step-01 (M3): Analyze `messageRoutes.js` and existing mount points
+Files to modify: `messageRoutes.js` (Read), `server.js` (Read), `routes.js` (Read, if relevant)
+
+2025-05-25 10:00:00
+Now working on step-01 (M4): Identify existing journal endpoints
+Files to inspect: server.js, routes.js, src/routes/legacyRoutes.js, journalRoutes.js (if it exists) 

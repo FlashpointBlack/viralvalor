@@ -1,12 +1,12 @@
 # Viral Valor – Backend
 
-This Node / Express backend powers the Viral Valor SPA. The codebase is currently undergoing an incremental refactor from a monolithic `routes.js` file to a **domain-driven router architecture** under `src/routes/`.
+This Node / Express backend powers the Viral Valor SPA. The codebase has completed a refactor from a monolithic `routes.js` file to a **domain-driven router architecture** under `src/routes/`.
 
 ## Key Points
 
 1. **Stable Public API** – All HTTP endpoints now live exclusively under the `/api/*` namespace. The temporary root-level aliases were removed in Milestone 7, so be sure every request is prefixed with `/api`.
 2. **Health Endpoints** – Every router exposes `/health` for monitoring (see docs/API.md).
-3. **Admin Self-Test** – Navigate to `/api/admin/selftest` (admin-only) to run comprehensive integration checks that exercise database helpers and HTTP endpoints.
+3. **Admin Self-Test** – Navigate to `/api/selftest/` (admin-only) to run comprehensive integration checks that exercise database helpers and HTTP endpoints.
 
 ## Router Migration Status
 
@@ -22,7 +22,6 @@ This Node / Express backend powers the Viral Valor SPA. The codebase is currentl
 | Backdrops | `src/routes/backdropRoutes.js` | `/api/backdrops/health` | ✅ |
 | Student Instructions | `src/routes/instructionRoutes.js` | `/api/instructions/health` | ✅ |
 | Tags | `src/routes/tagRoutes.js` | `/api/tags/health` | ✅ |
-| Legacy Fallback | `src/routes/legacyRoutes.js` | `/api/legacy-health` | ✅ |
 
 ## Development
 
@@ -35,4 +34,13 @@ The server automatically mounts all routers from `src/routes/index.js` under `/a
 
 ---
 
-Full endpoint reference lives in [`docs/API.md`](docs/API.md). 
+Full endpoint reference lives in [`docs/API.md`](docs/API.md).
+
+Admin Self-Test
+---------------
+
+To run a suite of integration tests against the current database and key API endpoints:
+
+1. Ensure you are logged in as an Administrator.
+2. Navigate your browser to `/api/selftest/`.
+3. The page will display PASS/FAIL for various operational checks. 

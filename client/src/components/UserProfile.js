@@ -93,7 +93,7 @@ const UserProfile = ({ userId = null }) => {
           try {
             // Try to get current user first (if authenticated)
             console.log('Attempting to fetch authenticated user data...');
-            userDataResponse = await axios.get('user/me', { headers });
+            userDataResponse = await axios.get('users/me', { headers });
             
             if (userDataResponse.data && userDataResponse.data.id) {
               console.log('Successfully fetched authenticated user data:', userDataResponse.data.id);

@@ -19,7 +19,7 @@ const ProfileSearch = ({ onViewProfile }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('/public-profiles?limit=12');
+      const response = await axios.get('users/public-profiles?limit=12');
       // Ensure we always store an array to avoid runtime errors when rendering
       setProfiles(Array.isArray(response.data) ? response.data : []);
       setShowRecent(true);
@@ -45,7 +45,7 @@ const ProfileSearch = ({ onViewProfile }) => {
     setSearching(true);
     
     try {
-      const response = await axios.get(`/public-profiles/search/${encodeURIComponent(searchTerm)}`);
+      const response = await axios.get(`users/public-profiles/search/${encodeURIComponent(searchTerm)}`);
       setProfiles(Array.isArray(response.data) ? response.data : []);
       setShowRecent(false);
     } catch (err) {

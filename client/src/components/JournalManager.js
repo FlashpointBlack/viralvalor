@@ -26,7 +26,7 @@ const JournalManager = () => {
   const fetchPrompts = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get('/journal-prompts');
+      const { data } = await axios.get('journal/prompts');
       setPrompts(Array.isArray(data) ? data : []);
     } catch (err) {
       setError('Failed to load prompts');
@@ -39,15 +39,15 @@ const JournalManager = () => {
   const openEdit = (p) => setEditingPrompt({ ...p });
   const closeEditor = () => setEditingPrompt(null);
 
-  const savePrompt = async () => {
+  const handleSavePrompt = async () => {
     const { id, title, promptText } = editingPrompt;
     if (!title || !promptText) return alert('Title and prompt text required');
     setLoading(true);
     try {
       if (id) {
-        await axios.put(`/journal-prompts/${id}`, { title, promptText });
+        await axios.put(`journal/prompts/${id}`, { title, promptText });
       } else {
-        await axios.post('/journal-prompts', { title, promptText });
+        await axios.post('journal/prompts', { title, promptText });
       }
       closeEditor();
       fetchPrompts();
@@ -66,7 +66,7 @@ const JournalManager = () => {
         setConfirm({ ...confirm, open: false });
         setLoading(true);
         try {
-          await axios.delete(`/journal-prompts/${id}`);
+          await axios.delete(`journal/prompts/${id}`);
           fetchPrompts();
         } catch (err) {
           setError('Failed to delete');
@@ -85,7 +85,7 @@ const JournalManager = () => {
         setConfirm({ ...confirm, open: false });
         setLoading(true);
         try {
-          const { data } = await axios.post('/release-journal-prompt', { promptId: id });
+          const { data } = await axios.post('journal/prompts/release', { promptId: id });
           addToast(`Journal released to ${data.releasedCount || 0} students`, 'success');
         } catch (err) {
           setError('Failed to release prompt');
@@ -101,8 +101,8 @@ const JournalManager = () => {
     setLoading(true);
     try {
       const [rRes, sRes] = await Promise.all([
-        axios.get(`/journal-prompts/${id}/recipients`).catch(() => ({ data: [] })),
-        axios.get(`/journal-prompts/${id}/stats`).catch(() => ({ data: [] })),
+        axios.get(`journal/prompts/${id}/recipients`).catch(() => ({ data: [] })),
+        axios.get(`journal/prompts/${id}/stats`).catch(() => ({ data: [] })),
       ]);
       const recips = Array.isArray(rRes.data) ? rRes.data : [];
       const stats = Array.isArray(sRes.data) ? sRes.data : [];
@@ -180,7 +180,7 @@ const JournalManager = () => {
               />
             </label>
             <div className="modal-actions">
-              <button className="btn btn-primary btn-md" onClick={savePrompt}>Save</button>
+              <button className="btn btn-primary btn-md" onClick={handleSavePrompt}>Save</button>
               <button className="btn btn-secondary btn-md" onClick={closeEditor}>Cancel</button>
             </div>
           </div>

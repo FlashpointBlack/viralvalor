@@ -1,0 +1,3 @@
+2024-07-03T10:00:00Z
+Now working on step-00: Purge Legacy Route Files and Server Mounts
+Files to modify: server.js (modify), routes.js (delete), src/routes/legacyRoutes.js (delete) 
