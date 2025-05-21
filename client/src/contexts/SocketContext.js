@@ -16,6 +16,8 @@ export const SocketProvider = ({ children }) => {
   const [lastViewed, setLastViewed] = useState(Date.now()); // Global timestamp when user opened dropdown
   const [lastViewedConvos, setLastViewedConvos] = useState({}); // { [conversationId]: ts }
   const [connectedUsersList, setConnectedUsersList] = useState([]);
+  const [lastXPAward, setLastXPAward] = useState(null); // State for last XP award details
+  const [lastBadgeAward, setLastBadgeAward] = useState(null); // State for last Badge award details
 
   const authRef = React.useRef({});
   const { user, isAuthenticated } = useAuth0();
@@ -128,6 +130,16 @@ export const SocketProvider = ({ children }) => {
 
     newSocket.on('update user list', (users) => {
       setConnectedUsersList(users);
+    });
+
+    newSocket.on('xp_awarded', (data) => {
+      console.log('Received xp_awarded event:', data);
+      setLastXPAward(data); // Update state with XP award details
+    });
+
+    newSocket.on('badge_awarded', (data) => {
+      console.log('Received badge_awarded event:', data);
+      setLastBadgeAward(data); // Update state with Badge award details
     });
 
     // If we authenticated after socket was connected, make sure to register then
@@ -246,6 +258,14 @@ export const SocketProvider = ({ children }) => {
     }
   };
 
+  const clearLastXPAward = () => {
+    setLastXPAward(null);
+  };
+
+  const clearLastBadgeAward = () => {
+    setLastBadgeAward(null);
+  };
+
   const value = {
     socket,
     isConnected,
@@ -267,7 +287,11 @@ export const SocketProvider = ({ children }) => {
     emitNewUser,
     emitNewAdminUser,
     sendMessage,
-    selectEncounter
+    selectEncounter,
+    lastXPAward, // Expose last XP award details
+    clearLastXPAward, // Expose function to clear XP award details
+    lastBadgeAward, // Expose last Badge award details
+    clearLastBadgeAward // Expose function to clear Badge award details
   };
 
   return (

@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
+    "madge": "^8.0.0",
     "supertest": "^6.3.3"
   }
 }

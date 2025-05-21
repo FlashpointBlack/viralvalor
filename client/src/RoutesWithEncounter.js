@@ -12,6 +12,8 @@ import CompleteProfile from './components/CompleteProfile';
 import PresentationLanding from './components/PresentationLanding';
 import PresentationEnd from './components/PresentationEnd';
 import PresentationDisplayHost from './components/PresentationDisplayHost';
+// SiteHealthDisplay is now rendered within HomePage, so direct import here is not needed for routing.
+// import SiteHealthDisplay from './views/Admin/SiteHealthDisplay'; 
 // Ensure ProtectedRoute is imported if it's used directly here, or assume it's applied in App.js structure
 import { useAuth0 } from '@auth0/auth0-react'; // For ProtectedRoute logic if replicated
 import { useAuth } from './contexts/AuthContext';   // For ProtectedRoute logic if replicated
@@ -89,6 +91,18 @@ const RoutesWithEncounter = () => {
           </ProtectedRoute>
         } 
       /> */}
+
+      {/* Admin Routes */}
+      {/* Route for Site Health removed, now handled as a tab in HomePage 
+      <Route 
+        path="/admin/site-health" 
+        element={ 
+          <ProtectedRoute requireAdmin={true}>
+            <SiteHealthDisplay />
+          </ProtectedRoute>
+        }
+      />
+      */}
 
       {/* Routes for encounters, assuming they need EncounterContext */}
       <Route path="/encounters2" element={<PresentationLanding />} /> 

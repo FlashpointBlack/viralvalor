@@ -1,0 +1,75 @@
+.site-health-container {
+  padding: 20px;
+  font-family: sans-serif;
+}
+
+.site-health-container h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.health-group {
+  margin-bottom: 30px;
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.health-group h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #555;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+}
+
+.health-group ul {
+  list-style: none;
+  padding: 0;
+}
+
+.health-status-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.health-status-item:last-child {
+  border-bottom: none;
+}
+
+.health-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.status-ok .health-indicator {
+  background-color: #4CAF50; /* Green */
+}
+
+.status-error .health-indicator {
+  background-color: #F44336; /* Red */
+}
+
+.service-name {
+  font-weight: bold;
+  color: #333;
+}
+
+.error-message {
+  color: #D32F2F; /* Darker Red */
+  margin-left: 5px;
+  font-size: 0.9em;
+}
+
+.service-detail {
+  color: #777;
+  margin-left: 5px;
+  font-size: 0.9em;
+} 

@@ -5,5 +5,4 @@ alwaysApply: true
 ---
 -node.js & express for the back end
 -react for the front end
-
 -MySQL databases, never JSON file storage. 

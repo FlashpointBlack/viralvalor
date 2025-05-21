@@ -86,6 +86,7 @@ router.get('/GetEncounterData/:id', async (req, res) => {
 
   try {
     const data = await GetEncounterData(parseInt(encounterId));
+
     if (!data || !data.Encounter) {
       return res.status(404).json({ error: 'Encounter not found' });
     }

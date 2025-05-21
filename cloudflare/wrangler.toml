@@ -1,0 +1,10 @@
+name = "keepalive-worker"
+compatibility_date = "2025-05-21"
+
+[vars]
+# Comma-separated list of URLs to ping (no spaces)
+KEEPALIVE_URLS = "https://www.viralvalor.com/api/encounters/health"
+
+# Cron schedule – hourly on the free plan (change as needed)
+[[triggers]]
+cron = "0 * * * *"  # minute hour day-of-month month day-of-week 

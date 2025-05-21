@@ -90,7 +90,7 @@ const MobilePoll = () => {
   const { userData } = useAuth();
 
   const { openChat } = useChat();
-  const { chatMessages, lastViewedByConv, markMessagesViewed } = useAppSocket();
+  const { chatMessages, lastViewedByConv, markMessagesViewed, lastXPAward, clearLastXPAward, lastBadgeAward, clearLastBadgeAward } = useAppSocket();
 
   // Reusable floating login button (only if user not authenticated)
   const floatingLogin = null;
@@ -148,9 +148,21 @@ const MobilePoll = () => {
     };
   }, []);
 
+  useEffect(() => {
+    // Preload the audio
+    rewardAudioRef.current = new Audio('/XP.mp3'); // Changed to /XP.mp3 as per bottom of file
+    rewardAudioRef.current.load();
+  }, []);
+
   // Initialize socket connection and event listeners
   useEffect(() => {
     console.log('MobilePoll component mounted, device ID:', deviceId);
+
+    // BASIC TEST: Is 'presentation started' event being received at all?
+    socket.on('presentation started', (data) => {
+      console.log('[!!! TEST LISTENER !!!] Received \'presentation started\' event data:', data);
+      updateDebugInfo({ lastEvent: 'TEST presentation started' });
+    });
     
     // Check if we have a game ID in the URL first (needed for registration)
     const urlParams = new URLSearchParams(window.location.search);
@@ -270,18 +282,23 @@ const MobilePoll = () => {
 
     // Track connection status
     socket.on('connect', () => {
-      console.log('Socket connected');
+      console.log('[MobilePoll] Socket connected. Requesting current state.');
       updateDebugInfo({ socketConnected: true });
       
-      // Re-register with device ID on reconnect
+      // Re-register with device ID on reconnect if user was already known
       if (isRegistered && username) {
+        console.log('[MobilePoll] Re-emitting \'register user\' on connect:', { username, deviceId, gameId });
         socket.emit('register user', {
           username: username,
           deviceId: deviceId,
-          gameId: gameId
+          gameId: gameId // gameId might be null if not yet known
         });
       }
       
+      // Always request current presenter info and quiz state on connect
+      console.log('[MobilePoll] Emitting \'get presenter\' on connect, current local gameId:', gameId);
+      socket.emit('get presenter', gameId || null); 
+      console.log('[MobilePoll] Emitting \'request current quiz\' on connect, current local gameId:', gameId);
       socket.emit('request current quiz', { gameId, deviceId });
       socket.emit('request current instruction');
     });
@@ -311,27 +328,63 @@ const MobilePoll = () => {
 
     // Listen for presenter info and presentation status events
     const handlePresentationStarted = ({ gameId: startedGameId, hostSub }) => {
-      if (startedGameId && (!gameId || startedGameId === gameId)) {
+      console.log('[MobilePoll] Received \'presentation started\' event:', { startedGameId, hostSub, currentLocalGameId: gameId });
+      if (startedGameId && (!gameId || startedGameId !== startedGameId)) { // Ensure gameId is new or different
         setGameId(startedGameId);
         setPresenterSub(hostSub);
         setPresentationActive(true);
+        // Explicitly register/re-register with the new gameId
+        console.log('[MobilePoll] Emitting \'register user\' from handlePresentationStarted (new/different gameId):', { username: username, deviceId: deviceId, gameId: startedGameId });
+        socket.emit('register user', {
+          username: username, // Use the current username state
+          deviceId: deviceId,
+          gameId: startedGameId
+        });
+      } else if (startedGameId && startedGameId === gameId && !presentationActive) {
+        // If same gameId but presentation wasn't marked active
+        setPresenterSub(hostSub);
+        setPresentationActive(true);
+        // Re-register just in case, ensuring user is active in this known game
+        console.log('[MobilePoll] Emitting \'register user\' from handlePresentationStarted (same gameId, was not active):', { username: username, deviceId: deviceId, gameId: startedGameId });
+        socket.emit('register user', {
+          username: username, // Use the current username state
+          deviceId: deviceId,
+          gameId: startedGameId
+        });
       }
     };
 
     const handlePresenterInfo = ({ gameId: infoGameId, hostSub, isActive }) => {
-      // Always update presenterSub if we have it
+      console.log('[MobilePoll] Received \'presenter info\' event:', { infoGameId, hostSub, isActive, currentLocalGameId: gameId });
+      let needsRegistration = false;
+      let finalGameId = gameId;
+
       if (hostSub) {
         setPresenterSub(hostSub);
       }
 
-      // If the server indicates the presentation is already active, update local state.
       if (isActive) {
         setPresentationActive(true);
-
-        // If we didn't have a game ID yet, set it from the payload
-        if (!gameId && infoGameId) {
+        if (infoGameId && (!gameId || gameId !== infoGameId)) {
           setGameId(infoGameId);
+          finalGameId = infoGameId;
+          needsRegistration = true;
+        } else if (!infoGameId && gameId) {
+          // We have a local gameId, presenter info confirms active session
+          needsRegistration = true; // Good to re-confirm registration
+        } else if (infoGameId && gameId === infoGameId) {
+          // Game ID matches, session is active.
+          needsRegistration = true; // Re-confirm registration
         }
+      }
+
+      if (needsRegistration && finalGameId) {
+        console.log('[MobilePoll] Emitting \'register user\' from handlePresenterInfo:', { username: username, deviceId: deviceId, gameId: finalGameId });
+        socket.emit('register user', {
+          username: username, // Use the current username state
+          deviceId: deviceId,
+          gameId: finalGameId
+        });
       }
     };
 
@@ -362,29 +415,31 @@ const MobilePoll = () => {
 
     // Reward notifications
     const handleXpAwarded = (payload) => {
-      console.log('XP awarded event received', payload);
+      console.log('xp_awarded event received directly in MobilePoll', payload);
       setRewardPopup({ type: 'xp', payload });
+      // Sound will be played by the useEffect that watches rewardPopup state
     };
     const handleBadgeAwarded = (payload) => {
-      console.log('Badge awarded event received', payload);
+      console.log('badge_awarded event received directly in MobilePoll', payload);
       setRewardPopup({ type: 'badge', payload });
+      // Sound will be played by the useEffect that watches rewardPopup state
     };
-    socket.on('xp awarded', handleXpAwarded);
-    socket.on('badge awarded', handleBadgeAwarded);
+    socket.on('xp_awarded', handleXpAwarded);
+    socket.on('badge_awarded', handleBadgeAwarded);
 
     // Instruction notifications
     const handleInstructionBroadcast = (payload) => {
-      console.log('Instruction broadcast received:', payload);
+      console.log('instruction_broadcast received:', payload);
       setInstructionPopup(payload);
     };
-    socket.on('instruction broadcast', handleInstructionBroadcast);
+    socket.on('instruction_broadcast', handleInstructionBroadcast);
 
     // Handle instruction close events
     const handleInstructionClose = () => {
-      console.log('Instruction close received');
+      console.log('instruction_close received');
       setInstructionPopup(null);
     };
-    socket.on('instruction close', handleInstructionClose);
+    socket.on('instruction_close', handleInstructionClose);
 
     // Clean up event listeners on unmount
     return () => {
@@ -402,10 +457,10 @@ const MobilePoll = () => {
       socket.off('presenter info', handlePresenterInfo);
       socket.off('presentation ended', handlePresentationEnded);
       socket.off('receive message', handleReceiveMessage);
-      socket.off('xp awarded', handleXpAwarded);
-      socket.off('badge awarded', handleBadgeAwarded);
-      socket.off('instruction broadcast', handleInstructionBroadcast);
-      socket.off('instruction close', handleInstructionClose);
+      socket.off('xp_awarded', handleXpAwarded);
+      socket.off('badge_awarded', handleBadgeAwarded);
+      socket.off('instruction_broadcast', handleInstructionBroadcast);
+      socket.off('instruction_close', handleInstructionClose);
     };
   }, [isRegistered, isPollActive, debugInfo.receivedPolls, gameId, deviceId, username, presenterSub, presenterConversationId]);
 
@@ -756,54 +811,61 @@ const MobilePoll = () => {
 
   // ----- Reward Popup Modal component -----
   const RewardPopupModal = () => {
+    console.log('[MobilePoll] RewardPopupModal rendering. Current rewardPopup state:', rewardPopup);
     if (!rewardPopup) return null;
 
-    const close = () => setRewardPopup(null);
     const { type, payload } = rewardPopup;
 
+    const close = () => {
+      setRewardPopup(null);
+      if (type === 'xp') {
+        clearLastXPAward(); // Clear the XP award from context
+      } else if (type === 'badge') {
+        clearLastBadgeAward(); // Clear the Badge award from context
+      }
+    };
+
+    let title = '';
+    let content = null;
+
+    if (type === 'xp' && payload) {
+      title = 'XP Awarded!';
+      content = (
+        <>
+          <p style={{ fontSize: '1.5em', fontWeight: 'bold', color: payload.xpAwarded > 0 ? 'var(--green)' : 'var(--red)' }}>
+            {payload.xpAwarded > 0 ? `+${payload.xpAwarded}` : payload.xpAwarded} XP
+          </p>
+          {payload.newXP !== undefined && <p>Total XP: {payload.newXP}</p>}
+          {payload.newLevel !== undefined && <p>Level: {payload.newLevel}</p>}
+        </>
+      );
+    } else if (type === 'badge' && payload) {
+      title = 'Badge Unlocked!';
+      const img = payload.badgeImage || payload.imageUrl;
+      const name = payload.badgeName || payload.title;
+      const desc = payload.badgeDescription || payload.description;
+      content = (
+        <>
+          {img && <img src={img} alt={name} style={{ maxWidth: '100px', maxHeight: '100px', margin: '10px auto', display: 'block' }} />}
+          <p style={{ fontSize: '1.2em', fontWeight: 'bold' }}>{name}</p>
+          {desc && <p>{desc}</p>}
+        </>
+      );
+    } else {
+      // Fallback or handle other types if necessary
+      return null;
+    }
+
     return (
-      <div className="profile-modal-overlay" onClick={close}>
-        <div className="profile-modal-content" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
-          <button className="close-modal-btn" onClick={close}>×</button>
-          {type === 'xp' && (
-            <>
-              <img 
-                src="/images/PlusXP.png" 
-                alt="XP" 
-                style={{ 
-                  width: '75%',          // 75% of modal width
-                  height: 'auto',        // maintain aspect ratio
-                  display: 'block',      // allow centering via margin auto
-                  margin: '0 auto 1rem'  // center horizontally and keep spacing below
-                }} 
-              />
-              <p style={{ fontSize: '4.5rem', fontWeight:'900', color:'#ffffff', margin:'0.5rem 0' }}>
-                {payload?.amount > 0 ? `+${payload.amount}` : payload.amount}
-              </p>
-              {payload?.level && (
-                <p style={{ fontSize: '1.5rem', marginTop: '0.75rem', color:'#fff' }}>Your new level: <strong>{payload.level}</strong></p>
-              )}
-            </>
-          )}
-          {type === 'badge' && (
-            <>
-              <h2 style={{ color:'#fff', marginBottom:'1rem' }}>New Badge Earned!</h2>
-              {payload?.imageUrl && (
-                <img 
-                  src={payload?.imageUrl} 
-                  alt={payload?.title || 'Badge'} 
-                  style={{ 
-                    width: '75%',          // fill 75% of modal width
-                    height: 'auto',        // keep aspect ratio
-                    display: 'block',      // allow margin auto centering
-                    margin: '0 auto 1rem'  // center and spacing
-                  }} 
-                />
-              )}
-              <h3 style={{ color:'#fff', marginBottom:'0.5rem' }}>{payload?.title || 'Badge'}</h3>
-              {payload?.description && <p style={{ color:'#fff' }}>{payload.description}</p>}
-            </>
-          )}
+      <div className="reward-popup-overlay" onClick={close}>
+        <div className="reward-popup-content" onClick={(e) => e.stopPropagation()}>
+          <h2>{title}</h2>
+          <div className="reward-details">
+            {content}
+          </div>
+          <button onClick={close} className="btn btn-primary" style={{ marginTop: '20px' }}>
+            Awesome!
+          </button>
         </div>
       </div>
     );
@@ -892,6 +954,7 @@ const MobilePoll = () => {
 
   // Request presenter info when we have a game ID (handles late joiners)
   useEffect(() => {
+    console.log('[MobilePoll] useEffect for \'get presenter\' triggered. Current gameId:', gameId);
     // Always ask the server for the current presenter status. We pass a gameId if we know it,
     // otherwise null so the server can return any active presentation that exists.
     socket.emit('get presenter', gameId || null);
@@ -900,9 +963,17 @@ const MobilePoll = () => {
   // Auto-dismiss reward popup after 8 seconds
   useEffect(() => {
     if (!rewardPopup) return;
-    const timer = setTimeout(() => setRewardPopup(null), 8000);
+    const timer = setTimeout(() => {
+      const currentType = rewardPopup ? rewardPopup.type : null;
+      setRewardPopup(null);
+      if (currentType === 'xp') {
+        clearLastXPAward(); // Clear from context on auto-dismiss
+      } else if (currentType === 'badge') {
+        clearLastBadgeAward(); // Clear from context on auto-dismiss
+      }
+    }, 8000);
     return () => clearTimeout(timer);
-  }, [rewardPopup]);
+  }, [rewardPopup, clearLastXPAward, clearLastBadgeAward]);
 
   // Play a celebratory sound whenever the user is shown an XP or badge notification
   useEffect(() => {

@@ -8,6 +8,7 @@ import '../styles/StorylineEditorDebug.css';
 import { useAuth } from '../contexts/AuthContext';
 import prettyBytes from 'pretty-bytes';
 import ConfirmationModal from './ConfirmationModal';
+import * as encounterService from '../services/encounterService'; // Import the new service
 
 const StorylineEditor = () => {
   const [activeEncounterId, setActiveEncounterId] = useState(null);
@@ -39,7 +40,7 @@ const StorylineEditor = () => {
       // Set defaults needed for fetches
       axios.defaults.headers.common['x-user-sub'] = userSub;
       axios.defaults.withCredentials = true;
-      fetchRootEncounters();
+      fetchRootEncountersFromComponent();
       // Optionally, load a default or last-viewed encounter here if desired,
       // using loadEncounter(defaultId, { isNewRoot: true });
     } else {
@@ -89,47 +90,44 @@ const StorylineEditor = () => {
   const runDiagnostics = async () => {
     console.log('Running diagnostics...');
     try {
-      await axios.get('user/profile-status');
-    } catch {}
+      await encounterService.getUserProfileStatus(); // Use service
+    } catch (err) {
+      console.error('Diagnostic: getUserProfileStatus failed', err.message);
+    }
     try {
-      await axios.get('encounters/root-encounters');
-    } catch {}
+      await encounterService.fetchRootEncounters();
+    } catch (err) {
+      console.error('Diagnostic: fetchRootEncounters failed', err.message);
+    }
     try {
-      await axios.get('encounters/unlinked-encounters');
-    } catch {}
+      await encounterService.fetchUnlinkedEncounters(); // Use service
+    } catch (err) {
+      console.error('Diagnostic: fetchUnlinkedEncounters failed', err.message);
+    }
     console.log('Diagnostics complete.');
   };
 
-  const fetchRootEncounters = async () => {
+  const fetchRootEncountersFromComponent = async () => {
     try {
-      const response = await axios.get('encounters/root-encounters', { 
-        withCredentials: true,
-        headers: { 'x-user-sub': userSub },
-        params: { _t: new Date().getTime() }
-      });
+      const data = await encounterService.fetchRootEncounters();
       
-      if (Array.isArray(response.data)) {
-        setRootEncounters(response.data);
+      setRootEncounters(data);
 
-        if (activeEncounterId) {
-          const isCurrentInRootList = response.data.some(e => e.ID === activeEncounterId);
-          if (!isCurrentInRootList) {
-            if (encounterPath.length === 1) {
-              setEncounter(null);
-              setEncounterRoutes([]);
-              setActiveEncounterId(null);
-              setEncounterPath([]);
-              setSelectedRootEncounterId("");
-            }
-          } else {
-            if (encounterPath.length === 1) {
-              setSelectedRootEncounterId(activeEncounterId.toString());
-            }
+      if (activeEncounterId) {
+        const isCurrentInRootList = data.some(e => e.ID === activeEncounterId);
+        if (!isCurrentInRootList) {
+          if (encounterPath.length === 1) {
+            setEncounter(null);
+            setEncounterRoutes([]);
+            setActiveEncounterId(null);
+            setEncounterPath([]);
+            setSelectedRootEncounterId("");
+          }
+        } else {
+          if (encounterPath.length === 1) {
+            setSelectedRootEncounterId(activeEncounterId.toString());
           }
         }
-      } else {
-        console.error('Root encounters response is not an array', response.data);
-        setRootEncounters([]);
       }
     } catch (err) {
       console.error('Error fetching root encounters:', err);
@@ -171,22 +169,12 @@ const StorylineEditor = () => {
     setError(null);
     
     try {
-      const response = await axios({
-        method: 'post',
-        url: 'encounters/create-blank-encounter', 
-        data: { userSub },
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-sub': userSub
-        }
-      });
-      
-      const newEncounterId = response.data.encounterId;
+      const responseData = await encounterService.createBlankEncounter(); // Use service
+      const newEncounterId = responseData.encounterId;
 
       await new Promise(resolve => setTimeout(resolve, 100)); 
       
-      await fetchRootEncounters(); 
+      await fetchRootEncountersFromComponent(); 
       
       await loadEncounter(newEncounterId, { isNewRoot: true });
       
@@ -219,16 +207,10 @@ const StorylineEditor = () => {
       setError(null);
 
       try {
-        await axios({
-          method: 'post',
-          url: 'encounters/delete-root-encounter',
-          data: { rootEncounterId: parseInt(selectedRootEncounterId, 10) },
-          withCredentials: true,
-          headers: { 'x-user-sub': userSub, 'Content-Type': 'application/json' }
-        });
+        await encounterService.deleteRootEncounter(parseInt(selectedRootEncounterId, 10)); // Use service
 
         // Refresh root encounter list
-        await fetchRootEncounters();
+        await fetchRootEncountersFromComponent();
 
         // If the deleted scenario was the active one, clear the editor state
         if (encounterPath.length && encounterPath[0] === parseInt(selectedRootEncounterId, 10)) {
@@ -284,15 +266,10 @@ const StorylineEditor = () => {
     });
 
     // Persist the change in the background
-    axios
-      .post('encounters/update-encounter-field', {
-        id: activeEncounterId,
-        field,
-        value
-      })
+    encounterService.updateEncounterField(activeEncounterId, field, value) // Use service
       .catch((err) => {
         console.error('Error updating encounter field:', err);
-        setError(`Failed to update ${field}`);
+        setError(`Failed to update ${field}: ${err.message}`); // Display service error message
       });
   };
 
@@ -300,15 +277,12 @@ const StorylineEditor = () => {
     if (!activeEncounterId || !userSub) return;
     
     try {
-      const response = await axios.post('encounters/create-encounter-choice', {
-        EncounterID: activeEncounterId,
-        UserSub: userSub
-      });
+      const newChoiceData = await encounterService.createEncounterChoice(activeEncounterId); // Use service
       
       // Add the new choice to the routes array
       const newChoice = {
-        ID: response.data.ID,
-        Title: "",
+        ID: newChoiceData.ID, // Assuming service returns the new choice object or at least its ID
+        Title: newChoiceData.Title || "", // Use data from service if available
         RelID_Encounter_Calling: activeEncounterId,
         RelID_Encounter_Receiving: null
       };
@@ -316,17 +290,14 @@ const StorylineEditor = () => {
       setEncounterRoutes(prev => [...prev, newChoice]);
     } catch (err) {
       console.error('Error creating encounter choice:', err);
-      setError('Failed to create new choice');
+      setError(`Failed to create new choice: ${err.message}`); // Display service error message
     }
   };
 
   const updateEncounterChoice = async (choiceId, title) => {
     if (!userSub) return;
     try {
-      await axios.post('encounters/update-encounter-choice', {
-        ID: choiceId,
-        Title: title
-      });
+      await encounterService.updateEncounterChoice(choiceId, title); // Use service
       
       // Update the local state
       setEncounterRoutes(prev =>
@@ -343,7 +314,7 @@ const StorylineEditor = () => {
   const deleteEncounterChoice = async (choiceId) => {
     if (!userSub) return;
     try {
-      await axios.post('encounters/delete-encounter-choice', { ID: choiceId });
+      await encounterService.deleteEncounterChoice(choiceId); // Use service
       
       // Remove the choice from local state
       setEncounterRoutes(prev => 
@@ -371,31 +342,35 @@ const StorylineEditor = () => {
     
     try {
       // 1. Update the link on the server
-      await axios({
-        method: 'post',
-        url: 'encounters/set-receiving-encounter',
-        data: {
-          RouteID: routeId,
-          selectedEncounterID: receivingEncounterId
-        },
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-sub': userSub
-        }
-      });
+      // await axios({
+      //   method: 'post',
+      //   url: 'encounters/set-receiving-encounter',
+      //   data: {
+      //     RouteID: routeId,
+      //     selectedEncounterID: receivingEncounterId
+      //   },
+      //   withCredentials: true,
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'x-user-sub': userSub
+      //   }
+      // });
+      await encounterService.linkEncounterToRoute(routeId, receivingEncounterId); // Use service
       
       // 2. Refetch the parent encounter data to get the updated routes
-      const response = await axios({
-        method: 'get',
-        url: `encounters/GetEncounterData/${parentEncounterId}`,
-        withCredentials: true,
-        headers: { 'x-user-sub': userSub },
-        params: { _t: new Date().getTime() } // Cache buster
-      });
+      // const response = await axios({
+      //   method: 'get',
+      //   url: `encounters/GetEncounterData/${parentEncounterId}`,
+      //   withCredentials: true,
+      //   headers: { 'x-user-sub': userSub },
+      //   params: { _t: new Date().getTime() } // Cache buster
+      // });
+      const parentDataResponse = await encounterService.getEncounterData(parentEncounterId); // Already uses service, ensure this is correct
 
-      const parentEncounterData = response.data.Encounter;
-      const parentRoutesData = response.data.EncounterRoutes || [];
+      // const parentEncounterData = response.data.Encounter;
+      // const parentRoutesData = response.data.EncounterRoutes || [];
+      const parentEncounterData = parentDataResponse.Encounter;
+      const parentRoutesData = parentDataResponse.EncounterRoutes || [];
 
       // 3. Update the cache for the parent encounter
       setEncounterCache(prev => ({ 
@@ -414,10 +389,13 @@ const StorylineEditor = () => {
     } catch (err) {
       const statusCode = err.response?.status;
       const responseData = err.response?.data;
-      const operation = err.config?.url?.includes('set-receiving') ? 'link/unlink route' : 'refetch parent';
+      // const operation = err.config?.url?.includes('set-receiving') ? 'link/unlink route' : 'refetch parent';
+      // Determine operation based on which call failed, though service error messages are now primary
+      const operation = 'link/unlink route or refetch parent'; 
       
       console.error(`Error during ${operation}:`, err);
-      setError(`Failed to ${receivingEncounterId ? 'link' : 'unlink'} encounter (${operation} - ${statusCode || 'Network Error'}): ${responseData?.error || err.message}`);
+      // setError(`Failed to ${receivingEncounterId ? 'link' : 'unlink'} encounter (${operation} - ${statusCode || 'Network Error'}): ${responseData?.error || err.message}`);
+      setError(`Operation failed: ${err.message}`); // Use service error message
       
       return Promise.reject(err);
     } finally {
@@ -436,14 +414,8 @@ const StorylineEditor = () => {
     
     try {
       // 1. Duplicate the current encounter
-      const duplicateResponse = await axios({
-        method: 'post',
-        url: 'encounters/duplicateEncounter',
-        data: { encounterId: activeEncounterId, userSub },
-        withCredentials: true,
-        headers: { 'Content-Type': 'application/json', 'x-user-sub': userSub }
-      });
-      const newEncounterId = duplicateResponse.data.newEncounterId;
+      const duplicateData = await encounterService.duplicateEncounter(activeEncounterId); // Use service
+      const newEncounterId = duplicateData.newEncounterId;
       
       await new Promise(resolve => setTimeout(resolve, 50));
       
@@ -458,7 +430,7 @@ const StorylineEditor = () => {
       const responseData = err.response?.data;
       
       console.error(`Error during duplicate encounter:`, err);
-      setError(`Operation failed (duplicate encounter - ${statusCode || 'Network Error'}): ${responseData?.error || err.message}`);
+      setError(`Operation failed: ${err.message}`); // Use service error message
       if (statusCode === 401) {
         loadEncounter(activeEncounterId); // Reload current state
       }
@@ -469,11 +441,10 @@ const StorylineEditor = () => {
 
   const fetchUnlinkedEncounters = async () => {
     try {
-      const response = await axios.get('encounters/unlinked-encounters');
-      return response.data;
+      return await encounterService.fetchUnlinkedEncounters(); // Use service
     } catch (err) {
       console.error('Error fetching unlinked encounters:', err);
-      setError('Failed to fetch unlinked encounters');
+      setError(`Failed to fetch unlinked encounters: ${err.message}`); // Display service error
       return [];
     }
   };
@@ -555,10 +526,10 @@ const StorylineEditor = () => {
       axiosDefaults: { withCredentials: axios.defaults.withCredentials, hasUserSubHeader: !!axios.defaults.headers.common['x-user-sub'] }
     });
     try {
-      const profileResponse = await axios.get('user/profile-status');
-      console.log('Profile status check succeeded', profileResponse.data);
+      const profileResponse = await encounterService.getUserProfileStatus(); // Use service
+      console.log('Profile status check succeeded', profileResponse);
     } catch (err) {
-      console.error('Profile status check failed', { status: err.response?.status, data: err.response?.data, error: err.message });
+      console.error('Profile status check failed', { error: err.message, status: err.response?.status, data: err.response?.data });
     }
     const cookies = document.cookie.split(';').map(c => c.trim());
     console.log('Available cookies', cookies.length ? cookies : 'No cookies accessible to JavaScript');
@@ -573,21 +544,20 @@ const StorylineEditor = () => {
     }
     
     try {
-      const testResponse = await axios({
-        method: 'post',
-        url: 'encounters/create-blank-encounter',
-        data: { userSub },
-        withCredentials: true,
-        headers: { 'Content-Type': 'application/json', 'x-user-sub': userSub }
-      });
+      const testResponseData = await encounterService.createBlankEncounter(); // Use service for test
       
-      console.log('Test create succeeded!', { status: testResponse.status, responseData: testResponse.data });
-      fetchRootEncounters();
+      console.log('Test create succeeded!', { responseData: testResponseData });
+      fetchRootEncountersFromComponent();
     } catch (err) {
-      const responseData = err.response?.data;
-      const statusCode = err.response?.status;
+      const responseData = err.response?.data; // This might not be available if service throws generic error
+      const statusCode = err.response?.status; // Same here
       
-      console.error('Test create failed', { status: statusCode, responseData, requestConfig: { url: err.config?.url, method: err.config?.method, withCredentials: err.config?.withCredentials, headers: { contentType: err.config?.headers['Content-Type'], userSub: err.config?.headers['x-user-sub']?.substring(0, 8) + '...' } } });
+      console.error('Test create failed', { 
+        error: err.message, // Use error message from service
+        status: statusCode, 
+        responseData, 
+        // requestConfig: { url: err.config?.url, method: err.config?.method, withCredentials: err.config?.withCredentials, headers: { contentType: err.config?.headers['Content-Type'], userSub: err.config?.headers['x-user-sub']?.substring(0, 8) + '...' } }
+      });
     }
   };
 
@@ -642,16 +612,10 @@ const StorylineEditor = () => {
 
       } else {
         // Fetch from server
-        const response = await axios({
-          method: 'get',
-          url: `encounters/GetEncounterData/${id}`,
-          withCredentials: true,
-          headers: { 'x-user-sub': userSub },
-          params: { _t: new Date().getTime() }
-        });
+        const encounterDataResponse = await encounterService.getEncounterData(id);
         
-        const encounterData = response.data.Encounter;
-        const routesData = response.data.EncounterRoutes || [];
+        const encounterData = encounterDataResponse.Encounter;
+        const routesData = encounterDataResponse.EncounterRoutes || [];
 
         setEncounter(encounterData);
         setEncounterRoutes(routesData);

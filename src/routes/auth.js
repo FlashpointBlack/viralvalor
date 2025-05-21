@@ -19,7 +19,7 @@ const router = express.Router();
 // Mount the Auth0 helper – this automatically registers /login, /logout, etc.
 router.use(auth(config));
 
-// Simple uptime probe used by the SPA Self-Test page.
+// Simple uptime probe to check if the auth service is responsive.
 router.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });

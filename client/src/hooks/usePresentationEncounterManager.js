@@ -28,7 +28,7 @@ const usePresentationEncounterManager = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // console.log(`[usePresentationEncounterManager] Fetching data for encounter ${encounterId}`);
+      console.log(`[usePresentationEncounterManager] Fetching data for encounter ${encounterId}`);
       const response = await axios.get(`encounters/GetEncounterData/${encounterId}`, {
         params: { scope: 'public' },
       });
@@ -37,7 +37,7 @@ const usePresentationEncounterManager = () => {
       if (newData && newData.Encounter) {
         encounterCacheRef.current.set(encounterId, newData);
         setEncounterData(newData);
-        // console.log(`[usePresentationEncounterManager] Fetched and cached data for encounter ${encounterId}:`, newData);
+        console.log(`[usePresentationEncounterManager] Fetched and cached data for encounter ${encounterId}:`, newData);
         return newData;
       } else {
         throw new Error('Invalid data structure received from API.');

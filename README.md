@@ -25,22 +25,25 @@ This Node / Express backend powers the Viral Valor SPA. The codebase has complet
 
 ## Development
 
-```bash
-npm install
-npm run dev  # nodemon server.js
-```
+Ensure you have `nodemon` installed globally (`npm i -g nodemon`).
 
-The server automatically mounts all routers from `src/routes/index.js` under `/api`.
+### Local Environment Setup
+
+1.  **Database:** Ensure MySQL is running and accessible. Create a database (e.g., `viralvalor`) and a user with privileges.
+2.  **Environment Variables:** Copy `.env.example` to `.env` and populate with your local database credentials, Auth0 settings, OpenAI key, etc.
+    *   `cp .env.example .env`
+3.  **Dependencies:** Install Node.js packages:
+    *   `npm install`
+4.  **Database Migrations:** Apply database migrations. The specific command might vary based on the migration tool being used (e.g., if using Knex: `npx knex migrate:latest`).  *Currently, migrations might be manual or part of app startup logic if no dedicated tool is integrated.*
+5.  **Run the Application:**
+    *   `npm start` (or `nodemon server.js` or relevant script)
+
+The application should typically be available at `http://localhost:3000` (or the port specified in your `.env`).
+
+### Admin Self-Test Page (Obsolete)
+
+This section is obsolete as the self-test page has been removed and is being replaced by a Site Health dashboard.
 
 ---
 
-Full endpoint reference lives in [`docs/API.md`](docs/API.md).
-
-Admin Self-Test
----------------
-
-To run a suite of integration tests against the current database and key API endpoints:
-
-1. Ensure you are logged in as an Administrator.
-2. Navigate your browser to `/api/selftest/`.
-3. The page will display PASS/FAIL for various operational checks. 
+Full endpoint reference lives in [`docs/API.md`](docs/API.md). 

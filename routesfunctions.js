@@ -105,6 +105,7 @@ function GetEncounterData(encounterId) {
         try {
             // Get encounter data
             const encounters = await executeQuery('SELECT * FROM Encounters WHERE ID = ?', [encounterId]);
+
             if (encounters.length === 0) {
                 return reject(new Error(`No encounter found with ID ${encounterId}`));
             }
@@ -119,6 +120,9 @@ function GetEncounterData(encounterId) {
             
             // Function to handle image fetching for character models
             const fetchCharacterImage = async (imageId) => {
+                if (!imageId) {
+                    return null;
+                }
                 const images = await executeQuery(
                     'SELECT FileNameServer FROM Images WHERE ID = ?', 
                     [imageId]
@@ -133,6 +137,9 @@ function GetEncounterData(encounterId) {
             
             // Function to handle image fetching for backdrops
             const fetchBackdropImage = async (imageId) => {
+                if (!imageId) {
+                    return null;
+                }
                 const images = await executeQuery(
                     'SELECT FileNameServer FROM Images WHERE ID = ?', 
                     [imageId]
@@ -187,6 +194,7 @@ function GetEncounterData(encounterId) {
                 EncounterRoutes: encounterRoutes
             });
         } catch (error) {
+            console.error(`[GetEncounterData] Error for encounterId: ${encounterId}`, error);
             reject(error);
         }
     });

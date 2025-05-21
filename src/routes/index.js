@@ -16,7 +16,7 @@ const lectureRoutes = require('./lectureRoutesApi');
 const userRoutes = require('./userRoutesApi');
 const messageApiRoutes = require('./messageRoutesApi');
 const journalApiRoutes = require('./journalRoutesApi');
-const selfTestApiRoutes = require('./selfTestRoutesApi');
+// const selfTestApiRoutes = require('./selfTestRoutesApi');
 
 // Import message routes setup
 // const { setupMessageRoutes } = require('../../messageRoutes'); // Removed legacy import
@@ -47,7 +47,7 @@ router.use('/lectures', lectureRoutes);
 router.use('/users', userRoutes);
 router.use(messageApiRoutes);
 router.use('/journal', journalApiRoutes);
-router.use('/selftest', selfTestApiRoutes);
+// router.use('/selftest', selfTestApiRoutes);
 
 // Ensure message routes are available under /api
 // Original attempt: setupMessageRoutes(router); This mounted /conversations at apiRouter's root.

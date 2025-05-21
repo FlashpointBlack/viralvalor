@@ -51,7 +51,7 @@ if (rootElement) {
         clientId={clientId}
         authorizationParams={{
           redirect_uri: redirectUri,
-          scope: 'openid profile email'
+          scope: 'openid profile email offline_access'
         }}
         cacheLocation="localstorage"
         useRefreshTokens

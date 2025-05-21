@@ -1,6 +1,8 @@
 // My includes
 const { db, dbPromise } = require('./db');
 const apiRoutes = require('./src/routes');
+const userRoutesApi = require('./src/routes/userRoutesApi');
+const messageRoutesApi = require('./src/routes/messageRoutesApi');
 const { connectedUsers } = require('./globals');
 var { quizResponses, currentQuiz } = require('./globals');
 const { calculateQuizResults, formatResultsMessage } = require('./quizfunctions');
@@ -17,9 +19,6 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
 const { auth } = require('express-openid-connect');
-const userRoutesApi = require('./src/routes/userRoutesApi');
-const messageRoutesApi = require('./src/routes/messageRoutesApi');
-const journalRoutesApi = require('./src/routes/journalRoutesApi');
 
 // ===== BEGIN ADDED LOGGING =====
 app.use((req, res, next) => {
@@ -133,37 +132,62 @@ let userPollsVoted = {}; // Track total polls voted by each user by device ID
 let activeGames = {}; // Track active game sessions by UUID
 let guestCounter = 1; // For guest naming
 
-function sendUserList() {
-    // Only include users that currently have an active socket associated with their device ID
-    const userList = Object.entries(deviceUsers)
+// Modified to accept targetGameId and emit to specific host if provided
+async function sendUserList(targetGameId) { // Made async to potentially await DB calls if needed inside, though not strictly necessary with current changes
+    let userListForGame = Object.entries(deviceUsers)
         .filter(([deviceId]) => !!deviceSockets[deviceId]) // filter out disconnected devices
-        .sort(([deviceIdA, nameA], [deviceIdB, nameB]) => {
-            const isGuestA = nameA.toLowerCase().startsWith('guest');
-            const isGuestB = nameB.toLowerCase().startsWith('guest');
-            if (isGuestA === isGuestB) return nameA.localeCompare(nameB);
-            return isGuestA ? 1 : -1; // Guests last
-        })
-        .map(([deviceId, username]) => {
-            // Derive a human-readable display name. If the username string contains pipe-delimited
-            // segments (e.g. "auth0|xyz|Jane Doe"), use the last segment. Otherwise use the whole string.
-            let displayName = username;
-            if (typeof username === 'string' && username.includes('|')) {
-                const parts = username.split('|');
-                displayName = parts[parts.length - 1] || username;
+        .map(([deviceId, userData]) => { // userData is now { name: originalUsername, dbId: numericDbId }
+            let displayName = userData.name;
+            if (typeof userData.name === 'string' && userData.name.includes('|')) {
+                const parts = userData.name.split('|');
+                displayName = parts[parts.length - 1] || userData.name;
             }
 
             return {
-                id: deviceId,
-                name: username,        // keep original identifier for actions requiring sub
+                id: userData.dbId || null,
+                name: userData.name, // Original username (e.g., auth0_sub|DisplayName or guest name)
                 display_name: displayName,
                 gameId: deviceGameMap[deviceId] || null,
                 pollsVoted: userPollsVoted[deviceId] || 0,
                 selection: userVotes[deviceId] || null,
-                hasMessages: false
+                hasMessages: false // Placeholder for future chat integration
             };
         });
 
-    io.emit('update user list', userList);
+    if (targetGameId) {
+        // Filter list for the target game
+        const filteredUserList = userListForGame.filter(user => user.gameId === targetGameId);
+        
+        const gameData = activeGames[targetGameId];
+        if (gameData && gameData.hostSub) {
+            let hostSocketFound = false;
+            // deviceUsers maps deviceId to username/userSub.
+            // We need to find the deviceId whose associated username/userSub is gameData.hostSub
+            Object.entries(deviceUsers).forEach(([deviceId, userIdentifier]) => {
+                if (userIdentifier.name === gameData.hostSub) { // Crucial comparison
+                    const hostSocketId = deviceSockets[deviceId];
+                    if (hostSocketId && io.sockets.sockets.get(hostSocketId)) {
+                        console.log(`[sendUserList] Sending targeted user list for game ${targetGameId} to host ${gameData.hostSub} on socket ${hostSocketId}. Users: ${filteredUserList.length}`);
+                        io.sockets.sockets.get(hostSocketId).emit('updateUserList', { gameId: targetGameId, users: filteredUserList, total: filteredUserList.length });
+                        hostSocketFound = true;
+                    }
+                }
+            });
+            if (!hostSocketFound) {
+                 console.warn(`[sendUserList] Host socket NOT FOUND for game ${targetGameId}, hostSub ${gameData.hostSub}. DeviceUsers dump:`, deviceUsers);
+                 // Fallback if host not found: still emit targeted list but maybe to a game room if hosts join it?
+                 // For now, this means the host won't get the list if identification fails.
+            }
+        } else {
+            console.warn(`[sendUserList] No active game or hostSub found for gameId ${targetGameId}. Cannot send targeted user list.`);
+        }
+    } else {
+        // Original behavior: broadcast to everyone (unfiltered list) if no specific gameId is targeted.
+        // This path should ideally not be hit for game-specific updates.
+        console.warn('[sendUserList] Broadcasting UNFILTERED user list to ALL clients (no targetGameId).');
+        const fullUserList = userListForGame; // Send all users if no target game
+        io.emit('updateUserList', { gameId: null, users: fullUserList, total: fullUserList.length });
+    }
 }
 
 function getUniqueUserCount() {
@@ -172,95 +196,138 @@ function getUniqueUserCount() {
 }
 
 io.on('connection', (socket) => {
-    // Socket connection doesn't increment user count anymore
-    // User count will be incremented only when a new device ID is registered
+    let currentSocketDeviceId = null; // Store deviceId for this specific socket connection
 
-    socket.on('register user', (data) => {
+    console.log(`[Socket Connection] New connection: ${socket.id}`);
+
+    socket.on('register user', async (data) => { // Made async to handle DB query
         try {
-            let username, deviceId, gameId;
+            let username, deviceId, gameId, userDbId = null;
             
-            // Handle both string (legacy) and object format
-            if (typeof data === 'string') {
+            if (typeof data === 'string') { // Legacy
                 username = data;
-                // No device ID, use socket ID as fallback (legacy support)
                 deviceId = socket.id; 
                 gameId = null;
+                // Guests or legacy string-only users won't have a dbId immediately here
             } else {
-                username = data.username;
+                username = data.username; // This is typically userSub for authenticated users, or a generated name
                 deviceId = data.deviceId;
-                gameId = data.gameId || null;
+                gameId = data.gameId || null; // gameId from student client
             }
             
+            if (!deviceId) {
+                console.error('[register user] Critical: No deviceId received. Aborting registration for socket:', socket.id, 'Data:', data);
+                return;
+            }
+            currentSocketDeviceId = deviceId; // Associate deviceId with this socket session
+
+            // If authenticated user, try to get their numeric DB ID
+            if (username && typeof username === 'string' && username.includes('|')) {
+                const auth0Sub = username.split('|')[0]; // Extract Auth0 sub part
+                try {
+                    const [userAccount] = await dbPromise.query('SELECT id FROM UserAccounts WHERE auth0_sub = ? LIMIT 1', [auth0Sub]);
+                    if (userAccount && userAccount.length > 0) {
+                        userDbId = userAccount[0].id;
+                        console.log(`[register user] Fetched DB ID ${userDbId} for auth0_sub ${auth0Sub}`);
+                    } else {
+                        console.warn(`[register user] No UserAccounts entry found for auth0_sub ${auth0Sub}`);
+                    }
+                } catch (dbError) {
+                    console.error(`[register user] DB error fetching ID for auth0_sub ${auth0Sub}:`, dbError);
+                }
+            }
+
             const isNewDevice = !deviceUsers[deviceId];
             
-            // Store device mapping (username here represents userSub when available)
-            deviceUsers[deviceId] = username;
-            deviceSockets[deviceId] = socket.id;
-            socketToDevice[socket.id] = deviceId;
-            deviceGameMap[deviceId] = gameId;
-            
-            // Join a private room for this user (using userSub/username as room id)
-            if (username) {
-                socket.join(username);
+            // If it's an existing device but new socket, update socket mapping
+            if (!isNewDevice && deviceSockets[deviceId] !== socket.id) {
+                console.log(`[register user] Device ${deviceId.substring(0,8)} reconnected with new socket ${socket.id} (was ${deviceSockets[deviceId]})`);
             }
             
-            console.log(`User registered: ${username} with device ID: ${deviceId.substring(0, 8)}...`);
+            deviceUsers[deviceId] = { name: username, dbId: userDbId }; // Store as object with name and dbId
+            deviceSockets[deviceId] = socket.id;
+            socketToDevice[socket.id] = deviceId;
+            if (gameId) { // Only set gameId if provided (i.e., from a student joining a game)
+              deviceGameMap[deviceId] = gameId;
+            }
             
-            // Only increment count for new devices
+            if (username) {
+                socket.join(username); // Join room by full username (may include display name)
+                // Also join a room keyed only by the Auth0 sub (provider|uuid) so server-side
+                // reward notifications that target pure subs reach this socket.
+                if (typeof username === 'string' && username.includes('|')) {
+                  const pureSub = username.split('|').slice(0, 2).join('|');
+                  socket.join(pureSub);
+                }
+            }
+            // All users should join a room for their specific gameId if available
+            if (gameId) {
+                socket.join(gameId);
+                console.log(`[register user] Socket ${socket.id} (Device: ${deviceId.substring(0,8)}) joined game room: ${gameId}`);
+            }
+            
+            console.log(`[register user] User: ${username} (Device: ${deviceId.substring(0,8)}, Socket: ${socket.id}) GameID: ${gameId || 'N/A'}`);
+            
             if (isNewDevice) {
                 onlineUsers++;
-                io.emit('user count', onlineUsers);
-                
+                // io.emit('user count', onlineUsers); // Consider if this is still needed or if total from userList is enough
                 const timestamp = Date.now();
-                const message = `${username} has joined`;
-                io.emit('system message', { message, timestamp });
-                
-                // Initialize polls voted count for new user
+                // const message = `${username} has joined`; // System message might be too noisy
+                // io.emit('system message', { message, timestamp });
                 userPollsVoted[deviceId] = 0;
             }
             
-            // Update user list
-            sendUserList();
+            // When a user registers, send them the user list for their game.
+            // If gameId is null (e.g. host before starting presentation), this won't send a targeted list.
+            if (gameId) {
+                sendUserList(gameId);
+            }
         } catch (error) {
-            console.error('Error registering user:', error);
+            console.error('[register user] Error:', error, 'Data:', data);
         }
     });
 
     socket.on('disconnect', () => {
-        try {
-            // Get device ID for this socket
-            const deviceId = socketToDevice[socket.id];
+        const deviceId = currentSocketDeviceId || socketToDevice[socket.id]; // Use socket-specific deviceId first
+        if (deviceId) {
+            console.log(`[Socket Disconnect] Socket ${socket.id} (Device: ${deviceId.substring(0,8)}) disconnected.`);
             
-            if (deviceId) {
-                console.log(`Socket disconnected for device: ${deviceId.substring(0, 8)}...`);
+            // Check if this was the last active socket for this device
+            let 다른socketMatchesDeviceId = false;
+            for (const sockId in socketToDevice) {
+                if (socketToDevice[sockId] === deviceId && sockId !== socket.id && io.sockets.sockets.get(sockId)) {
+                    다른socketMatchesDeviceId = true;
+                    break;
+                }
+            }
+
+            if (!다른socketMatchesDeviceId) {
+                console.log(`[Socket Disconnect] Device ${deviceId.substring(0,8)} fully disconnected (no other active sockets).`);
+                const username = deviceUsers[deviceId].name;
+                delete deviceSockets[deviceId]; // Remove active socket mapping
+
+                // Do not delete deviceUsers[deviceId] or deviceGameMap[deviceId] immediately.
+                // User might reconnect. Handle stale users later if needed.
+
+                if (username) { // Only if user was actually registered
+                    onlineUsers = Math.max(0, onlineUsers - 1);
+                    // io.emit('user count', onlineUsers); // Consider if needed
+                    // const timestamp = Date.now();
+                    // const message = `${username} has left`;
+                    // io.emit('system message', { message, timestamp });
+                }
                 
-                // Clean up socket mapping
-                delete socketToDevice[socket.id];
-                
-                // Only remove device if this was the last socket for it
-                if (deviceSockets[deviceId] === socket.id) {
-                    // Socket is the registered socket for this device
-                    delete deviceSockets[deviceId];
-                    delete deviceGameMap[deviceId];
-                    
-                    // We don't immediately remove the user, allowing for reconnection
-                    // Keep the user in deviceUsers and keep their votes/data
-                    
-                    // Notify about disconnect without removing user
-                    console.log(`User ${deviceUsers[deviceId]} temporarily disconnected`);
+                // Update user list for the game the user was in, if any
+                const gameId = deviceGameMap[deviceId];
+                if (gameId) {
+                    sendUserList(gameId);
                 }
             } else {
-                console.log('Socket disconnected - no device ID found');
+                console.log(`[Socket Disconnect] Device ${deviceId.substring(0,8)} still has other active sockets. Not removing from deviceUsers/deviceGameMap yet.`);
             }
-            
-            // Update user count based on actual device count
-            onlineUsers = getUniqueUserCount();
-            io.emit('user count', onlineUsers);
-            
-            // Update user list
-            sendUserList();
-        } catch (error) {
-            console.error('Error handling disconnect:', error);
+            delete socketToDevice[socket.id]; // Always remove current socket from mapping
+        } else {
+            console.log(`[Socket Disconnect] Socket ${socket.id} disconnected. No deviceId mapping found.`);
         }
     });
 
@@ -289,19 +356,19 @@ io.on('connection', (socket) => {
         if (!userVotedPolls[deviceId].has(response.quizId)) {
             userVotedPolls[deviceId].add(response.quizId);
             userPollsVoted[deviceId] = (userPollsVoted[deviceId] || 0) + 1;
-            console.log(`Incremented polls voted count for ${deviceUsers[deviceId] || 'Unknown'} to ${userPollsVoted[deviceId]}`);
+            console.log(`Incremented polls voted count for ${deviceUsers[deviceId].name || 'Unknown'} to ${userPollsVoted[deviceId]}`);
         } else {
             console.log(`User already voted in this poll - not incrementing count`);
         }
         
-        const username = deviceUsers[deviceId] || 'Unknown User';
+        const username = deviceUsers[deviceId].name || 'Unknown User';
         console.log(`User ${username} responded with option ${response.selectedOption}`);
         
         // Notify everyone that a vote was received to trigger result updates
         io.emit('vote received', Object.keys(quizResponses).length);
         
         // Update user list with new selection information
-        sendUserList();
+        sendUserList(null);
     });
     
     socket.on('update quiz', (newQuiz) => {
@@ -345,7 +412,7 @@ io.on('connection', (socket) => {
             }
             
             // Update user list to keep selections visible
-            sendUserList();
+            sendUserList(null);
         } catch (error) {
             console.error('Error ending quiz:', error);
         }
@@ -396,7 +463,7 @@ io.on('connection', (socket) => {
         io.emit('poll data cleared');
         
         // Update user list to clear selections
-        sendUserList();
+        sendUserList(null);
     });
 
     // Simplify existing event handlers
@@ -415,50 +482,38 @@ io.on('connection', (socket) => {
     });
     
     // Educator starts a presentation
-    socket.on('start presentation', (payload = {}) => {
-        try {
-            const { gameId, hostSub } = payload;
-            if (!gameId || !hostSub) {
-                console.warn('start presentation event missing gameId or hostSub');
-                return;
-            }
-
-            /*
-             * =============================================================
-             * RESET ALL PRIOR GAME STATE – single-presentation mode
-             * =============================================================
-             *  • Mark every previously stored activeGame as inactive so they
-             *    will be ignored by late-joining displays/clients.
-             *  • Clear any lingering quiz / poll data so the new run begins
-             *    with a clean slate.
-             */
-            Object.keys(activeGames).forEach(oldId => {
-                if (activeGames[oldId]) {
-                    activeGames[oldId].isActive = false;
-                }
-            });
-
-            // Flush poll state
-            currentQuiz     = null;
-            pendingQuiz     = null;
-            quizResponses   = {};
-            userVotes       = {};
-            userVotedPolls  = {};
-            userPollsVoted  = {};
-
-            // Tell every client to clear stale poll data
-            io.emit('poll data cleared');
-
-            // Ensure fresh activeGames entry for this presentation
-            activeGames[gameId] = { id: gameId, connectedClients: [], currentEncounterId: null };
-            activeGames[gameId].hostSub = hostSub;
-            activeGames[gameId].isActive = true;
-
-            // Broadcast to all clients so they know who the presenter is
-            io.emit('presentation started', { gameId, hostSub });
-        } catch (err) {
-            console.error('Error handling start presentation:', err);
+    socket.on('start presentation', ({ gameId, hostSub }) => {
+        if (!gameId || !hostSub) {
+            console.error('[start presentation] Invalid data received:', { gameId, hostSub });
+            return;
         }
+        activeGames[gameId] = { 
+            hostSub: hostSub, 
+            presenterSocketId: socket.id, // Store the socket ID of the presenter
+            encounterId: null, 
+            poll: null, 
+            users: {} 
+        };
+
+        // The host's deviceId should be in socketToDevice[socket.id]
+        const hostDeviceId = socketToDevice[socket.id];
+        if (hostDeviceId) {
+            deviceUsers[hostDeviceId] = { name: hostSub, dbId: null }; // CRITICAL: Ensure host's userSub is stored against their deviceId
+            deviceGameMap[hostDeviceId] = gameId; // Associate host's device with the game
+            console.log(`[start presentation] Host ${hostSub} (Device: ${hostDeviceId.substring(0,8)}) started game ${gameId}. Storing userSub in deviceUsers.`);
+            // Join the host to the game room as well
+            socket.join(gameId);
+            console.log(`[start presentation] Host socket ${socket.id} joined game room: ${gameId}`);
+        } else {
+            console.error(`[start presentation] CRITICAL: Could not find deviceId for host socket ${socket.id}. HostSub: ${hostSub}, Game: ${gameId}`);
+        }
+
+        console.log(`[start presentation] Presentation started. Game ID: ${gameId}, Host Sub: ${hostSub}`);
+        // Emit to all clients that a presentation has started
+        io.emit('presentation started', { gameId, hostSub });
+
+        // Send an empty user list to the host initially.
+        sendUserList(gameId);
     });
 
     // Client requests presenter info for a game (useful for late joiners)
@@ -584,26 +639,26 @@ io.on('connection', (socket) => {
     });
 
     // -------- Reward notifications (XP / Badge) --------
-    // Relay XP award events to the intended recipient's private room
-    socket.on('xp awarded', (payload = {}) => {
+    // Use unified event name `xp_awarded`
+    socket.on('xp_awarded', (payload = {}) => {
       try {
         const { toSub } = payload;
         if (!toSub) return;
         // Emit only to the specific user's room so others don't see it
-        io.to(toSub).emit('xp awarded', payload);
+        io.to(toSub).emit('xp_awarded', payload);
       } catch (err) {
-        console.error('Error handling xp awarded event:', err);
+        console.error('Error handling xp_awarded event:', err);
       }
     });
 
-    // Relay Badge award events to the intended recipient's private room
-    socket.on('badge awarded', (payload = {}) => {
+    // Use unified event name `badge_awarded`
+    socket.on('badge_awarded', (payload = {}) => {
       try {
         const { toSub } = payload;
         if (!toSub) return;
-        io.to(toSub).emit('badge awarded', payload);
+        io.to(toSub).emit('badge_awarded', payload);
       } catch (err) {
-        console.error('Error handling badge awarded event:', err);
+        console.error('Error handling badge_awarded event:', err);
       }
     });
 
@@ -654,24 +709,24 @@ io.on('connection', (socket) => {
         console.error('Socket error:', err);
     });
 
-    // Relay Student Instruction broadcast to all connected clients
-    socket.on('instruction broadcast', (payload = {}) => {
+    // Unified event name `instruction_broadcast`
+    socket.on('instruction_broadcast', (payload = {}) => {
       try {
         // payload expected: { id, title, description, imageUrl }
         currentInstruction = payload; // Store as active instruction
-        io.emit('instruction broadcast', payload);
+        io.emit('instruction_broadcast', payload);
       } catch (err) {
-        console.error('Error handling instruction broadcast event:', err);
+        console.error('Error handling instruction_broadcast event:', err);
       }
     });
 
-    // Relay Student Instruction close events to all connected clients
-    socket.on('instruction close', () => {
+    // Unified event name `instruction_close`
+    socket.on('instruction_close', () => {
       try {
         currentInstruction = null; // Clear active instruction
-        io.emit('instruction close');
+        io.emit('instruction_close');
       } catch (err) {
-        console.error('Error handling instruction close event:', err);
+        console.error('Error handling instruction_close event:', err);
       }
     });
 
@@ -680,7 +735,7 @@ io.on('connection', (socket) => {
       try {
         if (currentInstruction) {
           // Send only to requesting socket
-          socket.emit('instruction broadcast', currentInstruction);
+          socket.emit('instruction_broadcast', currentInstruction);
         }
       } catch (err) {
         console.error('Error handling request current instruction:', err);
@@ -709,6 +764,292 @@ io.on('connection', (socket) => {
             socket.emit('current encounter', { gameId: targetGameId, encounterId });
         } catch (err) {
             console.error('Error handling request current encounter:', err);
+        }
+    });
+
+    socket.on('awardXP', async (payload) => {
+        try {
+            const { userId, amount, reason, awardedBy, gameId } = payload;
+            if (!userId || amount == null || !awardedBy || !gameId) {
+                console.error('[awardXP] Invalid payload:', payload);
+                // Optionally, emit an error back to the sender (educator)
+                // socket.emit('awardXP_error', { message: 'Invalid payload' });
+                return;
+            }
+
+            const targetUserSub = userId.includes('|') ? userId.split('|').slice(0, 2).join('|') : userId;
+            const xpAmount = parseInt(amount, 10);
+
+            if (isNaN(xpAmount)) {
+                console.error('[awardXP] Invalid XP amount:', amount);
+                return;
+            }
+
+            // Update database
+            const updateUserQuery = 'UPDATE UserAccounts SET xp_points = xp_points + ? WHERE auth0_sub = ?';
+            const [updateResult] = await dbPromise.query(updateUserQuery, [xpAmount, targetUserSub]);
+
+            if (updateResult.affectedRows > 0) {
+                console.log(`[awardXP] Awarded ${xpAmount} XP to ${targetUserSub}. Reason: ${reason}. Awarded by: ${awardedBy} in game ${gameId}`);
+                
+                // Fetch the user's new total XP to send in the notification
+                const [userAccountRows] = await dbPromise.query('SELECT xp_points, display_name FROM UserAccounts WHERE auth0_sub = ?', [targetUserSub]);
+                const updatedUserAccount = userAccountRows[0];
+
+                // Notify the specific user
+                const notificationPayload = {
+                    toSub: targetUserSub,
+                    xpAwarded: xpAmount,
+                    reason,
+                    awardedBy,
+                    gameId,
+                    newXP: updatedUserAccount ? updatedUserAccount.xp_points : null,
+                    newLevel: updatedUserAccount ? updatedUserAccount.level : null,
+                    awardedToDisplayName: updatedUserAccount ? updatedUserAccount.display_name : targetUserSub
+                };
+                io.to(targetUserSub).emit('xp_awarded', notificationPayload);
+
+                // Optionally, notify the educator that the award was successful
+                // socket.emit('awardXP_success', { userId: targetUserSub, amount: xpAmount });
+            } else {
+                console.warn(`[awardXP] User not found or XP not updated for ${targetUserSub}. Payload:`, payload);
+                // socket.emit('awardXP_error', { message: 'User not found or XP not updated' });
+            }
+        } catch (error) {
+            console.error('[awardXP] Error awarding XP:', error, 'Payload:', payload);
+            // socket.emit('awardXP_error', { message: 'Internal server error while awarding XP' });
+        }
+    });
+
+    socket.on('awardXPToAll', async (payload) => {
+        try {
+            const { gameId, encounterId, amount, awardedBy } = payload;
+            if (!gameId || amount == null || !awardedBy) {
+                console.error('[awardXPToAll] Invalid payload:', payload);
+                return;
+            }
+
+            const xpAmount = parseInt(amount, 10);
+            if (isNaN(xpAmount)) {
+                console.error('[awardXPToAll] Invalid XP amount:', amount);
+                return;
+            }
+
+            // Find all users in the specified game
+            const userDeviceIdsInGame = Object.entries(deviceGameMap)
+                .filter(([deviceId, gid]) => gid === gameId)
+                .map(([deviceId]) => deviceId);
+
+            if (userDeviceIdsInGame.length === 0) {
+                console.warn(`[awardXPToAll] No users found in game ${gameId} to award XP to.`);
+                return;
+            }
+
+            const userSubsInGame = userDeviceIdsInGame.map(deviceId => deviceUsers[deviceId].name).filter(Boolean);
+            const uniqueUserSubsInGame = [...new Set(userSubsInGame)]; // Ensure unique userSubs
+
+            if (uniqueUserSubsInGame.length === 0) {
+                console.warn(`[awardXPToAll] No valid userSubs found in game ${gameId} after filtering. Device Map:`, deviceGameMap, 'Device Users:', deviceUsers);
+                return;
+            }
+
+            // Update database for all these users
+            // Note: Using a loop for individual updates. For very large numbers, a single bulk update or transaction might be better.
+            let awardedCount = 0;
+            for (const targetUserSub of uniqueUserSubsInGame) {
+                const pureTargetSub = targetUserSub.includes('|') ? targetUserSub.split('|').slice(0, 2).join('|') : targetUserSub;
+                const updateUserQuery = 'UPDATE UserAccounts SET xp_points = xp_points + ? WHERE auth0_sub = ?';
+                const [updateResult] = await dbPromise.query(updateUserQuery, [xpAmount, pureTargetSub]);
+                if (updateResult.affectedRows > 0) {
+                    awardedCount++;
+                    console.log(`[awardXPToAll] Awarded ${xpAmount} XP to ${pureTargetSub} in game ${gameId}.`);
+                    
+                    // Fetch new total XP for notification
+                    const [userAccountRows] = await dbPromise.query('SELECT xp_points, display_name FROM UserAccounts WHERE auth0_sub = ?', [pureTargetSub]);
+                    const updatedUserAccount = userAccountRows[0];
+
+                    // Notify the specific user
+                    const notificationPayload = {
+                        toSub: pureTargetSub,
+                        xpAwarded: xpAmount,
+                        reason: 'Bulk award for game activity',
+                        awardedBy,
+                        gameId,
+                        encounterId,
+                        newXP: updatedUserAccount ? updatedUserAccount.xp_points : null,
+                        newLevel: updatedUserAccount ? updatedUserAccount.level : null,
+                        awardedToDisplayName: updatedUserAccount ? updatedUserAccount.display_name : pureTargetSub
+                    };
+                    io.to(pureTargetSub).emit('xp_awarded', notificationPayload);
+                }
+            }
+            console.log(`[awardXPToAll] Completed. Awarded XP to ${awardedCount} users in game ${gameId}.`);
+            // Optionally, notify educator of bulk award success
+            // socket.emit('awardXPToAll_success', { gameId, count: awardedCount, amount: xpAmount });
+
+        } catch (error) {
+            console.error('[awardXPToAll] Error awarding XP to all:', error, 'Payload:', payload);
+            // socket.emit('awardXPToAll_error', { message: 'Internal server error', gameId });
+        }
+    });
+
+    socket.on('awardBadge', async (payload) => {
+        try {
+            const { userId, badgeId, gameId, encounterId, awardedBy } = payload;
+            if (!userId || !badgeId || !awardedBy || !gameId) {
+                console.error('[awardBadge] Invalid payload:', payload);
+                return;
+            }
+
+            const targetUserAuth0Sub = userId.includes('|') ? userId.split('|').slice(0, 2).join('|') : userId;
+            const numericBadgeId = parseInt(badgeId, 10);
+
+            if (isNaN(numericBadgeId)) {
+                console.error('[awardBadge] Invalid badgeId:', badgeId);
+                return;
+            }
+
+            // 1. Fetch UserAccounts.id using targetUserAuth0Sub
+            const [userAccountRows] = await dbPromise.query('SELECT id, display_name FROM UserAccounts WHERE auth0_sub = ?', [targetUserAuth0Sub]);
+            if (!userAccountRows || userAccountRows.length === 0) {
+                console.warn(`[awardBadge] No UserAccount found for auth0_sub ${targetUserAuth0Sub}. Cannot award badge.`);
+                // Optionally emit an error back to educator
+                // socket.emit('awardBadge_error', { message: `User ${targetUserAuth0Sub} not found.` });
+                return;
+            }
+            const userAccountId = userAccountRows[0].id; // Numeric ID for UserBadges
+            const awardedToDisplayName = userAccountRows[0].display_name || targetUserAuth0Sub;
+
+
+            // Check if user already has the badge using userAccountId
+            const [existingBadges] = await dbPromise.query('SELECT id FROM UserBadges WHERE user_id = ? AND badge_id = ?', [userAccountId, numericBadgeId]);
+            if (existingBadges.length > 0) {
+                console.log(`[awardBadge] User ${targetUserAuth0Sub} (ID: ${userAccountId}) already has badge ${numericBadgeId}.`);
+                // socket.emit('awardBadge_error', { message: 'User already has this badge' });
+                return;
+            }
+
+            // Insert new badge for user using userAccountId, only include existing columns
+            const insertQuery = 'INSERT INTO UserBadges (user_id, badge_id, date_earned) VALUES (?, ?, NOW())';
+            const [insertResult] = await dbPromise.query(insertQuery, [userAccountId, numericBadgeId]);
+
+            if (insertResult.affectedRows > 0) {
+                console.log(`[awardBadge] Awarded badge ${numericBadgeId} to ${targetUserAuth0Sub} (ID: ${userAccountId}) by ${awardedBy} in game ${gameId}.`);
+
+                // Fetch badge details for notification
+                const [badgeDetailsRows] = await dbPromise.query(
+                    'SELECT b.Title, b.Description, i.FileNameServer AS ImageFileName FROM Badges b LEFT JOIN Images i ON b.Image = i.ID WHERE b.ID = ?',
+                    [numericBadgeId]
+                );
+                const badgeDetails = badgeDetailsRows[0];
+
+                // Notify the specific user (using their Auth0 Sub for socket room)
+                const notificationPayload = {
+                    toSub: targetUserAuth0Sub, // Target socket room with Auth0Sub
+                    badgeId: numericBadgeId,
+                    badgeName: badgeDetails ? badgeDetails.Title : 'New Badge!',
+                    badgeDescription: badgeDetails ? badgeDetails.Description : '',
+                    badgeImage: badgeDetails && badgeDetails.ImageFileName ? `/images/uploads/badges/${badgeDetails.ImageFileName}` : null,
+                    awardedBy,
+                    gameId,
+                    encounterId,
+                    awardedToDisplayName // Added for consistency with XP
+                };
+                io.to(targetUserAuth0Sub).emit('badge_awarded', notificationPayload);
+                // socket.emit('awardBadge_success', { userId: targetUserAuth0Sub, badgeId: numericBadgeId });
+            } else {
+                console.warn(`[awardBadge] Badge not awarded for ${targetUserAuth0Sub} (ID: ${userAccountId}). Payload:`, payload);
+                // socket.emit('awardBadge_error', { message: 'Badge could not be awarded' });
+            }
+        } catch (error) {
+            console.error('[awardBadge] Error awarding badge:', error, 'Payload:', payload);
+            // socket.emit('awardBadge_error', { message: 'Internal server error', error: error.message });
+        }
+    });
+
+    socket.on('awardBadgeToAll', async (payload) => {
+        try {
+            const { badgeId, gameId, encounterId, awardedBy } = payload;
+            if (!badgeId || !awardedBy || !gameId) {
+                console.error('[awardBadgeToAll] Invalid payload:', payload);
+                return;
+            }
+
+            const numericBadgeId = parseInt(badgeId, 10);
+            if (isNaN(numericBadgeId)) {
+                console.error('[awardBadgeToAll] Invalid badgeId:', badgeId);
+                return;
+            }
+
+            const userDeviceIdsInGame = Object.entries(deviceGameMap)
+                .filter(([deviceId, gid]) => gid === gameId)
+                .map(([deviceId]) => deviceId);
+
+            if (userDeviceIdsInGame.length === 0) {
+                console.warn(`[awardBadgeToAll] No users found in game ${gameId} to award badge to.`);
+                return;
+            }
+
+            const userAuth0SubsInGameWithName = userDeviceIdsInGame.map(deviceId => deviceUsers[deviceId]?.name).filter(name => name && name.includes('|'));
+            const uniqueUserAuth0SubsInGame = [...new Set(userAuth0SubsInGameWithName.map(name => name.split('|').slice(0, 2).join('|')))];
+
+
+             if (uniqueUserAuth0SubsInGame.length === 0) {
+                console.warn(`[awardBadgeToAll] No valid user Auth0 subs found in game ${gameId} after filtering.`);
+                return;
+            }
+
+            // Fetch badge details once for notification
+            const [badgeDetailsRows] = await dbPromise.query(
+                'SELECT b.Title, b.Description, i.FileNameServer AS ImageFileName FROM Badges b LEFT JOIN Images i ON b.Image = i.ID WHERE b.ID = ?',
+                [numericBadgeId]
+            );
+            const badgeDetails = badgeDetailsRows[0];
+
+            let awardedCount = 0;
+            for (const targetUserAuth0Sub of uniqueUserAuth0SubsInGame) {
+                // 1. Fetch UserAccounts.id using targetUserAuth0Sub
+                const [userAccountRows] = await dbPromise.query('SELECT id, display_name FROM UserAccounts WHERE auth0_sub = ?', [targetUserAuth0Sub]);
+                if (!userAccountRows || userAccountRows.length === 0) {
+                    console.warn(`[awardBadgeToAll] No UserAccount found for auth0_sub ${targetUserAuth0Sub}. Skipping badge award for this user.`);
+                    continue;
+                }
+                const userAccountId = userAccountRows[0].id; // Numeric ID for UserBadges
+                const awardedToDisplayName = userAccountRows[0].display_name || targetUserAuth0Sub;
+                
+                const [existingBadges] = await dbPromise.query('SELECT id FROM UserBadges WHERE user_id = ? AND badge_id = ?', [userAccountId, numericBadgeId]);
+                if (existingBadges.length > 0) {
+                    console.log(`[awardBadgeToAll] User ${targetUserAuth0Sub} (ID: ${userAccountId}) already has badge ${numericBadgeId}, skipping.`);
+                    continue; // Skip if user already has it
+                }
+
+                // Insert new badge for user using userAccountId, only include existing columns
+                const insertQuery = 'INSERT INTO UserBadges (user_id, badge_id, date_earned) VALUES (?, ?, NOW())';
+                const [insertResult] = await dbPromise.query(insertQuery, [userAccountId, numericBadgeId]);
+
+                if (insertResult.affectedRows > 0) {
+                    awardedCount++;
+                    console.log(`[awardBadgeToAll] Awarded badge ${numericBadgeId} to ${targetUserAuth0Sub} (ID: ${userAccountId}) in game ${gameId}.`);
+                    const notificationPayload = {
+                        toSub: targetUserAuth0Sub, // Target socket room with Auth0Sub
+                        badgeId: numericBadgeId,
+                        badgeName: badgeDetails ? badgeDetails.Title : 'New Badge!',
+                        badgeDescription: badgeDetails ? badgeDetails.Description : '',
+                        badgeImage: badgeDetails && badgeDetails.ImageFileName ? `/images/uploads/badges/${badgeDetails.ImageFileName}` : null,
+                        awardedBy,
+                        gameId,
+                        encounterId,
+                        awardedToDisplayName // Added for consistency with XP
+                    };
+                    io.to(targetUserAuth0Sub).emit('badge_awarded', notificationPayload);
+                }
+            }
+            console.log(`[awardBadgeToAll] Completed. Awarded badge ${numericBadgeId} to ${awardedCount} users in game ${gameId}.`);
+            // socket.emit('awardBadgeToAll_success', { gameId, count: awardedCount, badgeId: numericBadgeId });
+
+        } catch (error) {
+            console.error('[awardBadgeToAll] Error awarding badge to all:', error, 'Payload:', payload);
+            // socket.emit('awardBadgeToAll_error', { message: 'Internal server error', gameId });
         }
     });
 });

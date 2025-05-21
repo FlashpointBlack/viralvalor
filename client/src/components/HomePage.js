@@ -27,6 +27,7 @@ import ArticleManager from './ArticleManager';
 import StudentArticleList from './StudentArticleList';
 import ArticleEditor from './ArticleEditor';
 import SendSystemMessage from './SendSystemMessage';
+import SiteHealthDisplay from '../views/Admin/SiteHealthDisplay';
 import '../styles/mobile-layout.css';
 import '../styles/dropdown.css';
 import '../styles/mobile-question-bank.css';
@@ -158,6 +159,13 @@ const HomePage = () => {
         );
       case 'sendsysmsg':
         return isAdmin ? <SendSystemMessage /> : (
+          <div style={{ padding: '1rem' }}>
+            <h3>Access Denied</h3>
+            <p>You do not have permission to view this section.</p>
+          </div>
+        );
+      case 'sitehealth':
+        return isAdmin ? <SiteHealthDisplay /> : (
           <div style={{ padding: '1rem' }}>
             <h3>Access Denied</h3>
             <p>You do not have permission to view this section.</p>

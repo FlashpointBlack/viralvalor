@@ -47,7 +47,7 @@ const BASE_MENU_CONFIG = [
     items: [
       { key: 'users', label: 'Users' },
       { key: 'sendsysmsg', label: 'Send System Message' },
-      { key: 'selftest', label: 'Ops Self-Test', path: '/api/selftest/', external: true },
+      { key: 'sitehealth', label: 'Site Health' },
 
       // REPORTS SECTION
       { type: 'header', label: 'Reports' },

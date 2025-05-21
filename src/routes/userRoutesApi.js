@@ -475,13 +475,17 @@ router.post('/:id/award-xp', async (req, res) => { // Path: /api/users/:id/award
     const xpToAdd = parseInt(amount);
     if (xpToAdd === 0 && amount !== 0) return res.status(400).json({ error: 'XP amount must be a valid number.'});
 
+    const io = req.app.get('io'); // Get socket.io instance
 
     try {
-        const results = await runQuery('SELECT xp_points, level FROM UserAccounts WHERE id = ?', [userId]);
-        if (results.length === 0) {
+        const userResults = await runQuery('SELECT xp_points, level, auth0_sub FROM UserAccounts WHERE id = ?', [userId]);
+        if (userResults.length === 0) {
             return res.status(404).json({ error: 'User not found' });
         }
-        const currentXP = results[0].xp_points || 0;
+        const currentUserData = userResults[0];
+        const currentXP = currentUserData.xp_points || 0;
+        const userSub = currentUserData.auth0_sub; // Get user's auth0_sub
+
         // Ensure newXP is not less than 0 if xpToAdd is negative.
         const newXP = Math.max(0, currentXP + xpToAdd); 
         // Level calculation needs to be robust for negative XP too. Level should not decrease below 1.
@@ -489,6 +493,17 @@ router.post('/:id/award-xp', async (req, res) => { // Path: /api/users/:id/award
 
         const updateQuery = 'UPDATE UserAccounts SET xp_points = ?, level = ? WHERE id = ?';
         await runQuery(updateQuery, [newXP, newLevel, userId]);
+
+        // Emit event to the specific user
+        if (io && userSub && xpToAdd !== 0) { // Only emit if XP was actually changed and userSub is available
+            io.to(userSub).emit('xp_awarded', {
+                userId: parseInt(userId),
+                xpAwarded: xpToAdd,
+                newXP: newXP,
+                newLevel: newLevel
+            });
+        }
+
         res.json({ userId: parseInt(userId), xp_points: newXP, level: newLevel });
     } catch (err) {
         console.error('Error updating XP:', err);

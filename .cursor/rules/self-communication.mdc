@@ -16,25 +16,23 @@ These rules guide Cursor AI’s autonomous work on this repository, ensuring co
 
 ## 2. Initial Statement of Work (SOW)
 
-On first run, create `/cursornotes/00_SOW.md` containing:
+On first run, create `/cursornotes/##_<Statement of work slug>/SOW.md`. Increase the index of ## by evaluating existing folders present. SOW.md must contain:
 
 1. **Goal** – one‑sentence objective.
 2. **Deliverables** – checklist.
 3. **Out‑of‑scope** items.
 4. **Dependencies**.
 5. **Milestones** – numbered; each ≤ 8 work‑hours.
-6. **Timeline** (optional).
 
-## 3. Planning Large Projects
+## 3. Planning Larger Projects
+For every milestone:
 
-For any milestone expected to take > 4 h or change > 400 LOC:
-
-1. Generate `/cursornotes/plan_<milestone‑slug>.md` with:
+1. Generate `/cursornotes/##_<Statement of work slug>/M#_<milestone slug>.md` where M# represents the milestone number. This file must include:
 
    * Context / problem statement.
-   * Task breakdown → chunks (`step‑xx`) each ≤ 1 h.
-   * **Files** to create/modify for every chunk (explicit paths or path‑globs).
-   * Tests or acceptance criteria for every chunk.
+   * Task breakdown → chunks (`step‑x`) each with an estimated time of ≤ 1 h.
+   * **Files** to create/modify for every chunk (explicit paths or path‑globs). Please do your research here, This will serve as a roadmap for which files we're allowing to be edited. it should be very restrictive, based only on what is necessary to complete the project.
+   * Acceptance criteria for every chunk.
 2. Link that plan from the SOW under the milestone.
 
 ## 4. Executing a Chunk
@@ -42,16 +40,17 @@ For any milestone expected to take > 4 h or change > 400 LOC:
 **Before coding**
 
 * Open the plan file and mark the chunk **IN‑PROGRESS**.
-* Review the **Files** list; limit edits strictly to those files. Only open or read files outside the list if absolutely necessary for context, and update the plan if new files must be touched.
-* Append to `/cursornotes/daily_<YYYY‑MM‑DD>.log`:
+* Review the **Files** list; limit edits strictly to those files. Only open or read files outside the list if absolutely necessary for context, and update the plan if new files must be touched. Consider implications of your actions especially closely when dealing with files not included in the milestone list.
+* Append to `/cursornotes/##_<Statement of work slug>/notes/M#.md`:
 
-  * Timestamp.
-  * "Now working on step‑xx: <title>".
+  * Timestamp. Verify with the system time when possible.
+  * "Now working on M# step‑xx: <title>".
   * Files you expect to modify (should match the plan).
 
 **While coding**
 
-* Add inline `TODO:` / `FIXME:` comments sparingly, referencing the chunk id.
+* Add inline `TODO:` / `FIXME:` comments sparingly, but when necessary referencing the chunk id.
+* If you will be making many similar edits, denote the first file you are working on as the template file. Other files should match the appropriate layout to fall in line with this layout, and the layout name/location should be notated in your updates.
 
 **After tests pass**
 
@@ -64,6 +63,7 @@ For any milestone expected to take > 4 h or change > 400 LOC:
    ```
 2. In the plan, mark the chunk **DONE** and add a short summary + lessons learned.
 3. If the milestone is finished, mark it **DONE** in the SOW and note the next milestone.
+4. If the milestone is finished, summarize all the notes you wrote about the actions you took for this milestone and add to the bottom of 'M#_<milestone slug>.md'
 
 ## 5. Resuming Work
 
@@ -75,7 +75,7 @@ On startup, parse `/cursornotes/*`:
 
 ## 6. Naming Conventions
 
-* Files: `00_SOW.md`, `plan_<slug>.md`, `daily_YYYY‑MM‑DD.log`.
+* Files: `SOW.md`, `M#_<milestone slug>.md`, `/notes/M#.md`.
 * Headings use ATX `###` style.
 * Status tags: **TODO**, **IN‑PROGRESS**, **BLOCKED**, **DONE** (bold uppercase).
 
@@ -97,15 +97,6 @@ On startup, parse `/cursornotes/*`:
 * If a template must evolve, update **both** the reference file **and** all living instances in the codebase within the same milestone, or flag a dedicated refactor milestone.
 * Document deviations; untracked divergence is **not allowed**.
 
-## 10. Admin Self‑Test & Regression Verification
-
-* **Goal:** ensure every potentially breaking change is immediately validated through the admin self‑test page, mirroring real user interactions. we do not use jest. we run these small tests under the following rules, particularly impoart is the rule for invoking code:
-* After completing any chunk that modifies business logic, database schema, UI wiring, or external interfaces, *add or update* a corresponding test block on the admin self‑test page **before** marking the chunk **DONE**.
-* Invoke the code under test **exactly as** the production control (button, route, API call, CLI wrapper) would—same function signature, parameters, and module context. No mocks or wrappers that change the calling semantics.
-* Commit the self‑test update in the *same commit* as the code change (or an immediate follow‑up commit within the chunk) with `test(admin):` prefix and reference to the chunk id.
-* If a reusable pattern emerges, save a template for the self‑test block in `/cursornotes/templates/selftest_<pattern>.md` and reuse it.
-* Missing or outdated self‑tests constitute a **BLOCKER** and must be resolved before advancing milestones.
-
 ---
 
 ### Checklist Template (copy into plan file)
@@ -115,8 +106,6 @@ On startup, parse `/cursornotes/*`:
 - Goal:
 - Files: <path(s)>
 - Acceptance tests:
-- Est. time: < 1 h
+- Template: 
 ```
-
-End of rules.
 

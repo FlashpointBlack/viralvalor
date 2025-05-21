@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 -focus on the areas of code relevant to the task
 -do not touch code that is unrelated to the task
