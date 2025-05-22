@@ -32,7 +32,7 @@ const LectureEditor = ({ lectureId, onBack }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [url, setUrl] = useState('');
-  const [file, setFile] = useState(null);
+  // const [file, setFile] = useState(null);
 
   // link vs file mode
   const initialMode = (url || lecture?.linkUrl) ? 'link' : (lecture?.fileNameServer ? 'file' : 'link');

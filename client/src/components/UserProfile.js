@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useAuth } from '../contexts/AuthContext';
 import { sanitizeObject } from '../utils/textUtils';
-import { useChat } from '../contexts/ChatContext';
+// import { useChat } from '../contexts/ChatContext';
 import BadgeShowcase from './BadgeShowcase';
 import './UserProfile.css';
 
@@ -31,7 +31,7 @@ const UserProfile = ({ userId = null }) => {
     streak_days: 0
   });
   const [profileImageUrl, setProfileImageUrl] = useState('');
-  const [selectedImageFile, setSelectedImageFile] = useState(null);
+  // const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState(null);
   const [isDemo, setIsDemo] = useState(false);
@@ -251,16 +251,19 @@ const UserProfile = ({ userId = null }) => {
     } finally {
       setUploadProgress(0);
       setSaving(false);
-      setSelectedImageFile(null);
+      // setSelectedImageFile(null);
     }
   };
 
   const handleProfileImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+    const file = e.target.files[0];
+    if (file) {
+      // setSelectedImageFile(file); // Store the selected file
+      // Optionally, create a preview URL if needed for UI before upload
+      // const reader = new FileReader();
       // Immediate local preview
       setProfileImageUrl(URL.createObjectURL(file));
-      setSelectedImageFile(file);
+      // setSelectedImageFile(file); <--- This was missed
       // Kick off upload immediately
       uploadProfileImage(file);
     }
@@ -349,10 +352,16 @@ const UserProfile = ({ userId = null }) => {
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleString();
-  };
+  // const formatDate = (dateString) => {
+  //   if (!dateString) return 'N/A';
+  //   try {
+  //     return new Date(dateString).toLocaleDateString(undefined, {
+  //       year: 'numeric', month: 'long', day: 'numeric'
+  //     });
+  //   } catch (e) {
+  //     return 'Invalid Date';
+  //   }
+  // };
 
   if (loading) {
     return <div className="profile-loading">Loading profile...</div>;

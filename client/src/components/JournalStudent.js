@@ -10,10 +10,10 @@ const JournalStudent = ({ initialPromptId = null }) => {
   const [selectedId, setSelectedId] = useState(null);
   const [prompt, setPrompt] = useState(null); // {title,promptText}
   const [response, setResponse] = useState('');
-  const [charCount, setCharCount] = useState(0);
+  // const [charCount, setCharCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [saveMsg, setSaveMsg] = useState(null);
+  const [saveMsg, /*setSaveMsg*/] = useState(null);
   const { isLoading: authLoading, isAuthenticated, user } = useAuth0();
   const [initialOpened, setInitialOpened] = useState(false);
 
@@ -63,10 +63,10 @@ const JournalStudent = ({ initialPromptId = null }) => {
       setPrompt(pRes.data);
       if (rRes.data) {
         setResponse(rRes.data.responseText || '');
-        setCharCount(rRes.data.charCount || 0);
+        // setCharCount(rRes.data.charCount || 0);
       } else {
         setResponse('');
-        setCharCount(0);
+        // setCharCount(0);
       }
     } catch (err) {
       setError('Failed to load prompt');
@@ -79,7 +79,7 @@ const JournalStudent = ({ initialPromptId = null }) => {
     setLoading(true);
     try {
       const { data } = await axios.post(`journal/prompts/${selectedId}/response`, { responseText: response }, { headers: { 'x-user-sub': user?.sub } });
-      setCharCount(data.charCount);
+      // setCharCount(data.charCount);
       // Refresh list so charCount reflects immediately
       await fetchPrompts();
 
@@ -96,7 +96,7 @@ const JournalStudent = ({ initialPromptId = null }) => {
     setSelectedId(null);
     setPrompt(null);
     setResponse('');
-    setCharCount(0);
+    // setCharCount(0);
   };
 
   if (loading) return <LoadingIndicator />;

@@ -30,12 +30,12 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
   const [newTagName, setNewTagName] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEducator, setIsEducator] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  // const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   // State to track theme for keying react-select
-  const [currentAppliedTheme, setCurrentAppliedTheme] = useState(
-    typeof document !== 'undefined' ? document.body.dataset.theme || 'light' : 'light'
-  );
+  // const [currentAppliedTheme, setCurrentAppliedTheme] = useState(
+  //   typeof document !== 'undefined' ? document.body.dataset.theme || 'light' : 'light'
+  // );
 
   // Helper computed – only educator admins may manage tags
   const allowTagging = isAdmin && isEducator;
@@ -43,7 +43,7 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
   // Setup mobile detection
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
+      // setIsMobile(window.innerWidth <= 768);
     };
     
     window.addEventListener('resize', handleResize);
@@ -54,14 +54,14 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
     if (typeof document === 'undefined') return;
 
     // Set initial theme
-    setCurrentAppliedTheme(document.body.dataset.theme || 'light');
+    // setCurrentAppliedTheme(document.body.dataset.theme || 'light');
 
     // Observe body for data-theme changes
     const observer = new MutationObserver((mutationsList) => {
       for (const mutation of mutationsList) {
         if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
           const newTheme = document.body.dataset.theme || 'light';
-          setCurrentAppliedTheme(newTheme);
+          // setCurrentAppliedTheme(newTheme);
         }
       }
     });
@@ -409,71 +409,6 @@ const QuestionBankEditor = ({ lectureId = null, showTagFilter = true }) => {
       setError('Failed to create tag');
       return null;
     }
-  };
-
-  // Get computed style from CSS variables based on current theme
-  const getThemeStyles = () => {
-    const root = document.documentElement;
-    const isDarkTheme = document.body.getAttribute('data-theme') === 'dark';
-
-    const getResolvedVar = (varName) => {
-      if (!varName) return null; // Handle cases where a variable might not be applicable
-      return getComputedStyle(root).getPropertyValue(varName).trim();
-    };
-
-    // Define light and dark variables explicitly for clarity
-    const controlBgVar = isDarkTheme ? '--input-bg-dark' : '--input-bg-light';
-    const controlTextVar = isDarkTheme ? '--text-dark' : '--text-light';
-    const controlBorderVar = isDarkTheme ? '--border-dark' : '--border-light';
-    const controlFocusBorderVar = isDarkTheme ? '--primary-dark' : '--primary-light'; // Use primary color for focus
-
-    const menuBgVar = isDarkTheme ? '--bg-dark-card' : '--bg-light-card';
-    // menuTextVar can be same as controlTextVar or specific if needed
-    const menuBorderVar = isDarkTheme ? '--border-dark' : '--border-light';
-
-    const optionBgVar = isDarkTheme ? '--bg-dark-card' : '--bg-light-card';
-    const optionHoverBgVar = isDarkTheme ? '--hover-dark' : '--hover-light';
-    const optionSelectedBgVar = isDarkTheme ? getResolvedVar('--primary-dark') : getResolvedVar('--primary-light'); // Selected option background
-    const optionSelectedTextVar = isDarkTheme ? getResolvedVar('--text-dark') : getResolvedVar('--button-text-light'); // Text for selected option (e.g., white on primary color)
-    const optionTextVar = isDarkTheme ? '--text-dark' : '--text-light';
-
-    // For multi-value chips (selected tags)
-    // Light theme: use var(--border-light) (#dddddd)
-    // Dark theme: use var(--bg-dark-alt) (#1e1e1e)
-    const multiValueBgColor = isDarkTheme ? getResolvedVar('--bg-dark-alt') : getResolvedVar('--border-light');
-    const multiValueTextColor = isDarkTheme ? getResolvedVar('--text-dark') : getResolvedVar('--text-light');
-    const multiValueRemoveHoverBgColor = isDarkTheme ? getResolvedVar('--button-hover-dark') : getResolvedVar('--button-hover-light');
-
-
-    const placeholderTextVar = isDarkTheme ? '--text-dark-tertiary' : '--text-light-tertiary';
-    const indicatorColorVar = isDarkTheme ? '--text-dark-secondary' : '--text-light-secondary';
-    const indicatorHoverColorVar = isDarkTheme ? '--text-dark' : '--text-light';
-
-
-    return {
-      controlBg: getResolvedVar(controlBgVar),
-      controlText: getResolvedVar(controlTextVar),
-      controlBorder: getResolvedVar(controlBorderVar),
-      controlFocusBorder: getResolvedVar(controlFocusBorderVar),
-      
-      menuBg: getResolvedVar(menuBgVar),
-      menuText: getResolvedVar(optionTextVar), // Use optionTextVar for general menu text color
-      menuBorder: getResolvedVar(menuBorderVar),
-      
-      optionBg: getResolvedVar(optionBgVar),
-      optionHoverBg: getResolvedVar(optionHoverBgVar),
-      optionSelectedBg: optionSelectedBgVar,
-      optionSelectedText: optionSelectedTextVar,
-      optionText: getResolvedVar(optionTextVar),
-      
-      multiValueBg: multiValueBgColor,
-      multiValueText: multiValueTextColor,
-      multiValueRemoveHoverBg: multiValueRemoveHoverBgColor,
-      
-      placeholderText: getResolvedVar(placeholderTextVar),
-      indicatorColor: getResolvedVar(indicatorColorVar),
-      indicatorHoverColor: getResolvedVar(indicatorHoverColorVar),
-    };
   };
 
   return (

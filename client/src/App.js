@@ -1,26 +1,26 @@
-import React, { useEffect, useContext, createContext } from 'react';
+import React, { useEffect, /*useContext,*/ createContext } from 'react';
 import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { EncounterProvider } from './contexts/EncounterContext';
 import { ChatProvider } from './contexts/ChatContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useAuth } from './contexts/AuthContext';
-import HomePage from './components/HomePage';
-import EducatorPanel from './components/EducatorPanel';
-import MobilePoll from './components/MobilePoll';
-import CompleteProfile from './components/CompleteProfile';
-import UserProfile from './components/UserProfile';
+// import HomePage from './components/HomePage';
+// import EducatorPanel from './components/EducatorPanel';
+// import MobilePoll from './components/MobilePoll';
+// import CompleteProfile from './components/CompleteProfile';
+// import UserProfile from './components/UserProfile';
 import LoginButton from './components/LoginButton';
 import LogoutButton from './components/LogoutButton';
 import AppWrapper from './components/AppWrapper';
 import ScrollToTop from './components/ScrollToTop';
 import useCustomNavigation from './hooks/useCustomNavigation';
-import navigationHistory from './utils/history';
+// import navigationHistory from './utils/history';
 import { ToastProvider } from './contexts/ToastContext';
 import './main.css';
-import axios from 'axios';
-import PresentationLanding from './components/PresentationLanding';
-import PresentationEnd from './components/PresentationEnd';
+// import axios from 'axios';
+// import PresentationLanding from './components/PresentationLanding';
+// import PresentationEnd from './components/PresentationEnd';
 import PresentationDisplayHost from './components/PresentationDisplayHost';
 import RoutesWithEncounter from './RoutesWithEncounter';
 
@@ -28,6 +28,7 @@ import RoutesWithEncounter from './RoutesWithEncounter';
 export const NavigationContext = createContext(null);
 
 // Simple Protected Route component using Auth0 directly
+/*
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const { isAuthenticated, isLoading, user } = useAuth0();
   const { isAdmin, profileComplete } = useAuth();
@@ -69,23 +70,24 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
   
   return children;
 };
+*/
 
 const App = () => {
-  const { isAuthenticated, user, isLoading, error } = useAuth0();
+  const { isAuthenticated, /*user,*/ isLoading, error } = useAuth0();
   const location = useLocation();
-  const { isAdmin, profileComplete } = useAuth();
+  const { profileComplete } = useAuth();
   const navigate = useNavigate();
   const customNavigation = useCustomNavigation();
 
   // Store user sub in localStorage for development purposes
   useEffect(() => {
     // Debug Auth0 state
-    console.table({ isLoading, isAuthenticated, user, error });
+    console.table({ isLoading, isAuthenticated, error });
 
-    if (isAuthenticated && user?.sub) {
-      localStorage.setItem('userSub', user.sub);
+    if (isAuthenticated /*&& user?.sub*/) {
+      // localStorage.setItem('userSub', user.sub);
     }
-  }, [isLoading, isAuthenticated, user, error]);
+  }, [isLoading, isAuthenticated, /*user,*/ error]);
 
   // Improve back button behavior by listening for popstate events
   useEffect(() => {
@@ -215,7 +217,7 @@ const App = () => {
                       <LoginButton />
                     ) : (
                       <>
-                        <span className="user-welcome">Welcome, {user.name}</span>
+                        <span className="user-welcome">Welcome, {/*user.name*/}</span>
                         <LogoutButton />
                       </>
                     )}

@@ -35,14 +35,13 @@ const MobilePoll = () => {
   const [pollOptions, setPollOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState(null);
   const [hasVoted, setHasVoted] = useState(false);
-  const [voteCounts, setVoteCounts] = useState([]);
   const [totalVotes, setTotalVotes] = useState(0);
   const [username, setUsername] = useState('');
   const [isRegistered, setIsRegistered] = useState(false);
   const [gameId, setGameId] = useState(null);
   const [quizId, setQuizId] = useState(null);
   const [showDebug, setShowDebug] = useState(false);
-  const [deviceId, setDeviceId] = useState(() => {
+  const [deviceId, /*setDeviceId*/] = useState(() => {
     // Get existing device ID or create a new one
     const storedDeviceId = localStorage.getItem('deviceUniqueId');
     if (storedDeviceId) return storedDeviceId;
@@ -90,7 +89,7 @@ const MobilePoll = () => {
   const { userData } = useAuth();
 
   const { openChat } = useChat();
-  const { chatMessages, lastViewedByConv, markMessagesViewed, lastXPAward, clearLastXPAward, lastBadgeAward, clearLastBadgeAward } = useAppSocket();
+  const { chatMessages, lastViewedByConv, markMessagesViewed, /* lastXPAward, */ clearLastXPAward, /* lastBadgeAward, */ clearLastBadgeAward } = useAppSocket();
 
   // Reusable floating login button (only if user not authenticated)
   const floatingLogin = null;
@@ -243,7 +242,7 @@ const MobilePoll = () => {
       // We acknowledge results but do not display them (anonymous)
       updateDebugInfo({ lastEvent: 'results updated' });
       if (results && Array.isArray(results)) {
-        setVoteCounts(results.map(r => parseFloat(r)));
+        // setVoteCounts(results.map(r => parseFloat(r)));
         setTotalVotes(totalVotes || 0);
       }
     });
@@ -265,7 +264,6 @@ const MobilePoll = () => {
       // Reset all voting state
       setSelectedOption(null);
       setHasVoted(false);
-      setVoteCounts([]);
       setTotalVotes(0);
       setIsPollActive(false);
       setPollOptions([]);
@@ -633,12 +631,12 @@ const MobilePoll = () => {
   };
 
   // Utility to copy game link
-  const copyGameLink = () => {
-    const link = `${window.location.origin}/poll${gameId ? `?gameId=${gameId}` : ''}`;
-    navigator.clipboard.writeText(link)
-      .then(() => alert('Game link copied to clipboard!'))
-      .catch(() => alert('Failed to copy link'));
-  };
+  // const copyGameLink = () => {
+  //   const link = `${window.location.origin}/poll${gameId ? `?gameId=${gameId}` : ''}`;
+  //   navigator.clipboard.writeText(link)
+  //     .then(() => alert('Game link copied to clipboard!'))
+  //     .catch(() => alert('Failed to copy link'));
+  // };
 
   // Handle vote submission
   const handleVote = (index) => {
@@ -666,50 +664,44 @@ const MobilePoll = () => {
   };
 
   // Message presenter helper – defined early so it can be referenced in JSX before this point
-  const handleMessagePresenter = async () => {
-    if (!presentationActive || !presenterSub) {
-      alert('Presentation is not active yet.');
-      return;
-    }
-
-    if (!isAuthenticated) {
-      alert('Please log in to send a message to the presenter.');
-      return;
-    }
-
-    const msg = prompt('Enter a message for the presenter:');
-    if (!msg || !msg.trim()) return;
-
-    try {
-      // Ensure direct conversation exists
-      const convRes = await fetch('/conversations/direct', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userSubA: authUser.sub, userSubB: presenterSub })
-      });
-      const convData = await convRes.json();
-      if (!convRes.ok) throw new Error(convData.error || 'Failed to create conversation');
-      const conversationId = convData.conversationId;
-
-      // Emit chat message via socket
-      socket.emit('send message', {
-        conversationId,
-        senderSub: authUser.sub,
-        body: msg.trim()
-      });
-
-      alert('Message sent!');
-    } catch (err) {
-      console.error('Error sending presenter message:', err);
-      alert('Failed to send message.');
-    }
-  };
-
-  // Handle showing results before voting
-  const handleShowResults = () => {
-    setHasVoted(true);
-    socket.emit('request results');
-  };
+  // const handleMessagePresenter = async () => {
+  //   if (!presentationActive || !presenterSub) {
+  //     alert('Presentation is not active yet.');
+  //     return;
+  //   }
+  //
+  //   if (!isAuthenticated) {
+  //     alert('Please log in to send a message to the presenter.');
+  //     return;
+  //   }
+  //
+  //   const msg = prompt('Enter a message for the presenter:');
+  //   if (!msg || !msg.trim()) return;
+  //
+  //   try {
+  //     // Ensure direct conversation exists
+  //     const convRes = await fetch('/conversations/direct', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ userSubA: authUser.sub, userSubB: presenterSub })
+  //     });
+  //     const convData = await convRes.json();
+  //     if (!convRes.ok) throw new Error(convData.error || 'Failed to create conversation');
+  //     const conversationId = convData.conversationId;
+  //
+  //     // Emit chat message via socket
+  //     socket.emit('send message', {
+  //       conversationId,
+  //       senderSub: authUser.sub,
+  //       body: msg.trim()
+  //     });
+  //
+  //     alert('Message sent!');
+  //   } catch (err) {
+  //     console.error('Error sending presenter message:', err);
+  //     alert('Failed to send message.');
+  //   }
+  // };
 
   // Function to show presenter profile in a mobile-friendly popup
   const showPresenterProfile = async () => {

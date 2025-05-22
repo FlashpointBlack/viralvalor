@@ -79,7 +79,7 @@ const PresentationEnd = ({ hostSubForDisplay, hostSub, gameId }) => {
           }
         }
 
-        const { encounterId, displayMode } = data;
+        const { encounterId, /* displayMode */ } = data;
         if (encounterId) {
           // Construct the URL to navigate to the specific encounter in single-player game view
           let url = `/game`; // Navigate to the general single-player game page

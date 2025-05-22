@@ -56,6 +56,7 @@ const ArticleManager = ({ onEditArticle }) => {
 
   useEffect(() => { load(); }, [load]);
 
+  /*
   const handleSubmitForApproval = async (id) => {
     askConfirm('Submit this article for admin approval?', async () => {
       setLoading(true);
@@ -67,6 +68,7 @@ const ArticleManager = ({ onEditArticle }) => {
       finally { setLoading(false); }
     });
   };
+  */
 
   const handleApprove = async (article) => {
     const needsWarn = article.approvalStatus !== 'PENDING';

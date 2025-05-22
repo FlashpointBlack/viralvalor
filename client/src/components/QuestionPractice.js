@@ -18,7 +18,7 @@ const QuestionPractice = () => {
   const [currentIndex, setCurrentIndex] = useState(0); // tracks position in randomized list
   const [question, setQuestion] = useState(null);          // {ID, QuestionText, options}
   const [selectedOptionId, setSelectedOptionId] = useState(null);
-  const [attempts, setAttempts] = useState([]);            // kept for future reporting UI
+  // const [attempts, setAttempts] = useState([]);            // kept for future reporting UI
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [submitStatus, setSubmitStatus] = useState(null);  // {isCorrect: bool}
@@ -80,21 +80,6 @@ const QuestionPractice = () => {
     }
   }, []);
 
-  const loadAttempts = useCallback(async (qid) => {
-    if (!qid || !userSub) {
-      setAttempts([]);
-      return;
-    }
-    try {
-      const { data } = await axios.get(`questions/my-question-attempts?questionId=${qid}`, {
-        headers: { 'x-user-sub': userSub }
-      });
-      setAttempts(Array.isArray(data) ? data : []);
-    } catch (err) {
-      // silently ignore – used for future reporting only
-    }
-  }, [userSub]);
-
   // initial load
   useEffect(() => {
     fetchQuestions();
@@ -103,9 +88,9 @@ const QuestionPractice = () => {
   // Load attempts when question changes (for future reports)
   useEffect(() => {
     if (selectedQuestionId) {
-      loadAttempts(selectedQuestionId);
+      // loadAttempts(selectedQuestionId);
     }
-  }, [selectedQuestionId, loadAttempts]);
+  }, [selectedQuestionId, /*loadAttempts*/]);
 
   /* --------------------- Event handlers --------------------------- */
   const handleSubmit = async () => {
@@ -123,7 +108,7 @@ const QuestionPractice = () => {
       });
       setSubmitStatus({ isCorrect: !!data.isCorrect, rationale: data.rationale || '' });
       // refresh attempts silently for future reporting
-      await loadAttempts(selectedQuestionId);
+      // await loadAttempts(selectedQuestionId);
     } catch (err) {
       console.error('Failed to submit attempt', err);
       setError('Failed to submit answer');

@@ -43,7 +43,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEducator, setIsEducator] = useState(false);
-  const [articleId, setArticleId] = useState(null);
+  // const [articleId, setArticleId] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
@@ -80,7 +80,7 @@ const HomePage = () => {
       setInitialPromptId(promptParam);
     }
 
-    if (artParam) setArticleId(artParam);
+    if (artParam) ; // setArticleId(artParam);
 
     if (!userSub) return;
     axios.get('am-admin', { headers: { 'x-user-sub': userSub } })

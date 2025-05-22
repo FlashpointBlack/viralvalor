@@ -13,7 +13,6 @@ const ChatWindow = ({ conversation, onClose, onMinimize, offset = 20, isPresente
   const listRef = useRef(null);
   const [selectedId, setSelectedId] = useState(null);
   const [reactionAnchor, setReactionAnchor] = useState(null);
-  const [reactions, setReactions] = useState({});
   const hideTimer = useRef(null);
   const [dynamicHeight, setDynamicHeight] = useState(null);
 
@@ -30,7 +29,6 @@ const ChatWindow = ({ conversation, onClose, onMinimize, offset = 20, isPresente
         // preload reactions map
         const rx = {};
         data.forEach(m=>{ if(m.reaction) rx[m.id||m.ID]=m.reaction; });
-        setReactions(rx);
       } catch (err) {
         console.error('Fetch msgs failed', err);
       } finally {

@@ -43,7 +43,7 @@ const ExportPdfButton = ({ targetRef, filename = 'report.pdf', orientation = 'la
       // Page dimensions for US Letter in jsPDF default units (mm)
       const pdf = new jsPDF({ orientation, unit: 'mm', format: 'letter' });
       const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
+      // const pageHeight = pdf.internal.pageSize.getHeight();
 
       // Calculate image dimensions preserving aspect ratio, fitting to page width
       const imgWidthPx = canvas.width;

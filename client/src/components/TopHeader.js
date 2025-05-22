@@ -9,7 +9,7 @@ import '../styles/MobileNav.css';
 
 const TopHeader = ({ title = 'Viral Valor', children, showGreeting = true, showAuthButtons = true }) => {
   const { isAuthenticated } = useAuth0();
-  const { userData, user, isAdmin } = useAuth();
+  const { userData, user, /*isAdmin*/ } = useAuth();
 
   // Debug displayName retrieval
   // eslint-disable-next-line no-console

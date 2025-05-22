@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate /*, Link*/ } from 'react-router-dom';
 import './EducatorPanel.css'; // Import component CSS
 import socket from '../socket'; // We'll create this file to handle socket.io connections
-import { createMultiplayerGame, updateGameEncounter, gameExists } from '../utils/multiplayerGameManager';
+// import { createMultiplayerGame, updateGameEncounter, gameExists } from '../utils/multiplayerGameManager';
 import TopHeader from './TopHeader';
-import EncounterThumbnail from './EncounterThumbnail';
+// import EncounterThumbnail from './EncounterThumbnail';
 import MainNavTabs from './MainNavTabs';
-import axios from 'axios';
-import { useAuth } from '../contexts/AuthContext'; // Add AuthContext
-import { useSocket } from '../contexts/SocketContext';
+// import axios from 'axios';
+// import { useAuth } from '../contexts/AuthContext'; // Add AuthContext
+// import { useSocket } from '../contexts/SocketContext';
 import { useChat } from '../contexts/ChatContext';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useToast } from '../contexts/ToastContext';
@@ -202,7 +202,7 @@ const EducatorPanel = ({ embedded = false }) => {
   const { addToast } = useToast();
   const { user } = useAuth0(); // Get user from Auth0
   const [displayError, setDisplayError] = useState(null); // ADDED for error toast
-  const [debugInfo, setDebugInfo] = useState({ // ADDED for debug panel
+  const [debugInfo, /*setDebugInfo*/] = useState({ // ADDED for debug panel
     displayWindowStatus: 'Not initialized',
     lastCommunicationStatus: 'none',
     communicationMethods: [],
@@ -210,12 +210,12 @@ const EducatorPanel = ({ embedded = false }) => {
     lastEncounterId: 'none',
     isConnected: false,
   });
-  const [displayCommunicationStatus, setDisplayCommunicationStatus] = useState('N/A'); // ADDED for debug panel
-  const [selectedUserForBadge, setSelectedUserForBadge] = useState(null); // ADDED for user management
+  const [displayCommunicationStatus, /*setDisplayCommunicationStatus*/] = useState('N/A'); // ADDED for debug panel
+  // const [selectedUserForBadge, setSelectedUserForBadge] = useState(null); // ADDED for user management
 
   // ====== NEW: Display window refs/state NEED to be declared BEFORE passing openDisplayWindow to hooks ======
   const displayWindowRef = useRef(null);
-  const [displayWindowUniqueId, setDisplayWindowUniqueId] = useState(null); // To track the specific window instance
+  // const [displayWindowUniqueId, setDisplayWindowUniqueId] = useState(null); // To track the specific window instance
   // Track the last encounter ID that was successfully dispatched to the display window. This helps
   // prevent sending identical LOAD_ENCOUNTER messages repeatedly (which resulted in the display
   // bouncing between "Loading" and "Encounter not available" states when the same encounter object
@@ -249,7 +249,7 @@ const EducatorPanel = ({ embedded = false }) => {
     if (newWindow) {
       displayWindowRef.current = newWindow;
       debugLog(`[EducatorPanel.openDisplayWindow] displayWindowRef.current set. Is it closed? ${displayWindowRef.current.closed}`);
-      setDisplayWindowUniqueId(uniqueId);
+      // setDisplayWindowUniqueId(uniqueId);
       addToast('Display window opened.', 'success');
       return true;
     }
@@ -257,7 +257,7 @@ const EducatorPanel = ({ embedded = false }) => {
     addToast('Failed to open display window. Check popup blocker.', 'error');
     logError('Failed to open display window');
     return false;
-  }, [addToast, setDisplayWindowUniqueId]);
+  }, [addToast]);
   // ====== END NEW BLOCK ======
 
   // Instantiate the useEducatorPolls hook
@@ -273,7 +273,6 @@ const EducatorPanel = ({ embedded = false }) => {
     sendPoll: hookSendPoll,
     endPoll: hookEndPoll,
     clearPollData: clearPollDataFromHook,
-    sendEncounterState: hookSendEncounterState,
     finalTotalVotes: hookFinalTotalVotes, // ADDED
     finalVoteCountsAbsolute: hookFinalVoteCountsAbsolute, // ADDED
     setExternalPollOptions: hookSetPollOptions,
@@ -291,7 +290,6 @@ const EducatorPanel = ({ embedded = false }) => {
     totalUsers,
     badges,
     loadingBadges,
-    fetchBadges: fetchBadgesFromHook,
     openAwardXPModal: openAwardXPModalFromHook,
     openAwardXPToAllModal: openAwardXPToAllModalFromHook,
     openBadgeAwardModal: openBadgeAwardModalFromHook,
@@ -323,10 +321,8 @@ const EducatorPanel = ({ embedded = false }) => {
   const {
     isPresentationActive,
     currentGameId: presentationManagerGameId, // Get gameId from the hook
-    presentationStartTime,
     startPresentation: hookStartPresentation,
     endPresentation: hookEndPresentation,
-    setCurrentGameId: hookSetCurrentGameId, // To set gameId from EducatorPanel if needed
   } = usePresentationManager(
     educatorPanelCurrentGameId, // Initial gameId
     openDisplayWindow, // Pass openDisplayWindow directly
@@ -341,7 +337,7 @@ const EducatorPanel = ({ embedded = false }) => {
     }
   }, [presentationManagerGameId, educatorPanelCurrentGameId]);
 
-  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated /*, getAccessTokenSilently*/ } = useAuth0();
   const navigate = useNavigate();
 
   const [debugPanelVisible, setDebugPanelVisible] = useState(DEBUG_MODE); // Start with debug mode
@@ -355,12 +351,12 @@ const EducatorPanel = ({ embedded = false }) => {
   const [unreadBySender, setUnreadBySender] = useState({});
 
   const [liveInstruction, setLiveInstruction] = useState(null); // For live instruction text
-  const [showInstructionInput, setShowInstructionInput] = useState(false);
-  const [currentInstructionText, setCurrentInstructionText] = useState('');
-  const [instructionRecipient, setInstructionRecipient] = useState('all'); // 'all' or user ID
-  const [sentInstructions, setSentInstructions] = useState([]); // Track sent instructions
+  // const [showInstructionInput, setShowInstructionInput] = useState(false);
+  // const [currentInstructionText, setCurrentInstructionText] = useState('');
+  // const [instructionRecipient, setInstructionRecipient] = useState('all'); // 'all' or user ID
+  // const [sentInstructions, setSentInstructions] = useState([]); // Track sent instructions
 
-  const [activeLeftTab, setActiveLeftTab] = useState('Instructions');
+  // const [activeLeftTab, setActiveLeftTab] = useState('Instructions');
 
   // Define navigateToRoute
   const navigateToRoute = useCallback((routeOrPath) => {
@@ -443,21 +439,21 @@ const EducatorPanel = ({ embedded = false }) => {
   }, [openChatWindow]);
 
   // STUBBED EVENT HANDLERS for useEffect
-  const handleEncounterUpdate = useCallback((data) => { debugLog('handleEncounterUpdate called with data:', data); }, []);
-  const handleUserUpdate = useCallback((data) => { debugLog('handleUserUpdate called with data:', data); }, []);
-  const handleUserXPUpdate = useCallback((data) => { debugLog('handleUserXPUpdate called with data:', data); }, []);
-  const handleBadgeAwarded = useCallback((data) => { debugLog('handleBadgeAwarded called with data:', data); }, []);
-  const handlePollStatus = useCallback((data) => { debugLog('handlePollStatus called with data:', data); }, []);
-  const handlePollResults = useCallback((data) => { debugLog('handlePollResults called with data:', data); }, []);
-  const handlePollEnded = useCallback((data) => { debugLog('handlePollEnded called with data:', data); }, []);
-  const handleInstructionBroadcast = useCallback((data) => { debugLog('handleInstructionBroadcast called with data:', data); }, []);
-  const handleInstructionClose = useCallback((data) => { debugLog('handleInstructionClose called with data:', data); }, []);
-  const handleNewChatMessage = useCallback((data) => { debugLog('handleNewChatMessage called with data:', data); }, []);
-  const handleChatHistory = useCallback((data) => { debugLog('handleChatHistory called with data:', data); }, []);
-  const handleUserTyping = useCallback((data) => { debugLog('handleUserTyping called with data:', data); }, []);
-  const handleUserStoppedTyping = useCallback((data) => { debugLog('handleUserStoppedTyping called with data:', data); }, []);
-  const handleChatError = useCallback((data) => { debugLog('handleChatError called with data:', data); }, []);
-  const handleReconnect = useCallback(() => { debugLog('handleReconnect called'); }, []);
+  // const handleEncounterUpdate = useCallback((data) => { debugLog('handleEncounterUpdate called with data:', data); }, []);
+  // const handleUserUpdate = useCallback((data) => { debugLog('handleUserUpdate called with data:', data); }, []);
+  // const handleUserXPUpdate = useCallback((data) => { debugLog('handleUserXPUpdate called with data:', data); }, []);
+  // const handleBadgeAwarded = useCallback((data) => { debugLog('handleBadgeAwarded called with data:', data); }, []);
+  // const handlePollStatus = useCallback((data) => { debugLog('handlePollStatus called with data:', data); }, []);
+  // const handlePollResults = useCallback((data) => { debugLog('handlePollResults called with data:', data); }, []);
+  // const handlePollEnded = useCallback((data) => { debugLog('handlePollEnded called with data:', data); }, []);
+  // const handleInstructionBroadcast = useCallback((instruction) => { debugLog('handleInstructionBroadcast called with instruction:', instruction); }, []);
+  // const handleInstructionClose = useCallback((data) => { debugLog('handleInstructionClose called with data:', data); }, []);
+  // const handleNewChatMessage = useCallback((message) => { debugLog('handleNewChatMessage called with message:', message); }, []);
+  // const handleChatHistory = useCallback((messages) => { debugLog('handleChatHistory called with messages:', messages); }, []);
+  // const handleUserTyping = useCallback((data) => { debugLog('handleUserTyping called with data:', data); }, []);
+  // const handleUserStoppedTyping = useCallback((data) => { debugLog('handleUserStoppedTyping called with data:', data); }, []);
+  // const handleChatError = useCallback((error) => { debugLog('handleChatError called with error:', error); }, []);
+  // const handleReconnect = useCallback(() => { debugLog('handleReconnect called'); }, []);
 
   useEffect(() => {
     if (!socket) return;

@@ -105,7 +105,7 @@ const BreadcrumbTrail = ({
           visited: item.visited !== undefined ? item.visited : getItemStatus(item.id).visited,
           unreachable: item.unreachable !== undefined ? item.unreachable : false, // Default if not provided
         };
-        const displayLabel = item.title || item.label || getEncounterTitle(item.id) || `Slide ${index + 1}`;
+        // const displayLabel = item.title || item.label || getEncounterTitle(item.id) || `Slide ${index + 1}`;
         const buttonTitle = status.unreachable 
           ? 'Alternative path not available' 
           : (item.title || getEncounterTitle(item.id) || `Navigate to slide ${index + 1}`);

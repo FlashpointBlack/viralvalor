@@ -6,7 +6,7 @@ import ImageSelector from './ImageSelector';
 import './StorylineEditor.css';
 import '../styles/StorylineEditorDebug.css';
 import { useAuth } from '../contexts/AuthContext';
-import prettyBytes from 'pretty-bytes';
+// import prettyBytes from 'pretty-bytes';
 import ConfirmationModal from './ConfirmationModal';
 import * as encounterService from '../services/encounterService'; // Import the new service
 
@@ -87,25 +87,25 @@ const StorylineEditor = () => {
   }, [userSub]);
 
   // Diagnostics runner
-  const runDiagnostics = async () => {
-    console.log('Running diagnostics...');
-    try {
-      await encounterService.getUserProfileStatus(); // Use service
-    } catch (err) {
-      console.error('Diagnostic: getUserProfileStatus failed', err.message);
-    }
-    try {
-      await encounterService.fetchRootEncounters();
-    } catch (err) {
-      console.error('Diagnostic: fetchRootEncounters failed', err.message);
-    }
-    try {
-      await encounterService.fetchUnlinkedEncounters(); // Use service
-    } catch (err) {
-      console.error('Diagnostic: fetchUnlinkedEncounters failed', err.message);
-    }
-    console.log('Diagnostics complete.');
-  };
+  // const runDiagnostics = async () => {
+  //   console.log('Running diagnostics...');
+  //   try {
+  //     await encounterService.getUserProfileStatus(); // Use service
+  //   } catch (err) {
+  //     console.error('Diagnostic: getUserProfileStatus failed', err.message);
+  //   }
+  //   try {
+  //     await encounterService.fetchRootEncounters();
+  //   } catch (err) {
+  //     console.error('Diagnostic: fetchRootEncounters failed', err.message);
+  //   }
+  //   try {
+  //     await encounterService.fetchUnlinkedEncounters(); // Use service
+  //   } catch (err) {
+  //     console.error('Diagnostic: fetchUnlinkedEncounters failed', err.message);
+  //   }
+  //   console.log('Diagnostics complete.');
+  // };
 
   const fetchRootEncountersFromComponent = async () => {
     try {
@@ -518,48 +518,52 @@ const StorylineEditor = () => {
   };
 
   // Add function to check authentication state
-  const checkAuthState = async () => {
-    console.log('Checking auth state...');
-    console.log('Auth context state', { 
-      userSub: userSub ? `${userSub.substring(0, 8)}...` : 'null',
-      isAuthenticated: !!userSub,
-      axiosDefaults: { withCredentials: axios.defaults.withCredentials, hasUserSubHeader: !!axios.defaults.headers.common['x-user-sub'] }
-    });
-    try {
-      const profileResponse = await encounterService.getUserProfileStatus(); // Use service
-      console.log('Profile status check succeeded', profileResponse);
-    } catch (err) {
-      console.error('Profile status check failed', { error: err.message, status: err.response?.status, data: err.response?.data });
-    }
-    const cookies = document.cookie.split(';').map(c => c.trim());
-    console.log('Available cookies', cookies.length ? cookies : 'No cookies accessible to JavaScript');
-  };
+  // const checkAuthState = async () => {
+  //   console.log('[StorylineEditor] Checking auth state...');
+  //   if (!userSub) {
+  //     console.log('[StorylineEditor] Auth check: No userSub found.');
+  //     setError('Authentication check failed: User not identified.');
+  //     return false;
+  //   }
+  //   try {
+  //     // Attempt a protected API call, e.g., fetching root encounters or a dedicated health check
+  //     await axios.get('/encounters/root-encounters', { headers: { 'x-user-sub': userSub } });
+  //     console.log('[StorylineEditor] Auth check: API call successful.');
+  //     return true;
+  //   } catch (error) {
+  //     console.error('[StorylineEditor] Auth check: API call failed.', error);
+  //     setError('Authentication check failed: API call error. Please re-login.');
+  //     return false;
+  //   }
+  // };
 
   // Add function to make a test request to help debug
-  const testCreateRequest = async () => {
-    console.log('Making test create request...');
-    if (!userSub) {
-      console.error('Cannot test: userSub not available');
-      return;
-    }
-    
-    try {
-      const testResponseData = await encounterService.createBlankEncounter(); // Use service for test
-      
-      console.log('Test create succeeded!', { responseData: testResponseData });
-      fetchRootEncountersFromComponent();
-    } catch (err) {
-      const responseData = err.response?.data; // This might not be available if service throws generic error
-      const statusCode = err.response?.status; // Same here
-      
-      console.error('Test create failed', { 
-        error: err.message, // Use error message from service
-        status: statusCode, 
-        responseData, 
-        // requestConfig: { url: err.config?.url, method: err.config?.method, withCredentials: err.config?.withCredentials, headers: { contentType: err.config?.headers['Content-Type'], userSub: err.config?.headers['x-user-sub']?.substring(0, 8) + '...' } }
-      });
-    }
-  };
+  // const testCreateRequest = async () => {
+  //   if (!userSub) {
+  //     alert('Cannot test: User not authenticated.');
+  //     return;
+  //   }
+  //   console.log(`[StorylineEditor] Test: Simulating create blank encounter for user ${userSub}`);
+  //   try {
+  //     const response = await axios.post('/encounters/create-blank', 
+  //       { title: 'Test Encounter from Editor' }, // Minimal payload
+  //       {
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           'x-user-sub': userSub
+  //         },
+  //         withCredentials: true
+  //       }
+  //     );
+  //     console.log('[StorylineEditor] Test create response:', response.data);
+  //     alert(`Test create successful! New ID: ${response.data.encounterId}`);
+  //     // Optionally refresh root encounters to see the new test item
+  //     await fetchRootEncountersFromComponent();
+  //   } catch (error) {
+  //     console.error('[StorylineEditor] Test create failed:', error.response || error);
+  //     alert(`Test create failed: ${error.response?.data?.error || error.message}`);
+  //   }
+  // };
 
   // Monitor encounter path changes to keep the dropdown selection in sync
   useEffect(() => {

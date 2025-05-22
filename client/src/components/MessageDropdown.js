@@ -10,7 +10,7 @@ import { useLocation } from 'react-router-dom';
 const DEBUG_MODE = true;
 
 const MessageDropdown = () => {
-  const { chatMessages, lastViewed, lastViewedByConv, markMessagesViewed } = useSocket();
+  const { chatMessages, /*lastViewed,*/ lastViewedByConv, markMessagesViewed } = useSocket();
   const { user, isAuthenticated } = useAuth0();
   const [showPopup, setShowPopup] = useState(false);
   const [conversations, setConversations] = useState([]);
