@@ -45,9 +45,6 @@
 /* Import encounter editor and UI components */
 @import './layout-encounter-ui.css';
 
-/* Import encounter display view (/encounters2) */
-@import './layout-encounter-display.css';
-
 /* Import compose UI and modal components */
 @import './layout-compose-ui.css';
 
@@ -61,4 +58,6 @@
 @import './layout-image-gallery.css';
 
 /* Import question bank styles */
-@import './layout-question-bank.css'; 
+@import './layout-question-bank.css';
+
+/* Generic styles for main views, typically full-bleed */ 

@@ -52,8 +52,8 @@ All encounter endpoints are grouped beneath `/api/encounters`. **The root-level 
 ### SPA / Legacy Display Paths _(unchanged)_
 These still resolve to the React SPA and are not handled by the API layer:
 - `/encounter-display`
-- `/encounters2/:id`
 - `/game/:gameId/encounter/:id`
+- `/presentation-display?gameId=<UUID>`
 
 ---
 

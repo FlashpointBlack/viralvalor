@@ -5,8 +5,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 // Some of these are placeholders or inferred from App.js and may need correction.
 import HomePage from './components/HomePage';
 import EducatorPanel from './components/EducatorPanel';
-import EncounterDisplay from './components/EncounterDisplay';
-// import StoryView from './components/StoryView'; // (legacy) currently unused after migration
 import MobilePoll from './components/MobilePoll';
 import CompleteProfile from './components/CompleteProfile';
 import PresentationLanding from './components/PresentationLanding';
@@ -105,7 +103,6 @@ const RoutesWithEncounter = () => {
       */}
 
       {/* Routes for encounters, assuming they need EncounterContext */}
-      {/* <Route path="/encounters2" element={<PresentationLanding />} /> */}
       
 
       {/* UUID-based game routes, assuming they need EncounterContext */}
@@ -113,7 +110,7 @@ const RoutesWithEncounter = () => {
         path="/game/:gameId/encounter/:id"
         element={
           <ProtectedRoute>
-            <EncounterDisplay />
+            <PresentationDisplayHost isSinglePlayerMode={true} />
           </ProtectedRoute>
         }
       />

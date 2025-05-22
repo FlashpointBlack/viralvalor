@@ -33,11 +33,14 @@ const applyTheme = (theme) => {
 const AppWrapper = ({ children }) => {
   const { userData } = useAuth();
   const location = useLocation();
-  const hideMessageDropdown =
-    location.pathname.startsWith('/encounters2') ||
-    location.pathname.startsWith('/encounter2') ||
-    location.pathname.includes('/poll') ||
-    location.pathname.startsWith('/presentation-landing');
+  const shouldApplySpecialLayout = (
+    location.pathname.startsWith('/game') ||
+    location.pathname.startsWith('/presentation-display') ||
+    location.pathname.startsWith('/presentation-landing') ||
+    location.pathname.startsWith('/presentation-end') ||
+    
+    location.pathname.includes('/poll')
+  );
 
   useEffect(() => {
     console.log('🔄 userData changed in AppWrapper:', userData);
@@ -87,7 +90,7 @@ const AppWrapper = ({ children }) => {
     <>
       {children}
       <ChatManager />
-      {!hideMessageDropdown && <MessageDropdown />}
+      {!shouldApplySpecialLayout && <MessageDropdown />}
     </>
   );
 };

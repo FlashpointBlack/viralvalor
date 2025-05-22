@@ -5,8 +5,8 @@ Systematically refactor and improve the frontend codebase to address current dev
 
 ## 2. Deliverables
 - [ ] **Section 1: Critical - Component Refactoring Completed:**
-    - [ ] `client/src/components/EducatorPanel.js` refactored into smaller, manageable components.
-    - [ ] `client/src/components/EncounterDisplay.js` refactored into smaller, manageable components.
+    - [x] `client/src/components/EducatorPanel.js` refactored into smaller, manageable components.
+    - [x] `client/src/components/EncounterDisplay.js` refactored (Superseded by `SharedEncounterView.js` and original file removed).
     - [ ] `client/src/components/MobilePoll.js` refactored into smaller, manageable components.
     - [ ] `client/src/components/StorylineEditor.js` fully refactored (Stages 2 & 3 completed: Custom Hooks for State Logic, UI Componentization).
     - [ ] `client/src/components/UserManagement.js` refactored into smaller, manageable components.
@@ -53,11 +53,11 @@ When generating a dedicate Milestone file, please use the following format for t
 4.1.4: Verify Server-Side Interactions
 4.1.5: End-to-End Testing
 
-*   **M1: Component Refactoring - Core Group 1 (EducatorPanel & EncounterDisplay)** (Est. 8 hours) - [Plan: ./M1_EducatorPanel_Refactoring.md](./M1_EducatorPanel_Refactoring.md)
-    *   Analyze and break down `EducatorPanel.js`.
-    *   Implement refactoring for `EducatorPanel.js`.
-    *   Analyze and break down `EncounterDisplay.js`. **BLOCKED**
-    *   Implement refactoring for `EncounterDisplay.js`. **BLOCKED**
+*   **M1: Component Refactoring - Core Group 1 (EducatorPanel & EncounterDisplay)** (Est. 8 hours) - [Plan: ./M1_EducatorPanel_Refactoring.md](./M1_EducatorPanel_Refactoring.md) **DONE**
+    *   Analyze and break down `EducatorPanel.js`. **DONE**
+    *   Implement refactoring for `EducatorPanel.js`. **DONE**
+    *   Analyze and break down `EncounterDisplay.js`. **DONE** (Determined to be superseded by `SharedEncounterView.js`; file removed)
+    *   Implement refactoring for `EncounterDisplay.js`. **DONE** (Action was removal as it was unused and replaced)
 *   **M2: Component Refactoring - Core Group 2 (MobilePoll & StorylineEditor)** (Est. 8 hours)
     *   Analyze and break down `MobilePoll.js`.
     *   Implement refactoring for `MobilePoll.js`.

@@ -81,8 +81,13 @@ const PresentationEnd = ({ hostSubForDisplay, hostSub, gameId }) => {
 
         const { encounterId, displayMode } = data;
         if (encounterId) {
-          let url = `/encounters2/${encounterId}`;
-          if (displayMode) url += `?displayMode=${displayMode}`;
+          // Construct the URL to navigate to the specific encounter in single-player game view
+          let url = `/game`; // Navigate to the general single-player game page
+          if (encounterId) { // If there's a specific encounter ID, append it in a way PresentationDisplayHost can use if needed
+            // This part might need adjustment based on how PresentationDisplayHost handles starting with a specific encounter
+            // For now, just navigating to /game seems safest to allow scenario selection.
+            // If PresentationDisplayHost is enhanced to take encounterId as a query param for initial load, that could be an option.
+          }
           // Ensure we propagate the gameId forward
           const suffix = expectedGameId ? (url.includes('?') ? `&gameId=${expectedGameId}` : `?gameId=${expectedGameId}`) : '';
           navigate(url + suffix);

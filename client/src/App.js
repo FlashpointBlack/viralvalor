@@ -5,11 +5,8 @@ import { ChatProvider } from './contexts/ChatContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useAuth } from './contexts/AuthContext';
-import StoryView from './components/StoryView';
 import HomePage from './components/HomePage';
 import EducatorPanel from './components/EducatorPanel';
-import EncounterDisplay from './components/EncounterDisplay';
-import EncounterDisplayPlaceholder from './components/EncounterDisplayPlaceholder';
 import MobilePoll from './components/MobilePoll';
 import CompleteProfile from './components/CompleteProfile';
 import UserProfile from './components/UserProfile';
@@ -197,7 +194,6 @@ const App = () => {
     location.pathname.startsWith('/multiplayer') ||
     location.pathname.startsWith('/game') ||
     location.pathname.includes('/educator-panel') ||
-    location.pathname.startsWith('/encounters2') ||
     location.pathname.startsWith('/poll') ||
     location.pathname.includes('/poll') ||
     location.pathname.startsWith('/presentation-landing') ||

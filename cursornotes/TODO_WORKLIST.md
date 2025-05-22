@@ -41,3 +41,5 @@ This file tracks pending tasks and larger refactoring items that are not part of
         - Browser-specific rendering quirks.
     - **Acceptance Criteria:**
         - The `PreviewPane` displays a smooth transition from a blank/loading state to the fully rendered encounter content without any intermediate flash of unstyled or prematurely revealed elements. 
+
+- Implement a debug mode toggle system (e.g., global flag, per-component flags, or environment variable) to control console debug output for major pages/components (like `PresentationDisplayHost.js`, `EducatorPanel.js`, etc.) to avoid spamming the console during normal operation and allow for easier debugging when needed.
