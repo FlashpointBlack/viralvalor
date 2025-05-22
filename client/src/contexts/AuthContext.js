@@ -75,7 +75,15 @@ export const AuthProvider = ({ children }) => {
 
             // No global axios header; will use fetch for secure API calls per request.
           } catch (err) {
-            console.error('[AuthContext] getAccessTokenSilently failed', err);
+            // Auth0 will throw if no refresh token is available ("Missing Refresh Token").
+            // This typically happens for users who logged-in before we added the
+            // offline_access scope. It isn't fatal – we can keep operating without
+            // a refreshed access-token until the next interactive login.
+            if (err?.message?.includes('Missing Refresh Token')) {
+              console.warn('[AuthContext] No refresh token available yet – silent token refresh skipped.');
+            } else {
+              console.error('[AuthContext] getAccessTokenSilently failed', err);
+            }
           }
         }
       } catch (error) {

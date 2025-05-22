@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSocket } from '../contexts/SocketContext';
 
-const useEducatorPolls = (initialGameId = null, initialPollOptions = []) => {
+const useEducatorPolls = (gameId, userSub, addToast, debugMode, initialPollOptions = []) => {
   const { socket } = useSocket() || {};
 
   const [isPollRunning, setIsPollRunning] = useState(false);
@@ -14,7 +14,7 @@ const useEducatorPolls = (initialGameId = null, initialPollOptions = []) => {
   const [totalVotes, setTotalVotes] = useState(0);
   const [finalTotalVotes, setFinalTotalVotes] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [currentGameId, setCurrentGameId] = useState(initialGameId);
+  const [currentGameId, setCurrentGameId] = useState(gameId);
 
   // Refs for internal logic, similar to EducatorPanel
   const isPollRunningRef = useRef(isPollRunning);
@@ -34,25 +34,26 @@ const useEducatorPolls = (initialGameId = null, initialPollOptions = []) => {
 
   useEffect(() => {
     setPollOptions(initialPollOptions);
-    console.log('[useEducatorPolls] initialPollOptions received:', initialPollOptions);
-  }, [initialPollOptions]);
+    if (debugMode) console.log('[useEducatorPolls] initialPollOptions received:', initialPollOptions);
+  }, [initialPollOptions, debugMode]);
   
   useEffect(() => {
-    setCurrentGameId(initialGameId);
-  }, [initialGameId]);
+    setCurrentGameId(gameId);
+    if (debugMode) console.log('[useEducatorPolls] gameId set to:', gameId);
+  }, [gameId, debugMode]);
 
   const requestResults = useCallback(() => {
     if (socket) {
-      console.log('[useEducatorPolls] Emitting request results');
+      if (debugMode) console.log('[useEducatorPolls] Emitting request results');
       socket.emit('request results');
     }
-  }, [socket]);
+  }, [socket, debugMode]);
 
   useEffect(() => {
     if (!socket) return;
 
     const handleVoteReceived = (totalVoteCount) => {
-      console.log('[useEducatorPolls] Vote received, total votes:', totalVoteCount);
+      if (debugMode) console.log('[useEducatorPolls] Vote received, total votes:', totalVoteCount);
       setIsPollRunning(true); // Ensure poll is marked active
       requestResults();
     };
@@ -63,10 +64,10 @@ const useEducatorPolls = (initialGameId = null, initialPollOptions = []) => {
       const newTotalVotes = totalVotesParam || 0;
 
       if (running && newTotalVotes < prevTotal) {
-        console.log('[useEducatorPolls] Ignoring stale results update (older totalVotes)', newTotalVotes, '<', prevTotal);
+        if (debugMode) console.log('[useEducatorPolls] Ignoring stale results update (older totalVotes)', newTotalVotes, '<', prevTotal);
         return;
       }
-      console.log('[useEducatorPolls] Results updated:', results, 'Total votes:', newTotalVotes, 'Routes:', routes);
+      if (debugMode) console.log('[useEducatorPolls] Results updated:', results, 'Total votes:', newTotalVotes, 'Routes:', routes);
       
       totalVotesRef.current = newTotalVotes; // Update ref immediately
 
@@ -87,20 +88,20 @@ const useEducatorPolls = (initialGameId = null, initialPollOptions = []) => {
           setTotalVotes(newTotalVotes);
           setVoteCountsAbsolute(newAbsoluteCounts);
         } else if (hasFinalResultsRef.current) {
-          console.log('[useEducatorPolls] Ignoring result update as we have final results already saved');
+          if (debugMode) console.log('[useEducatorPolls] Ignoring result update as we have final results already saved');
         } else {
-          console.log('[useEducatorPolls] Poll ended, saving final results:', newVoteCounts);
+          if (debugMode) console.log('[useEducatorPolls] Poll ended, saving final results:', newVoteCounts);
           setFinalVoteCounts(newVoteCounts);
           setFinalTotalVotes(newTotalVotes);
           setFinalVoteCountsAbsolute(newAbsoluteCounts);
           setHasFinalResults(true);
         }
       } else {
-        console.log('[useEducatorPolls] No results or empty results received');
+        if (debugMode) console.log('[useEducatorPolls] No results or empty results received');
       }
 
       if (routes && (!pollOptions || pollOptions.length === 0)) {
-        console.log('[useEducatorPolls] Updated pollOptions from results (routes):', routes);
+        if (debugMode) console.log('[useEducatorPolls] Updated pollOptions from results (routes):', routes);
         // Ensure standardized structure for poll options from server
         setPollOptions(routes.map(r => ({
           ID: r.ID || r.RelID_Encounter_Receiving, // Use RelID if ID is missing, common for server-sent routes
@@ -112,7 +113,7 @@ const useEducatorPolls = (initialGameId = null, initialPollOptions = []) => {
     };
 
     const handlePollStarted = () => {
-      console.log('[useEducatorPolls] Socket received poll_started event');
+      if (debugMode) console.log('[useEducatorPolls] Socket received poll_started event');
       setIsPollRunning(true);
       setHasFinalResults(false);
       setElapsedSeconds(0);
@@ -126,10 +127,10 @@ const useEducatorPolls = (initialGameId = null, initialPollOptions = []) => {
     };
 
     const handlePollEnded = () => {
-      console.log('[useEducatorPolls] Socket received poll_ended event');
+      if (debugMode) console.log('[useEducatorPolls] Socket received poll_ended event');
       // Save current results as final if not already done by 'results updated' when poll was not running
       if (!hasFinalResultsRef.current && voteCountsRef.current.length > 0) {
-        console.log('[useEducatorPolls] Poll ended - saving final results from live data');
+        if (debugMode) console.log('[useEducatorPolls] Poll ended - saving final results from live data');
         setFinalVoteCounts([...voteCountsRef.current]);
         setFinalVoteCountsAbsolute([...voteCountsAbsoluteRef.current]);
         setFinalTotalVotes(totalVotesRef.current);
@@ -140,7 +141,7 @@ const useEducatorPolls = (initialGameId = null, initialPollOptions = []) => {
     };
 
     const handlePollDataCleared = () => {
-      console.log('[useEducatorPolls] Poll data cleared event received');
+      if (debugMode) console.log('[useEducatorPolls] Poll data cleared event received');
       setIsPollRunning(false);
       // Optionally clear more state here if needed, e.g., vote counts
       setVoteCounts([]);
@@ -162,7 +163,7 @@ const useEducatorPolls = (initialGameId = null, initialPollOptions = []) => {
       socket.off('poll ended', handlePollEnded);
       socket.off('poll data cleared', handlePollDataCleared);
     };
-  }, [socket, requestResults, pollOptions]); // Added pollOptions to ensure it's current for setPollOptions in results updated
+  }, [socket, requestResults, pollOptions, debugMode]); // Added pollOptions and debugMode
 
   // Timer effect for poll duration
   useEffect(() => {
@@ -186,16 +187,19 @@ const useEducatorPolls = (initialGameId = null, initialPollOptions = []) => {
 
   const sendPoll = useCallback((currentEncounterText = "") => {
     if (!socket) return { success: false, message: 'Socket not available.' };
-    if (!currentGameId) return { success: false, message: 'Game ID not set.' };
-    // Use internal pollOptions state
+    if (!currentGameId) {
+        if (addToast) addToast('Game ID not set. Cannot send poll.', 'error');
+        return { success: false, message: 'Game ID not set.' };
+    }
     if (!pollOptions || pollOptions.length === 0) {
+        if (addToast) addToast("This scenario doesn't have any poll options configured. Cannot send poll.", 'warning');
         return { success: false, message: "This scenario doesn't have any poll options configured in the hook." };
     }
 
     const optionTitles = pollOptions.map(option => option.Title || 'Untitled Option');
     const pollId = Date.now().toString(); // Unique ID for this poll
 
-    console.log('[useEducatorPolls] sendPoll called with internal pollOptions:', pollOptions);
+    if (debugMode) console.log('[useEducatorPolls] sendPoll called with internal pollOptions:', pollOptions);
 
     const quizPayload = {
       text: currentEncounterText, // Use current encounter text or a default
@@ -204,10 +208,10 @@ const useEducatorPolls = (initialGameId = null, initialPollOptions = []) => {
       gameId: currentGameId,
     };
 
-    console.log('[useEducatorPolls] Sending poll with ID:', pollId, 'quiz payload:', quizPayload);
+    if (debugMode) console.log('[useEducatorPolls] Sending poll with ID:', pollId, 'quiz payload:', quizPayload);
 
     if (isPollRunningRef.current) { // End existing poll first
-      console.log('[useEducatorPolls] Existing poll is running, ending it first.');
+      if (debugMode) console.log('[useEducatorPolls] Existing poll is running, ending it first.');
       socket.emit('end quiz'); // Server handles state changes and notifications
     }
     
@@ -227,27 +231,28 @@ const useEducatorPolls = (initialGameId = null, initialPollOptions = []) => {
     // Server should ideally send 'poll started' which then requests results.
     // Requesting results here too quickly might be redundant if 'poll started' handles it.
     // setTimeout(requestResults, 500); // Original had this, evaluate if necessary
-
+    if (addToast) addToast('Poll sent!', 'success');
     return { success: true, message: 'Poll sent successfully.' };
-  }, [socket, currentGameId, requestResults, pollOptions]);
+  }, [socket, currentGameId, requestResults, pollOptions, debugMode, addToast]);
 
   const endPoll = useCallback(() => {
     if (!socket) return { success: false, message: 'Socket not available.' };
-    console.log('[useEducatorPolls] Ending poll');
+    if (debugMode) console.log('[useEducatorPolls] Ending poll');
     socket.emit('end quiz');
     // UI will update via 'poll ended' event from server
     // setIsPollRunning(false); // Direct state change was in original, but server should drive this via event
+    if (addToast) addToast('Poll ended.', 'info');
     return { success: true, message: 'End poll request sent.' };
-  }, [socket]);
+  }, [socket, debugMode, addToast]);
   
   // Function to manually set poll options if they come from encounter data directly
   const setExternalPollOptions = useCallback((options) => {
-    console.log('[useEducatorPolls] setExternalPollOptions called with options:', options);
+    if (debugMode) console.log('[useEducatorPolls] setExternalPollOptions called with options:', options);
     setPollOptions(options || []);
-  }, []);
+  }, [debugMode]);
 
   const clearPollData = useCallback(() => {
-    console.log('[useEducatorPolls] Clearing all poll data.');
+    if (debugMode) console.log('[useEducatorPolls] Clearing all poll data.');
     setIsPollRunning(false);
     setVoteCounts([]);
     setVoteCountsAbsolute([]);

@@ -19,7 +19,6 @@ const PresentationControls = ({
   sendPoll,
   endPoll,
 }) => {
-  console.log('[PresentationControls] Rendering with props - currentEncounter:', currentEncounter, 'pollOptions:', pollOptions, 'isPresentationActive:', isPresentationActive);
   // Render only if we have a valid encounter selected. We still allow rendering when the presentation
   // hasn't started so educators can review route options. The Send Poll button remains disabled
   // when `isPresentationActive` is false via its own `disabled` prop logic.

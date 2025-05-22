@@ -33,9 +33,6 @@ const EducatorPollDisplay = ({
   // formatTime, // formatTime is defined locally, or passed if needed from EP
 }) => {
   // Debug logs
-  console.log('[EducatorPollDisplay] Rendering with pollOptions:', pollOptions);
-  console.log('[EducatorPollDisplay] currentEncounter:', currentEncounter);
-  console.log('[EducatorPollDisplay] isPresentationActive:', isPresentationActive);
 
   return (
     <div className="poll-info-section">

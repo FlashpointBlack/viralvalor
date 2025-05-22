@@ -98,6 +98,10 @@ const EncounterDisplay = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const fetchAbortRef = useRef(null);
+  // NEW REFS FOR AUTOSIZING
+  const contentRef = useRef(null);
+  const titleRef = useRef(null);
+  const descRef = useRef(null);
 
   // Add AuthContext state
   const { user } = useAuth();
@@ -233,7 +237,10 @@ const EncounterDisplay = ({
         url: `/encounters/GetEncounterData/${encounterId}`,
         withCredentials: true, 
         headers: { 'x-user-sub': userSub },
-        params: { _t: new Date().getTime() },
+        params: { 
+          _t: new Date().getTime(),
+          scope: 'public', // Allow public-access fetch for display windows
+        },
         signal: controller.signal,
       });
       fetchAbortRef.current = null;
@@ -825,7 +832,7 @@ const EncounterDisplay = ({
   };
 
   // Automatic text autosize
-  useTextAutosize(encounter);
+  useTextAutosize(contentRef, titleRef, descRef, encounter);
 
   // Preload images when new encounter data arrives
   useEffect(() => {
@@ -1005,9 +1012,9 @@ const EncounterDisplay = ({
       {/* Current encounter (no fade-in; fully visible beneath) */}
       <div className={`encounter-container current ${isTransitioning ? 'fade-in' : ''}`}>
         {/* Main encounter content */}
-        <div className="encounter-content">
-          <h1 className="encounter-title">{encounter.Title}</h1>
-          <div className="encounter-description">{encounter.Description}</div>
+        <div className="encounter-content" ref={contentRef}>
+          <h1 className="encounter-title" ref={titleRef}>{encounter.Title}</h1>
+          <div className="encounter-description" ref={descRef}>{encounter.Description}</div>
           
           {/* Poll options section - only visible during active poll and NOT in educator mode */}
           {pollActive && routes.length > 0 && !isEducatorDisplay && !inPresentationDisplay && (

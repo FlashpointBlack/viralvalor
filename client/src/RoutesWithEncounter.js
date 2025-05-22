@@ -105,8 +105,8 @@ const RoutesWithEncounter = () => {
       */}
 
       {/* Routes for encounters, assuming they need EncounterContext */}
-      <Route path="/encounters2" element={<PresentationLanding />} /> 
-      <Route path="/encounters2/:id" element={<EncounterDisplay />} />
+      {/* <Route path="/encounters2" element={<PresentationLanding />} /> */}
+      
 
       {/* UUID-based game routes, assuming they need EncounterContext */}
       <Route

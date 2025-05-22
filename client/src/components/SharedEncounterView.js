@@ -1,33 +1,22 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
+// import PropTypes from 'prop-types'; // Removed as it's not used and was added unintentionally
 import sanitize from '../utils/sanitizeHtml'; // Assuming sanitizeHtml is used for HTML content
 import useTextAutosize from '../hooks/useTextAutosize'; // Import the hook
 import ChoiceButtons from './ChoiceButtons';
-
-// This helper function adjusts image paths within an HTML string to ensure they are correctly prefixed.
-const ensureImagePath = (htmlString) => {
-  if (!htmlString) return null;
-  // Regex to find src attribute: src="([^"]*)"
-  // It captures the content of src attribute
-  return htmlString.replace(/src="([^"]*)"/g, (match, currentSrc) => {
-    if (currentSrc.startsWith('http://') || currentSrc.startsWith('https://') || currentSrc.startsWith('data:')) {
-      return match; // It's an absolute URL or data URI, leave it
-    }
-    if (currentSrc.startsWith('/images/')) {
-      return match; // Already correctly prefixed with /images/
-    }
-    if (currentSrc.startsWith('/')) {
-      // Absolute path not starting with /images/, e.g., "/uploads/file.jpg"
-      // Prepend "/images" to make it "/images/uploads/file.jpg"
-      return `src="/images${currentSrc}"`;
-    }
-    // Relative path, e.g., "file.jpg" or "uploads/file.jpg"
-    // Prepend "/images/" to make it "/images/file.jpg" or "/images/uploads/file.jpg"
-    return `src="/images/${currentSrc}"`;
-  });
-};
+import './SharedEncounterView.css'; // Import the new CSS file
+import { ensureImagePath, extractImageSrc } from '../utils/imageHelpers'; // Import helpers
 
 // lockedFontSizes: optionally provide { title: '16px', desc: '12px' } to lock sizes (used for exiting slides)
-const SharedEncounterView = ({ encounterData, autosize = true, lockedFontSizes = null, routes = null, onSelectRoute = null }) => {
+const SharedEncounterView = ({ 
+  encounterData, 
+  autosize = true, 
+  lockedFontSizes = null, 
+  routes = null, 
+  onSelectRoute = null,
+  onImagesLoaded, // New prop
+  className: propClassName = '', // New prop for additional class names
+  style: propStyle = {}        // New prop for additional inline styles
+}) => {
   // Create refs for the elements that useTextAutosize will interact with
   const contentRef = useRef(null);
   const titleRef = useRef(null);
@@ -39,9 +28,59 @@ const SharedEncounterView = ({ encounterData, autosize = true, lockedFontSizes =
   // Call the hook with refs when appropriate
   useTextAutosize(contentRef, titleRef, descRef, encounterData?.Encounter, shouldAutosize);
 
+  useEffect(() => {
+    if (!encounterData || !encounterData.Encounter) {
+      if (onImagesLoaded) {
+        onImagesLoaded();
+      }
+      return;
+    }
+
+    const imagesToLoad = [];
+    const { BackdropImage, Character1Image, Character2Image } = encounterData.Encounter;
+
+    const backdropSrc = extractImageSrc(BackdropImage);
+    const char1Src = extractImageSrc(Character1Image);
+    const char2Src = extractImageSrc(Character2Image);
+
+    if (backdropSrc) imagesToLoad.push(backdropSrc);
+    if (char1Src) imagesToLoad.push(char1Src);
+    if (char2Src) imagesToLoad.push(char2Src);
+
+    if (imagesToLoad.length === 0) {
+      if (onImagesLoaded) {
+        onImagesLoaded();
+      }
+      return;
+    }
+
+    let loadedImages = 0;
+    const handleImageLoad = () => {
+      loadedImages++;
+      if (loadedImages === imagesToLoad.length) {
+        if (onImagesLoaded) {
+          onImagesLoaded();
+        }
+      }
+    };
+
+    imagesToLoad.forEach(src => {
+      const img = new Image();
+      img.onload = handleImageLoad;
+      img.onerror = handleImageLoad; // Call on error too, to not block indefinitely
+      img.src = src;
+    });
+
+    // Cleanup function in case the component unmounts before images are loaded,
+    // or if encounterData changes, to avoid calling onImagesLoaded for a previous encounter.
+    // We don't have explicit cleanup for the Image objects (img.onload = null, etc.)
+    // because they are local to this effect execution. If they load after unmount/re-run,
+    // their callbacks won't call the onImagesLoaded of the *current* effect instance.
+  }, [encounterData, onImagesLoaded]); // Removed extractImageSrc from dependencies
+
   if (!encounterData || !encounterData.Encounter) {
     // Or some placeholder/loading state if appropriate for a purely presentational component
-    return <div className="encounter-view empty">No encounter data provided.</div>;
+    return <div className={`encounter-view empty ${propClassName}`} style={propStyle}>No encounter data provided.</div>;
   }
 
   const { Title, Description, BackdropImage, Character1Image, Character2Image } = encounterData.Encounter;
@@ -57,7 +96,10 @@ const SharedEncounterView = ({ encounterData, autosize = true, lockedFontSizes =
   return (
     // Add 'encounter-display' class to the root to potentially pick up global styles.
     // Keep 'shared-encounter-view-container' for any specific overrides if needed later, or remove if redundant.
-    <div className="shared-encounter-view-container encounter-display">
+    <div 
+      className={`shared-encounter-view-container encounter-display ${propClassName}`.trim()}
+      style={propStyle}
+    >
       {/* Backdrop Image */}
       {finalBackdropImage && (
         <div

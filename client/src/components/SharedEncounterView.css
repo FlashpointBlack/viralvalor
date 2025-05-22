@@ -1,0 +1,97 @@
+/* Base styles for SharedEncounterView */
+.encounter-display {
+  --fade-duration: 1.5s; /* Adjusted transition speed (also set via JS) */
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background-color: #000;
+  font-family: Arial, sans-serif;
+  color: white;
+  cursor: pointer; /* Indicate clickable area */
+  user-select: none;
+}
+
+.encounter-display * {
+  user-select: none;
+}
+
+/* Encounter backdrop - appears behind everything */
+.encounter-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.encounter-backdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Character images - increase scaling to 60% */
+.encounter-character {
+  position: absolute;
+  bottom: 0;
+  z-index: 2;
+  height: 60vh; /* Increased from 40vh to 60vh */
+  display: flex;
+  align-items: flex-end;
+}
+
+.encounter-character img {
+  max-height: 100%;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Place characters firmly at the bottom corners */
+.character-1 {
+  left: 0;
+  bottom: 0;
+}
+
+.character-2 {
+  right: 0;
+  bottom: 0;
+}
+
+/* Main content area - reduce width to 60% */
+.encounter-content {
+  position: absolute;
+  z-index: 3;
+  padding: 40px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  max-width: 60%;
+  max-height: 80%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+}
+
+.encounter-title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.encounter-description {
+  font-size: 1.5rem;
+  line-height: 1.6;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  white-space: pre-wrap;
+} 

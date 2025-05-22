@@ -34,9 +34,16 @@ export const NavigationContext = createContext(null);
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const { isAuthenticated, isLoading, user } = useAuth0();
   const { isAdmin, profileComplete } = useAuth();
+  const location = useLocation();
   
   if (isLoading) {
     return <div className="loading">Loading...</div>;
+  }
+  
+  // If on /presentation-display, allow it to render without full auth/profile checks
+  // as it's a passive display window controlled by an authenticated educator.
+  if (location.pathname === '/presentation-display') {
+    return children;
   }
   
   if (!isAuthenticated) {
@@ -49,8 +56,11 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
   }
   
   // Redirect users with incomplete profiles to the in-app profile tab
+  // UNLESS it's the presentation display window.
   if (profileComplete === false) {
-    return <Navigate to="/?tab=profile" replace />;
+    if (location.pathname !== '/presentation-display') { 
+        return <Navigate to="/?tab=profile" replace />;
+    }
   }
   
   // For admin routes - add logic to check if user is admin

@@ -9,7 +9,7 @@ import { useSocket } from '../contexts/SocketContext';
 // useSocket returns an object; we need its socket instance
 
 const useUserManagement = (gameId, encounterId) => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { socket } = useSocket() || {};
 
   const [userList, setUserList] = useState([]);
@@ -47,16 +47,22 @@ const useUserManagement = (gameId, encounterId) => {
       const { data } = await axios.get('badges/GetAllBadgesData'); 
       setBadges(Array.isArray(data) ? data : []); // Ensure data is an array
     } catch (err) {
-      console.error('Error fetching badges:', err);
+      // ECONNABORTED indicates a client-side abort/timeout; warn once to avoid spamming.
+      if (err?.code === 'ECONNABORTED') {
+        console.warn('[useUserManagement] Badge request aborted (likely network timeout)');
+      } else {
+        console.error('[useUserManagement] Error fetching badges:', err);
+      }
       setBadges([]); // Set to empty array on error
     }
     setLoadingBadges(false);
   }, []); // Dependency array is empty
 
   useEffect(() => {
-    // Fetches all badges when the hook is used
-    fetchBadges();
-  }, [fetchBadges]);
+    if (isAuthenticated) {
+      fetchBadges();
+    }
+  }, [isAuthenticated, fetchBadges]);
 
   // ------------------------------------------------------------------
   // XP helpers

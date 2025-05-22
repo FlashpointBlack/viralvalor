@@ -1,19 +1,17 @@
-.encounter-display {
-  --fade-duration: 1.5s; /* Adjusted transition speed (also set via JS) */
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  position: relative;
-  background-color: #000;
-  font-family: Arial, sans-serif;
-  color: white;
-  cursor: pointer; /* Indicate clickable area */
-  user-select: none;
-}
-
-.encounter-display * {
-  user-select: none;
-}
+/* Base styles for SharedEncounterView have been moved to SharedEncounterView.css */
+/* The following sections are now removed from this file:
+.encounter-display { ... }
+.encounter-display * { ... }
+.encounter-backdrop { ... }
+.encounter-backdrop img { ... }
+.encounter-character { ... }
+.encounter-character img { ... }
+.character-1 { ... }
+.character-2 { ... }
+.encounter-content { ... }
+.encounter-title { ... }
+.encounter-description { ... }
+*/
 
 .loading-display {
   display: flex;
@@ -58,17 +56,6 @@
   width: auto;
   object-fit: contain;
   display: block;
-}
-
-/* Place characters firmly at the bottom corners */
-.character-1 {
-  left: 0;
-  bottom: 0;
-}
-
-.character-2 {
-  right: 0;
-  bottom: 0;
 }
 
 /* Main content area - reduce width to 60% */
@@ -169,19 +156,17 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .encounter-content {
-    max-width: 90%;
-    padding: 20px;
-    margin: 20px;
-  }
+  /* NOTE: Styles for .encounter-content, .encounter-title, .encounter-description
+     within this media query were originally targeting elements that are now
+     styled by SharedEncounterView.css. If responsive adjustments are needed
+     for SharedEncounterView, they should be added to SharedEncounterView.css
+     or a more global responsive stylesheet. For now, these specific rules
+     will be removed from here if they solely target the moved classes.
+     If they target other elements within EncounterDisplay's direct context,
+     they will be kept.
+  */
 
-  .encounter-title {
-    font-size: 1.8rem;
-  }
-
-  .encounter-description {
-    font-size: 1.2rem;
-  }
+  /* The following rules for .encounter-content, .encounter-title, .encounter-description are removed. */
 
   .poll-timer h2 {
     font-size: 1.2rem;

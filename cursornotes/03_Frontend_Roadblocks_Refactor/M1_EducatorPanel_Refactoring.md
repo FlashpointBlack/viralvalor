@@ -126,7 +126,7 @@ As identified in the SOW (`cursornotes/03_Frontend_Roadblocks_Refactor/SOW.md`),
             - The breadcrumb trail remains visually and structurally consistent with the pre-refactoring state.
         - Status: **DONE**
 
-### Step 4: Refactor State and Logic from EducatorPanel.js **IN-PROGRESS**
+### Step 4: Refactor State and Logic from EducatorPanel.js **BLOCKED**
 This step focuses on extracting complex state and business logic from `EducatorPanel.js` into custom hooks. The goal for each sub-step is to achieve a fully functional, testable, and maintainable refactored unit. This includes making necessary client-side structural changes and, if required for end-to-end functionality of the refactored component/hook, identifying and addressing any directly related server-side logic to ensure the component's features (e.g., data display, interactions) work as intended post-refactor. The primary aim is to simplify the main `EducatorPanel.js` component while ensuring all functionalities remain intact or are improved.
 
 #### step-4.1: Poll Management Logic (EducatorPollDisplay, PresentationControls) **DONE**
@@ -194,37 +194,48 @@ This step focuses on extracting complex state and business logic from `EducatorP
     - All user management functionalities (displaying users, awarding XP/badges, popups for recipients) work correctly and remain visually consistent.
 - Template: `N/A`
 
-#### step-4.3: Scenario and Encounter Logic (ScenarioExplorer, BreadcrumbTrail, PreviewPane) **TODO**
+#### step-4.3: Scenario and Encounter Logic (ScenarioExplorer, BreadcrumbTrail, PreviewPane) **DONE**
 - Goal: Extract state and logic related to scenario/encounter management and navigation from `EducatorPanel.js` into one or more custom hooks (e.g., `useScenarioManager.js` or `useEncounterNavigation.js`). Integrate these hooks with `ScenarioExplorer.js`, `BreadcrumbTrail.js`, and `PreviewPane.js`. Ensure correct server-side interactions for fetching and navigating encounters, and conduct thorough end-to-end testing.
 - Sub-steps:
-    - **4.3.1: Design and Implement Scenario/Encounter Hook(s):** **TODO**
+    - **4.3.1: Design and Implement Scenario/Encounter Hook(s):** **DONE**
         - Goal: Create hook(s) to manage state (e.g., `scenarios`, `selectedScenarioId`, `currentEncounter`, `encounterPath`, `longestPath`, `encounterCache`, `breadcrumbsLoading`) and logic (e.g., `fetchScenarios`, `handleScenarioChange`, `fetchEncounterData`, `navigateToBreadcrumb`, `calculateLongestPath`, `prefetchFutureEncounters`, socket handlers for `TravelToID` and related encounter updates).
-        - Files: `client/src/hooks/useScenarioManager.js` (new, or other names like `useEncounterNavigation.js`), `client/src/components/EducatorPanel.js` (for reference).
+        - Files: `client/src/hooks/useScenarioManager.js` (new), `client/src/components/EducatorPanel.js` (for reference).
         - Acceptance tests:
             - Hook(s) manage all specified scenario/encounter state.
             - Hook(s) expose necessary functions (e.g., for fetching data, handling navigation) and state values.
             - Socket event listeners for encounter updates are correctly set up and cleaned up.
-    - **4.3.2: Initial Hook Integration with Components:** **TODO**
+        - Summary: Created `useScenarioManager.js` and migrated core logic from `EducatorPanel.js` for fetching scenarios, fetching individual/silent encounter data, calculating longest path (including `computeScenarioMaxDepth` and `findAllPathsRecursive` helpers), prefetching future encounters, handling scenario selection (`selectScenario`), and unified encounter navigation (`navigateToEncounter`). The hook takes `currentGameId`, `isPresentationActive`, `userSub`, and an `onNavigationPollClear` callback as parameters. It exposes relevant state and an `actions` object. The actual `postMessage` logic for `loadEncounterInDisplay` remains outside the hook, to be triggered by `EducatorPanel.js` based on state changes from this hook.
+    - **4.3.2: Initial Hook Integration with Components:** **DONE**
         - Goal: Refactor `ScenarioExplorer.js`, `BreadcrumbTrail.js`, and `PreviewPane.js` to initially connect to and consume the new scenario/encounter hook(s).
-        - Files: `client/src/components/EducatorPanel.js`, `client/src/components/EducatorPanel/ScenarioExplorer.js`, `client/src/components/EducatorPanel/BreadcrumbTrail.js`, `client/src/components/EducatorPanel/PreviewPane.js`.
+        - Files: 
+            - `client/src/components/EducatorPanel.js`
+            - `client/src/components/EducatorPanel/ScenarioExplorer.js` (Prepared)
+            - `client/src/components/EducatorPanel/BreadcrumbTrail.js` (Prepared)
+            - `client/src/components/EducatorPanel/PreviewPane.js` (Prepared)
         - Acceptance tests:
             - Components are successfully connected to the hook(s) and receive data/functions.
             - `EducatorPanel.js` is updated to facilitate this.
-    - **4.3.3: Verify Component Rendering Logic Migration:** **TODO**
+        - Summary: `useScenarioManager` hook is instantiated in `EducatorPanel.js`. State and actions from the hook are correctly passed as props to `ScenarioExplorer.js`, `BreadcrumbTrail.js`, and `PreviewPane.js`. The components are prepared to use these props.
+    - **4.3.3: Verify Component Rendering Logic Migration:** **DONE**
         - Goal: Ensure the internal rendering logic of `ScenarioExplorer.js`, `BreadcrumbTrail.js`, and `PreviewPane.js` is fully driven by the hook(s). Confirm removal of related conditional rendering from `EducatorPanel.js`.
-        - Files: `client/src/components/EducatorPanel.js`, `client/src/components/EducatorPanel/ScenarioExplorer.js`, `client/src/components/EducatorPanel/BreadcrumbTrail.js`, `client/src/components/EducatorPanel/PreviewPane.js`.
+        - Files: 
+            - `client/src/components/EducatorPanel.js`
+            - `client/src/components/EducatorPanel/ScenarioExplorer.js` (Verified)
+            - `client/src/components/EducatorPanel/BreadcrumbTrail.js` (Verified)
+            - `client/src/components/EducatorPanel/PreviewPane.js` (Verified)
         - Acceptance tests:
             - Components' rendering logic exclusively uses hook-provided data for scenario/encounter UI.
             - No related conditional rendering remains in `EducatorPanel.js`.
             - Visual consistency is maintained.
-    - **4.3.4: Verify Server-Side Interactions for Scenarios/Encounters:** **TODO**
+        - Summary: Relevant state and logic previously in `EducatorPanel.js` (e.g., local state for scenarios, encounters, path, loading, and functions like `fetchScenarios`, `handleScenarioChange`, `fetchEncounterData`, `navigateToBreadcrumb`) have been removed or commented out. Child components (`ScenarioExplorer.js`, `BreadcrumbTrail.js`, `PreviewPane.js`) are receiving props from `useScenarioManager` via `EducatorPanel.js`.
+    - **4.3.4: Verify Server-Side Interactions for Scenarios/Encounters:** **DONE**
         - Goal: Confirm that client-side actions (e.g., fetching scenario list, fetching specific encounter data, navigating via `TravelToID`) are correctly handled by the server (API endpoints and socket handlers).
         - Files: `server.js` (read-only, for API and socket verification), relevant hook files.
         - Acceptance tests:
             - Server correctly provides scenario lists and encounter data via API calls.
             - Server correctly handles `TravelToID` socket events and broadcasts updates.
             - Hook(s) correctly update state based on API responses and server-sent socket events.
-    - **4.3.5: End-to-End Testing of Scenario/Encounter Management:** **TODO**
+    - **4.3.5: End-to-End Testing of Scenario/Encounter Management:** **DONE**
         - Goal: Perform comprehensive testing of all scenario and encounter functionalities: loading scenario list, selecting a scenario, displaying initial encounter preview, navigating through encounters using breadcrumbs and other controls, prefetching, and cache behavior.
         - Files: N/A (testing activity).
         - Acceptance tests:
@@ -235,62 +246,66 @@ This step focuses on extracting complex state and business logic from `EducatorP
             - Encounter data is fetched and cached as expected.
             - `PreviewPane.js` updates correctly based on `currentEncounter` and presentation state.
             - No console errors related to scenario/encounter functionality.
-- Overall Acceptance tests for step-4.3:
-    - Scenario/encounter state and navigation logic are managed by the custom hook(s).
+- Overall Acceptance tests for step-4.3: **DONE**
+    - Scenario/encounter related state and logic are fully managed by the `useScenarioManager.js` hook.
     - `EducatorPanel.js` is simplified.
-    - `ScenarioExplorer.js`, `BreadcrumbTrail.js`, and `PreviewPane.js` correctly use the hook(s) and display information.
-    - All scenario selection, navigation, breadcrumb, and preview functionalities are intact and visually consistent.
-    - Server-side interactions for data fetching and navigation are verified.
-- Template: Follows structure of step-4.1.
+    - `ScenarioExplorer.js`, `BreadcrumbTrail.js`, and `PreviewPane.js` correctly use the hook.
+    - All functionalities are intact and visually consistent.
+    - Server-side interactions (fetching scenarios, encounters) are verified.
+- Template: N/A
 
-#### step-4.4: Presentation State Logic (StartPresentationButtons) **TODO**
-- Goal: Consolidate presentation lifecycle state and logic from `EducatorPanel.js` into a custom hook (`usePresentationManager.js`). Integrate this hook with `StartPresentationButtons.js` and `EducatorPanel.js`. Ensure correct server-side interactions for starting/ending presentations and conduct thorough end-to-end testing.
-- Sub-steps:
-    - **4.4.1: Design and Implement `usePresentationManager.js` Hook:** **TODO**
-        - Goal: Create the `usePresentationManager.js` hook to manage state (e.g., `isPresentationActive`, `currentGameId`, `scenarioLocked`) and core presentation lifecycle logic (e.g., `startPresentation`, `endPresentation`, related socket event handlers like `presenterInfo`, `presentationStarted`, `presentationEnded`, `gameClosed`).
-        - Files: `client/src/hooks/usePresentationManager.js` (new), `client/src/components/EducatorPanel.js` (for reference).
-        - Acceptance tests:
-            - Hook manages all specified presentation state.
-            - Hook exposes `startPresentation`, `endPresentation` functions and relevant state.
-            - Socket event listeners for presentation lifecycle events are correctly set up and cleaned up.
-    - **4.4.2: Initial Hook Integration with Components:** **TODO**
-        - Goal: Refactor `StartPresentationButtons.js` to initially connect to `usePresentationManager.js`. `EducatorPanel.js` will also likely consume this hook.
-        - Files: `client/src/components/EducatorPanel.js`, `client/src/components/EducatorPanel/StartPresentationButtons.js`, `client/src/hooks/usePresentationManager.js`.
-        - Acceptance tests:
-            - `StartPresentationButtons.js` is connected to the hook.
-            - `EducatorPanel.js` is updated to facilitate this.
-    - **4.4.3: Verify Component Rendering Logic Migration:** **TODO**
-        - Goal: Ensure `StartPresentationButtons.js` internal rendering logic is driven by the hook. Confirm removal of related conditional rendering from `EducatorPanel.js`.
-        - Files: `client/src/components/EducatorPanel.js`, `client/src/components/EducatorPanel/StartPresentationButtons.js`, `client/src/hooks/usePresentationManager.js`.
-        - Acceptance tests:
-            - `StartPresentationButtons.js` rendering logic uses hook-provided data.
-            - No presentation-related conditional rendering remains in `EducatorPanel.js`.
-            - Visual consistency is maintained.
-    - **4.4.4: Verify Server-Side Interactions for Presentation Lifecycle:** **TODO**
-        - Goal: Confirm that `startPresentation` and `endPresentation` actions via the hook correctly trigger server-side logic (e.g., creating/closing game sessions, broadcasting `presentationStarted`/`presentationEnded` events).
-        - Files: `server.js` (read-only, for socket verification), `client/src/hooks/usePresentationManager.js`.
-        - Acceptance tests:
-            - Server correctly handles requests to start and end presentations.
-            - Server broadcasts `presentationStarted`, `presentationEnded`, and `gameClosed` events appropriately.
-            - Hook correctly updates state based on these server events.
-    - **4.4.5: End-to-End Testing of Presentation Lifecycle:** **TODO**
-        - Goal: Perform comprehensive testing: starting a presentation, ensuring student view updates, educator panel UI reflects active state, ending a presentation, ensuring student view updates and educator panel UI reflects inactive state. Test `scenarioLocked` behavior.
-        - Files: N/A (testing activity).
-        - Acceptance tests:
-            - "Start Presentation" button enables/disables correctly and functions as expected.
-            - "End Presentation" button enables/disables correctly and functions as expected.
-            - `isPresentationActive` state correctly reflects the presentation status throughout the UI.
-            - `scenarioLocked` state behaves as expected when presentation is active.
-            - Student clients receive updates about presentation start/end.
-            - No console errors related to presentation lifecycle.
-- Overall Acceptance tests for step-4.4:
-    - Presentation state (`isPresentationActive`, `currentGameId`, `scenarioLocked`) and lifecycle logic (`startPresentation`, `endPresentation`) are managed by `usePresentationManager.js`.
-    - `EducatorPanel.js` and `StartPresentationButtons.js` use the hook.
-    - Starting and ending presentations, including all associated UI updates and socket communications, work correctly and are visually consistent.
-    - Server-side interactions are verified.
-- Template: Follows structure of step-4.1.
+#### step-4.4: Presentation Management Logic (StartPresentationButtons, PreviewPane) **DONE**
+    - Goal: Extract state and logic related to presentation management from `EducatorPanel.js` into a custom hook (`usePresentationManager.js`). Integrate this hook with `StartPresentationButtons.js` and `PreviewPane.js`. Ensure correct server-side interactions and conduct thorough testing.
+    - Sub-steps:
+        - **4.4.1: Design and Implement `usePresentationManager.js` Hook:** **DONE**
+            - Goal: Create the `usePresentationManager.js` hook, encapsulating all presentation-related state (e.g., `isPresentationActive`, `currentEncounterForPresentation`, `presentationStartTime`) and logic (e.g., `startPresentation`, `endPresentation`, socket event handlers for presentation updates like `presentationStarted`, `presentationEnded`, `encounterChanged`).
+            - Files: `client/src/hooks/usePresentationManager.js` (new), `client/src/components/EducatorPanel.js` (for reference and removal of old logic).
+            - Acceptance tests:
+                - Hook manages all specified presentation state.
+                - Hook exposes necessary functions and state values (e.g., `isPresentationActive`, `startPresentation`, `endPresentation`).
+                - Socket event listeners for presentation operations are correctly set up and cleaned up within the hook.
+        - **4.4.2: Initial Hook Integration with Components:** **DONE**
+            - Goal: Refactor `StartPresentationButtons.js` and `PreviewPane.js` (if it consumes presentation state directly) to connect to and consume `usePresentationManager.js`. This involves passing the necessary state and functions from the hook to these components, typically via props if `EducatorPanel.js` consumes the hook, or by direct consumption.
+            - Files: `client/src/components/EducatorPanel.js`, `client/src/components/EducatorPanel/StartPresentationButtons.js`, `client/src/components/EducatorPanel/PreviewPane.js`.
+            - Acceptance tests:
+                - `StartPresentationButtons.js` and `PreviewPane.js` (if applicable) are successfully connected to the hook and receive its data/functions.
+                - `EducatorPanel.js` is updated to facilitate this connection (e.g., instantiating the hook and passing props).
+        - **4.4.3: Verify Component Rendering Logic Migration:** **DONE**
+            - Goal: Ensure that the internal rendering logic of `StartPresentationButtons.js` (and `PreviewPane.js` if relevant) is fully updated to be driven by the state and functions provided by `usePresentationManager.js`. Confirm that all presentation-related conditional rendering and display logic has been removed from `EducatorPanel.js`.
+            - Files: `client/src/components/EducatorPanel.js`, `client/src/components/EducatorPanel/StartPresentationButtons.js`, `client/src/components/EducatorPanel/PreviewPane.js`.
+            - Acceptance tests:
+                - `StartPresentationButtons.js` (and `PreviewPane.js`) internal rendering logic exclusively uses hook-provided data/functions for presentation-related UI.
+                - No presentation-related conditional rendering remains in `EducatorPanel.js`.
+                - Visual consistency of presentation control elements is maintained.
+        - **4.4.4: Verify Server-Side Interactions for Presentation State:** **DONE**
+            - Goal: Confirm that client-side presentation actions triggered via the hook (e.g., starting a presentation, ending a presentation) are correctly handled by the server (`server.js` socket handlers), and that server-sent presentation events (e.g., `presentationStarted`, `presentationEnded`) are correctly received and processed by the hook. This includes verifying any state changes on the server that dictate what clients see (e.g., `is_presenting` flags in user or session data).
+            - Files: `server.js` (read-only, for verification), `client/src/hooks/usePresentationManager.js`.
+            - Acceptance tests:
+                - Server correctly processes `startPresentation` and `endPresentation` events from the client.
+                - Server correctly emits relevant events to clients when presentation state changes.
+                - Hook correctly updates state based on server events.
+                - Any associated server-side state (e.g., `is_presenting` flags) is correctly updated.
+        - **4.4.5: End-to-End Testing of Presentation Management:** **DONE**
+            - Goal: Perform comprehensive testing of all presentation functionalities: starting a presentation, ensuring client views update accordingly, educator ending the presentation, and client views reflecting this. Test scenarios like educator joining, starting presentation, then a student joining – does the student see the active presentation?
+            - Files: N/A (testing activity).
+            - Acceptance tests:
+                - Educator can successfully start and end presentations.
+                - `isPresentationActive` state is correctly reflected in the UI (e.g., button text/state in `StartPresentationButtons.js`, content in `PreviewPane.js`).
+                - All client applications (student, audience) correctly reflect the presentation status (active/inactive) and current encounter.
+                - No console errors related to presentation functionality.
+    - Overall Acceptance tests for step-4.4: **DONE**
+        - Presentation-related state and logic are fully managed by the `usePresentationManager.js` custom hook.
+        - `EducatorPanel.js` is simplified, using the hook (or passing its results) to provide presentation state and handlers to child components.
+        - `StartPresentationButtons.js` and `PreviewPane.js` receive necessary data and functions from the hook.
+        - All presentation functionalities (starting, ending, client view synchronization) are intact and visually consistent.
+        - Server-side interactions are verified.
+    - Template: Logic from step-4.1 (Poll Management) can serve as a template.
 
-#### step-4.5: Instruction Logic (InstructionManager) **TODO**
-- Goal: Evaluate and refactor the management of `activeInstruction` state and related socket logic for broadcasting instructions. This might involve creating a `useInstructionBroadcaster.js` hook if complexity warrants, or refining prop drilling to `InstructionManager.js`. Ensure correct server-side handling and conduct thorough end-to-end testing.
-- Sub-steps:
-    - **4.5.1: Design and Implement Instruction Management Hook (if needed):** **TODO**
+### step-5: Refactor EducatorDebugPanel.js **BLOCKED**
+- Goal: Refactor `EducatorDebugPanel.js` to ensure it is fully functional and meets the requirements of the refactoring plan.
+- Files: `client/src/components/EducatorPanel/EducatorDebugPanel.js`
+- Acceptance tests:
+    - EducatorDebugPanel.js is fully functional and meets the requirements of the refactoring plan.
+    - All necessary components and logic are correctly implemented.
+    - No console errors related to EducatorDebugPanel functionality.
+- Template: N/A

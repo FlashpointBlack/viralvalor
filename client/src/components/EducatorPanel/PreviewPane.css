@@ -1,0 +1,117 @@
+/* client/src/components/EducatorPanel/PreviewPane.css */
+.encounter-preview-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px; /* Or adjust as needed, e.g., 30vh */
+  max-height: 45vh; /* Constraint max height */
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f9f9f9;
+  overflow: hidden; /* Important: clips content that's too large */
+  box-sizing: border-box;
+}
+
+.preview-message {
+  color: #777;
+  font-size: 1.1rem; /* Slightly smaller */
+  font-weight: 500;
+  line-height: 1.4;
+  max-width: 350px; /* Slightly wider */
+  margin: 0 auto;
+  padding: 20px; /* Add some padding to the message itself */
+}
+
+.preview-content-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* The child (.preview-scaled-content) will be scaled */
+}
+
+.preview-scaled-content {
+  /* 
+    This is where the scaling happens. We want SharedEncounterView's root
+    to try and fit within the .preview-content-wrapper.
+    The .encounter-display class on SharedEncounterView's root likely has
+    its own width/height (e.g. 100vw/100vh for fullscreen). We need to override that here.
+  */
+  width: 100%;   /* Make it responsive to the wrapper's width */
+  height: 100%;  /* Make it responsive to the wrapper's height */
+  max-width: 100%;
+  max-height: 100%;
+  opacity: 0; /* Start invisible */
+  transition: opacity 0.4s ease-out; /* Fallback transition for opacity */
+  
+  /* 
+    The ideal scenario is that SharedEncounterView's internal elements 
+    (images, text containers) use percentages or are otherwise responsive,
+    so they scale down with their parent.
+
+    If the content inside .preview-scaled-content still overflows or doesn't scale,
+    we might need to use transform: scale().
+    Example for transform (would require JS to calculate scale factor for aspect ratio):
+    transform-origin: center center; 
+    transform: scale(0.5); / * Example scale factor * /
+  */
+
+  /* 
+    Let's assume SharedEncounterView might have a fixed aspect ratio 
+    (e.g., from a full-screen design). If so, we might need to force 
+    one dimension and let the other be 'auto' IF its internal styling supports that.
+    This is often tricky for complex components.
+  */
+
+  /* 
+    Override any fixed position or large dimensions from .encounter-display 
+    if it's designed for fullscreen.
+  */
+  position: relative !important; /* Override absolute if any */
+  display: block; /* Or flex, depending on its internal structure */
+  /* Add any other overrides if .encounter-display is too rigid */
+}
+
+/* 
+  Targeting specific elements within .preview-scaled-content if they don't scale:
+  This assumes .preview-scaled-content is the root of SharedEncounterView.
+*/
+.preview-scaled-content .encounter-backdrop,
+.preview-scaled-content .encounter-character,
+.preview-scaled-content .encounter-content {
+  /* Ensure these children don't break out or have fixed large sizes */
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain; /* For images if they are direct children or img tags */
+}
+
+.preview-scaled-content .encounter-title {
+  /* Text should wrap and shrink. Autosizer hook in SharedEncounterView helps. */
+  /* Potentially further reduce max font size for preview if autosizer isn't enough */
+   font-size: clamp(0.8rem, 3vw, 1.5rem); /* Example: responsive font size */
+}
+
+.preview-scaled-content .encounter-description {
+   font-size: clamp(0.7rem, 2.5vw, 1rem); /* Example: responsive font size */
+}
+
+/* Animation for new content in preview pane */
+@keyframes fadeInAndScale {
+  from {
+    opacity: 0;
+    transform: scale(0.97); /* Start slightly smaller */
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.preview-content-fade-in {
+  animation: fadeInAndScale 0.4s ease-out forwards;
+  /* Ensure opacity is set to 1 by the animation if it wasn't already */
+  /* opacity: 1; /* This is handled by the 'to' state of fadeInAndScale */
+} 
